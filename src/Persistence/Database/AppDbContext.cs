@@ -26,7 +26,7 @@ public class AppDbContext : DbContext
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {
         foreach (var entry in base.ChangeTracker.Entries<BaseEntity>()
-                     .Where(q => q.State is EntityState.Added or EntityState.Modified or EntityState.Modified))
+                     .Where(q => q.State is EntityState.Added or EntityState.Modified))
         {
             entry.Entity.UpdatedAt = GetValidUtcNow();
 
