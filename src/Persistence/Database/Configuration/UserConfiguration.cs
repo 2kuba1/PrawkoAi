@@ -14,10 +14,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         
         builder.Property(x => x.DeviceId)
             .IsRequired();
-        
+
         builder.Property(x => x.Email)
-            .HasMaxLength(256)
-            .IsRequired();
+            .HasMaxLength(256);
 
         builder.HasOne(x => x.Role)
             .WithMany(x => x.Users)
