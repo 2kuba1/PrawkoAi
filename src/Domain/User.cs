@@ -9,5 +9,5 @@ public class User : BaseEntity
     public Guid RoleId { get; set; }
 
     public List<UserAnswer> UserAnswers { get; set; } = new();
-    public Role? Role { get; set; }
+    public Role Role { get; set; }
 }
