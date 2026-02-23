@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Persistence.Database.Configuration;
 
-public class QuestionConfiguration : IEntityTypeConfiguration<Question>
+internal sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
 {
     public void Configure(EntityTypeBuilder<Question> builder)
     {

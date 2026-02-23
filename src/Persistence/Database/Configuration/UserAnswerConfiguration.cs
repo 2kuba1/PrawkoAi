@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Persistence.Database.Configuration;
 
-public class UserAnswerConfiguration : IEntityTypeConfiguration<UserAnswer>
+internal sealed class UserAnswerConfiguration : IEntityTypeConfiguration<UserAnswer>
 {
     public void Configure(EntityTypeBuilder<UserAnswer> builder)
     {
@@ -29,5 +29,8 @@ public class UserAnswerConfiguration : IEntityTypeConfiguration<UserAnswer>
 
         builder.Property(x => x.AnsweredAt)
             .IsRequired();
+
+        builder.HasIndex(x => x.UserId);
+        builder.HasIndex(x => x.QuestionId);
     }
 }
