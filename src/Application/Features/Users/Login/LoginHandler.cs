@@ -19,19 +19,12 @@ public class LoginHandler : IRequestHandler<Login, TokenResponse>
     
     public async Task<TokenResponse> Handle(Login request, CancellationToken cancellationToken)
     {
-        var user = new User()
-        {
-            Id = Guid.NewGuid(),
-            DeviceId = "123",
-            Email = "jakub.w@c.c"
-        };
-        
-        var token = _authService.CreateToken(user);
+        var token = _authService.CreateToken(request.user);
 
         var refreshToken = new RefreshToken()
         {
             Id = Guid.NewGuid(),
-            UserId = user.Id,
+            UserId = request.user.Id,
             Token = _authService.GenerateRefreshToken(),
             ExpiresOnUtc = DateTime.UtcNow.AddDays(30)
         };

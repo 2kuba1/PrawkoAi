@@ -34,7 +34,7 @@ public class AuthService : IAuthService
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim("device_id", user.DeviceId),
-                new Claim("role", user.Role.Name)
+                new Claim("role", user.Role?.Name ?? "user")
             ]),
             Expires = DateTime.UtcNow.AddMinutes(_configuration.GetValue<int>("Jwt:ExpirationInMinutes")),
             SigningCredentials = credentials,
@@ -51,6 +51,6 @@ public class AuthService : IAuthService
 
     public string GenerateRefreshToken()
     {
-        return Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+        return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
     }
 }
