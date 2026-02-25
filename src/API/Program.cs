@@ -65,6 +65,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapQuestionsEndpoints();
 app.MapAuthEndpoints();
 
 app.Run();
