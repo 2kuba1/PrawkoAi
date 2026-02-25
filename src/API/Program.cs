@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Persistence;
+using Persistence.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +55,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+await app.SeedDatabaseAsync();
 
 app.UseCors("CorsPolicy");
 

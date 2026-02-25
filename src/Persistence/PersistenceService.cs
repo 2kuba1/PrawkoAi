@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Persistence.Database;
 using Persistence.Repositories;
+using Persistence.Seeders;
 using Persistence.Services;
 
 

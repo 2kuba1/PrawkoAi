@@ -12,12 +12,14 @@ public class CreateUserHandler : IRequestHandler<CreateUser, TokenResponse>
     private readonly IUserRepository _userRepository;
     private readonly IAuthService _authService;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
+    private readonly IRoleRepository _roleRepository;
 
-    public CreateUserHandler(IUserRepository userRepository, IAuthService authService, IRefreshTokenRepository refreshTokenRepository)
+    public CreateUserHandler(IUserRepository userRepository, IAuthService authService, IRefreshTokenRepository refreshTokenRepository, IRoleRepository roleRepository)
     {
         _userRepository = userRepository;
         _authService = authService;
         _refreshTokenRepository = refreshTokenRepository;
+        _roleRepository = roleRepository;
     }
     
     public async Task<TokenResponse> Handle(CreateUser request, CancellationToken cancellationToken)
@@ -34,10 +36,16 @@ public class CreateUserHandler : IRequestHandler<CreateUser, TokenResponse>
 
         if (user is null)
         {
+            var role = await _roleRepository.GetRoleByName("User");
+            
+            if(role is null)
+                throw new KeyNotFoundException($"Role does not exist");
+            
             var newUser = new User()
             {
                 Email = email,
                 DeviceId = "123",
+                RoleId =  role.Id,
             };
 
             await _userRepository.CreateAsync(newUser);

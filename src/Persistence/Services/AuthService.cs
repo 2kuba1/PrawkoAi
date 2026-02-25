@@ -34,7 +34,7 @@ public class AuthService : IAuthService
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim("device_id", user.DeviceId),
-                new Claim("role", user.Role?.Name ?? "user")
+                new Claim("role", user.Role?.Name ?? "User")
             ]),
             Expires = DateTime.UtcNow.AddMinutes(_configuration.GetValue<int>("Jwt:ExpirationInMinutes")),
             SigningCredentials = credentials,
