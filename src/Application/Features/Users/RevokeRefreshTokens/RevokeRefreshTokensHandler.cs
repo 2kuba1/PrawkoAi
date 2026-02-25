@@ -18,10 +18,10 @@ public class RevokeRefreshTokensHandler : IRequestHandler<RevokeRefreshTokens, b
     
     public async Task<bool> Handle(RevokeRefreshTokens request, CancellationToken cancellationToken)
     {
-        if(request.userId != GetCurrentUserId())
+        if(request.UserId != GetCurrentUserId())
             throw new ApplicationException("You are not authorized to revoke this refresh tokens");
         
-        await _refreshTokenRepository.RemoveUserRefreshTokens(request.userId);
+        await _refreshTokenRepository.RemoveUserRefreshTokens(request.UserId);
 
         return true;
     }
