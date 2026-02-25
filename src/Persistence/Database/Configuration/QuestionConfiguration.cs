@@ -29,6 +29,11 @@ internal sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
         builder.HasMany(x => x.Categories)
             .WithMany(x => x.Questions)
             .UsingEntity(x =>
-                x.ToTable("QuestionCategories"));
+            {
+                x.ToTable("QuestionCategories");
+
+                x.HasIndex("QuestionsId");
+                x.HasIndex("CategoriesId");
+            });
     }
 }

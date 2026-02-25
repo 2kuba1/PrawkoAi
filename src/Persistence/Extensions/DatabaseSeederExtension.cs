@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Persistence.Database;
 using Persistence.Seeders;
@@ -15,7 +16,7 @@ public static class DatabaseSeederExtension
         {
             await context.Database.EnsureCreatedAsync();
             await QuestionsSeeder.Seed(context);
-            await CategoriesSeeder.Seed(context);
+            // await CategoriesSeeder.Seed(context);
             await RolesSeeder.Seed(context);
         }
     }

@@ -13,5 +13,8 @@ internal sealed class CategoryConfiguration : IEntityTypeConfiguration<Category>
 
         builder.Property(x => x.Name)
             .IsRequired();
+        
+        builder.HasIndex(x => x.Name)
+            .IsUnique();
     }
 }

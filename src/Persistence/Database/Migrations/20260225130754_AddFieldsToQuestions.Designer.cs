@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence.Database;
 
@@ -11,9 +12,11 @@ using Persistence.Database;
 namespace Persistence.Database.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260225130754_AddFieldsToQuestions")]
+    partial class AddFieldsToQuestions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,7 +102,7 @@ namespace Persistence.Database.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<Guid?>("CorrectAnswerId")
+                    b.Property<Guid>("CorrectAnswerId")
                         .HasColumnType("char(36)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -108,11 +111,11 @@ namespace Persistence.Database.Migrations
                     b.Property<string>("MediaUrl")
                         .HasColumnType("longtext");
 
-                    b.Property<float>("Points")
-                        .HasColumnType("float");
+                    b.Property<int>("Points")
+                        .HasColumnType("int");
 
-                    b.Property<float>("QuestionNumber")
-                        .HasColumnType("float");
+                    b.Property<int>("QuestionNumber")
+                        .HasColumnType("int");
 
                     b.Property<string>("StructureScope")
                         .HasColumnType("longtext");
@@ -279,7 +282,8 @@ namespace Persistence.Database.Migrations
                     b.HasOne("Domain.Answer", "CorrectAnswer")
                         .WithMany()
                         .HasForeignKey("CorrectAnswerId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("CorrectAnswer");
                 });
