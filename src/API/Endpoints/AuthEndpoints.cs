@@ -1,6 +1,5 @@
-﻿using Application.Features.Users.CreateUser;
+﻿using Application.Features.Users.GoogleLogin;
 using Application.Features.Users.RevokeRefreshTokens;
-using Domain;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -35,7 +34,7 @@ public static class AuthEndpoints
         if (!result.Succeeded)
             return Results.Unauthorized();
 
-        var tokens = await mediator.Send(new CreateUser(result.Principal), CancellationToken.None);
+        var tokens = await mediator.Send(new GoogleLogin(result.Principal), CancellationToken.None);
         
         return Results.Ok(tokens);
     }

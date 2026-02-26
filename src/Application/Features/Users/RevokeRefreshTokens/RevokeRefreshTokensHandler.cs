@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Application.Features.Users.RevokeRefreshTokens;
 
-public class RevokeRefreshTokensHandler : IRequestHandler<RevokeRefreshTokens, bool>
+internal sealed class RevokeRefreshTokensHandler : IRequestHandler<RevokeRefreshTokens, bool>
 {
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IHttpContextAccessor _httpContextAccessor;

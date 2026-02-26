@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Users.LoginWithRefreshToken;
 
-public class LoginWithRefreshTokenHandler : IRequestHandler<LoginWithRefreshToken, TokenResponse>
+internal sealed class LoginWithRefreshTokenHandler : IRequestHandler<LoginWithRefreshToken, TokenResponse>
 {
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IAuthService _authService;

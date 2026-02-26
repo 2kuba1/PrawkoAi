@@ -5,16 +5,16 @@ using Application.Models;
 using Domain;
 using MediatR;
 
-namespace Application.Features.Users.CreateUser;
+namespace Application.Features.Users.GoogleLogin;
 
-public class CreateUserHandler : IRequestHandler<CreateUser, TokenResponse>
+internal sealed class GoogleLoginHandler : IRequestHandler<GoogleLogin, TokenResponse>
 {
     private readonly IUserRepository _userRepository;
     private readonly IAuthService _authService;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IRoleRepository _roleRepository;
 
-    public CreateUserHandler(IUserRepository userRepository, IAuthService authService, IRefreshTokenRepository refreshTokenRepository, IRoleRepository roleRepository)
+    public GoogleLoginHandler(IUserRepository userRepository, IAuthService authService, IRefreshTokenRepository refreshTokenRepository, IRoleRepository roleRepository)
     {
         _userRepository = userRepository;
         _authService = authService;
@@ -22,12 +22,12 @@ public class CreateUserHandler : IRequestHandler<CreateUser, TokenResponse>
         _roleRepository = roleRepository;
     }
     
-    public async Task<TokenResponse> Handle(CreateUser request, CancellationToken cancellationToken)
+    public async Task<TokenResponse> Handle(GoogleLogin request, CancellationToken cancellationToken)
     {
-        if(request.claims is null)
+        if(request.Claims is null)
             throw new ArgumentException("Claims cannot be null");
 
-        var email = request.claims.FindFirst(ClaimTypes.Email).Value;
+        var email = request.Claims.FindFirst(ClaimTypes.Email).Value;
         
         if(email is null)
             throw new ArgumentException("Claims cannot be null");
