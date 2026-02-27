@@ -35,24 +35,17 @@ public class AuthService : IAuthService
             Issuer = _configuration["Jwt:Issuer"],
             Audience = _configuration["Jwt:Audience"],
         };
+        
+        var claimsIdentity = new ClaimsIdentity([
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim("device_id", user.DeviceId),
+            new Claim("role", user.Role?.Name ?? "User")
+        ]);
+        
+        if (user.Email is not null)
+            claimsIdentity.AddClaim(new Claim("email", user.Email));
 
-        if (user.Email is null)
-        {
-            tokenDescriptor.Subject = new ClaimsIdentity([
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim("device_id", user.DeviceId),
-                new Claim("role", user.Role?.Name ?? "User")
-            ]);
-        }
-        else
-        {
-            tokenDescriptor.Subject = new ClaimsIdentity([
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim("device_id", user.DeviceId),
-                new Claim("role", user.Role?.Name ?? "User"),
-                new Claim("email", user.Email)
-            ]);
-        }
+        tokenDescriptor.Subject = claimsIdentity;
 
         var handler = new JsonWebTokenHandler();
 
