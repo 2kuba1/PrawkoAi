@@ -1,3 +1,4 @@
+using System.Text;
 using API.Endpoints;
 using Application;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -32,20 +33,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         opt.ClientSecret = builder.Configuration["GoogleAuth:ClientSecret"];
         opt.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     })
-    .AddJwtBearer(opt =>
+    .AddJwtBearer(o =>
     {
-        opt.RequireHttpsMetadata = false;
-        opt.Audience = builder.Configuration["Jwt:Audience"];
-        opt.TokenValidationParameters = new TokenValidationParameters()
+        o.RequireHttpsMetadata = false;
+        o.SaveToken = true;
+        o.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidateAudience = true,
             ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey
+                (Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"])),
+            ValidateIssuer = true,
+            ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
+            ClockSkew = TimeSpan.Zero
         };
     });
+
+
 builder.Services.AddAuthorization();
 
 
@@ -67,5 +73,6 @@ app.UseAuthorization();
 
 app.MapQuestionsEndpoints();
 app.MapAuthEndpoints();
+app.MapAnswerEndpoints();
 
 app.Run();
