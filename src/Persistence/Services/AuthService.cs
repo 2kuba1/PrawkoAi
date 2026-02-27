@@ -37,7 +37,7 @@ public class AuthService : IAuthService
         };
         
         var claimsIdentity = new ClaimsIdentity([
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim("id", user.Id.ToString()),
             new Claim("device_id", user.DeviceId),
             new Claim("role", user.Role?.Name ?? "User")
         ]);

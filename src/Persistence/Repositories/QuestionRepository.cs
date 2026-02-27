@@ -29,9 +29,13 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
         var randomId = questionIds[new Random().Next(questionIds.Count)];
 
         return await _context.Questions
+            .AsNoTracking()
             .Where(x => x.Id == randomId)
             .Include(x => x.CorrectAnswer)
             .Include(x => x.Categories.Where(c => c.Id == categoryId))
             .FirstOrDefaultAsync();
     }
+
+    public async Task<bool> CheckIfQuestionExists(Guid questionId)
+        => await _context.Questions.AsNoTracking().AnyAsync(x => x.Id == questionId);
 }
