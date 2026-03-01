@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using Domain;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Database;
 
@@ -25,7 +26,7 @@ internal static class QuestionsSeeder
         var existingCategories = await context.Categories.ToListAsync();
         var categoryDictionary = existingCategories.ToDictionary(c => c.Name, c => c);
 
-        var questionsToProcess = new List<(Question Question, string CorrectRaw)>();
+        var questionsToProcess = new List<(Domain.Entities.Question Question, string CorrectRaw)>();
 
         foreach (var line in lines)
         {

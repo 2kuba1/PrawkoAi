@@ -1,6 +1,6 @@
 ﻿using Domain.Shared;
 
-namespace Domain;
+namespace Domain.Entities;
 
 public class RefreshToken : BaseEntity
 {

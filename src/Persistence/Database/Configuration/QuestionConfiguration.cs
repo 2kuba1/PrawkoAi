@@ -1,4 +1,4 @@
-﻿using Domain;
+﻿using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -21,6 +21,10 @@ internal sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
             .OnDelete(DeleteBehavior.Cascade);
 
 
+        builder.HasMany(x => x.ExamSessionQuestions)
+            .WithOne(x => x.Question)
+            .HasForeignKey(x => x.QuestionId);
+        
         builder.HasOne(x => x.CorrectAnswer)
             .WithMany() 
             .HasForeignKey(x => x.CorrectAnswerId)

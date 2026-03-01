@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using Domain.Shared;
 
-namespace Domain;
+namespace Domain.Entities;
 
 public class Category : BaseEntity
 {

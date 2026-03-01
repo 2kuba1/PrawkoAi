@@ -1,6 +1,6 @@
 ﻿using Domain.Shared;
 
-namespace Domain;
+namespace Domain.Entities;
 
 public class User : BaseEntity
 {
@@ -10,4 +10,5 @@ public class User : BaseEntity
 
     public List<UserAnswer> UserAnswers { get; set; } = new();
     public Role Role { get; set; }
+    public List<ExamSession> ExamSessions { get; set; }
 }

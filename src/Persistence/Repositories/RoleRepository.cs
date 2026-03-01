@@ -1,5 +1,6 @@
 ﻿using Application.Contracts.Repositories;
 using Domain;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Database;
 

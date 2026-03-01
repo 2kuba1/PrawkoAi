@@ -1,4 +1,5 @@
 ﻿using Domain;
+using Domain.Entities;
 using MediatR;
 
 namespace Application.Models;

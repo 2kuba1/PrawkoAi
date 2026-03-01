@@ -1,5 +1,6 @@
 ﻿using Application.Models;
 using Domain;
+using Domain.Entities;
 
 namespace Application.Contracts.Repositories;
 

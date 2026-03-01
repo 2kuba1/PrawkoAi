@@ -1,4 +1,5 @@
 ﻿using Domain;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -22,5 +23,9 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .WithMany(x => x.Users)
             .HasForeignKey(x => x.RoleId)
             .IsRequired();
+
+        builder.HasMany(x => x.ExamSessions)
+            .WithOne(x => x.User)
+            .HasForeignKey(x => x.UserId);
     }
 }

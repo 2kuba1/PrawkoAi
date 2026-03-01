@@ -1,4 +1,5 @@
 ﻿using Domain;
+using Domain.Entities;
 using Domain.Shared;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +18,8 @@ public class AppDbContext : DbContext
     public DbSet<Question> Questions { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<ExamSession> ExamSessions { get; set; }
+    public DbSet<ExamSessionQuestion> ExamSessionQuestions { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,6 +1,6 @@
 ﻿using Domain.Shared;
 
-namespace Domain;
+namespace Domain.Entities;
 
 public class Question : BaseEntity
 {
@@ -16,4 +16,5 @@ public class Question : BaseEntity
     public List<Category> Categories { get; set; } = new();
     public List<Answer> Answers { get; set; } = new();
     public List<UserAnswer> UserAnswers { get; set; } = new();
+    public virtual List<ExamSessionQuestion> ExamSessionQuestions { get; set; }
 }

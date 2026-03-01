@@ -2,6 +2,7 @@
 using Application.Contracts.Services;
 using Application.Models;
 using Domain;
+using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.Users.GuestLogin;
