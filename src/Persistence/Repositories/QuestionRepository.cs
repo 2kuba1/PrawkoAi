@@ -31,6 +31,7 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
         return await _context.Questions
             .AsNoTracking()
             .Where(x => x.Id == randomId)
+            .Include(x => x.Answers)
             .Include(x => x.CorrectAnswer)
             .Include(x => x.Categories.Where(c => c.Id == categoryId))
             .FirstOrDefaultAsync();
