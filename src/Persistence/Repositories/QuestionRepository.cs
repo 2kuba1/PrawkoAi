@@ -1,4 +1,5 @@
 ﻿using Application.Contracts.Repositories;
+using Application.Models;
 using Domain;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Database;
@@ -39,4 +40,38 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
 
     public async Task<bool> CheckIfQuestionExists(Guid questionId)
         => await _context.Questions.AsNoTracking().AnyAsync(x => x.Id == questionId);
+
+    public async Task<ExamQuestions> GetExamSimulationQuestions()
+    {
+        var standardQuestionsWith3PointsIds = _context.Questions.Where(q => q.Points == 3 && q.Answers.Count == 2).OrderBy(q => EF.Functions.Random()).Select(q => q.Id).Take(10);
+        var standardQuestionsWith2PointsIds = _context.Questions.Where(q => q.Points == 2 && q.Answers.Count == 2).OrderBy(q => EF.Functions.Random()).Select(q => q.Id).Take(6);
+        var standardQuestionsWith1PointIds = _context.Questions.Where(q => q.Points == 1 && q.Answers.Count == 2).OrderBy(q => EF.Functions.Random()).Select(q => q.Id).Take(4);
+
+        var specializedQuestionsWith3PointsIds = _context.Questions.Where(q => q.Points == 3 && q.Answers.Count == 3).OrderBy(q => EF.Functions.Random()).Select(q => q.Id).Take(6);
+        var specializedQuestionsWith2PointsIds = _context.Questions.Where(q => q.Points == 2 && q.Answers.Count == 3).OrderBy(q => EF.Functions.Random()).Select(q => q.Id).Take(4);
+        var specializedQuestionsWith1PointIds = _context.Questions.Where(q => q.Points == 1 && q.Answers.Count == 3).OrderBy(q => EF.Functions.Random()).Select(q => q.Id).Take(2);
+
+    
+        var allStandardIds = await standardQuestionsWith3PointsIds.Concat(standardQuestionsWith2PointsIds).Concat(standardQuestionsWith1PointIds).ToListAsync();
+        var allSpecializedIds = await specializedQuestionsWith3PointsIds.Concat(specializedQuestionsWith2PointsIds).Concat(specializedQuestionsWith1PointIds).ToListAsync();
+
+        var standardQuestions = await _context.Questions
+            .AsNoTracking()
+            .Include(q => q.Answers)
+            .Where(q => allStandardIds.Contains(q.Id))
+            .ToListAsync();
+
+        var specializedQuestions = await _context.Questions
+            .AsNoTracking()
+            .Include(q => q.Answers)
+            .Where(q => allSpecializedIds.Contains(q.Id))
+            .ToListAsync();
+
+        var random = new Random();
+    
+        return new ExamQuestions(
+            Standard: standardQuestions.OrderBy(_ => random.Next()).ToList(),
+            Specialized: specializedQuestions.OrderBy(_ => random.Next()).ToList()
+        );
+    }
 }
