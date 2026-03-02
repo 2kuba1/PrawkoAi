@@ -8,12 +8,13 @@ public static class ExamEndpoints
 {
     public static void MapExamEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/exam/start", StartExam);
+        app.MapGet("/api/exam/start", StartExam)
+            .RequireAuthorization();
     }
 
-    private static async Task<IResult> StartExam([FromServices] IMediator mediator)
+    private static async Task<IResult> StartExam([FromQuery]string userId, [FromServices] IMediator mediator)
     {
-        var questions = await mediator.Send(new StartExam());
+        var questions = await mediator.Send(new StartExam(userId));
         return Results.Ok(questions);
     }
 }

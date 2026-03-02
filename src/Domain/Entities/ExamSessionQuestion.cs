@@ -1,4 +1,5 @@
-﻿using Domain.Shared;
+﻿using System.Text.Json.Serialization;
+using Domain.Shared;
 
 namespace Domain.Entities;
 
@@ -10,6 +11,7 @@ public class ExamSessionQuestion : BaseEntity
     public bool? IsCorrect { get; set; }
     public DateTime? AnsweredAt { get; set; }
     
-    public virtual ExamSession ExamSession { get; set; } = new();
+    [JsonIgnore]
+    public virtual ExamSession ExamSession { get; set; }
     public virtual Question Question { get; set; }
 }
