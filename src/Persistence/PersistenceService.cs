@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Persistence.Database;
 using Persistence.Repositories;
-using Persistence.Seeders;
 using Persistence.Services;
 
 
@@ -24,6 +23,8 @@ public static class PersistenceService
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IAnswerRepository, AnswerRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IExamSessionQuestionRepository, ExamSessionQuestionRepository>();
+        services.AddScoped<IExamSessionRepository, ExamSessionRepository>();
 
         services.AddScoped<IAuthService, AuthService>();
         
