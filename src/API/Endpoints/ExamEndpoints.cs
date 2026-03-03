@@ -11,6 +11,9 @@ public static class ExamEndpoints
     {
         app.MapGet("/api/exam/start", StartExam)
             .RequireAuthorization();
+        
+        app.MapPost("api/exam/answer", AnswerToExamQuestion)
+            .RequireAuthorization();
     }
 
     private static async Task<IResult> StartExam([FromQuery]string userId, [FromServices] IMediator mediator)
