@@ -43,7 +43,7 @@ internal sealed class StartExamHandler : IRequestHandler<StartExam, StartExamRes
         
         var questions = await _questionRepository.GetExamSimulationQuestions();
 
-        await _examSessionQuestionRepository.SaveExamSessionQuestions(questions, examSession.Id);
+        await _examSessionQuestionRepository.SaveExamSessionQuestionsAsync(questions, examSession.Id);
         
         return new StartExamResponse(new ExamSessionDto(examSession.Id, examSession.StaredAt), questions);
     }

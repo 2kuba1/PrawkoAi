@@ -5,5 +5,7 @@ namespace Application.Contracts.Repositories;
 
 public interface IExamSessionQuestionRepository : IGenericRepository<ExamSessionQuestion>
 {
-    Task SaveExamSessionQuestions(ExamQuestions examSessionQuestions, Guid examSessionId);
+    Task SaveExamSessionQuestionsAsync(ExamQuestions examSessionQuestions, Guid examSessionId);
+    Task UpdateExamSessionQuestionAsync(ExamSessionQuestion examSessionQuestion, Guid examSessionId, Guid selectedAnswerId);
+    Task<ExamSessionQuestion?> GetByQuestionAndSessionIdAsync(Guid questionId, Guid examSessionId);
 }
