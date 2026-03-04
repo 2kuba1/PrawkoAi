@@ -3,20 +3,20 @@ using Application.Contracts.Services;
 using Application.Models;
 using MediatR;
 
-namespace Application.Features.Users.LoginWithRefreshToken;
+namespace Application.Features.Users.RefreshAuthToken;
 
-internal sealed class LoginWithRefreshTokenHandler : IRequestHandler<LoginWithRefreshToken, TokenResponse>
+internal sealed class RefreshAuthTokenHandler : IRequestHandler<RefreshAuthToken, TokenResponse>
 {
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IAuthService _authService;
 
-    public LoginWithRefreshTokenHandler(IRefreshTokenRepository refreshTokenRepository, IAuthService authService)
+    public RefreshAuthTokenHandler(IRefreshTokenRepository refreshTokenRepository, IAuthService authService)
     {
         _refreshTokenRepository = refreshTokenRepository;
         _authService = authService;
     }
     
-    public async Task<TokenResponse> Handle(LoginWithRefreshToken request, CancellationToken cancellationToken)
+    public async Task<TokenResponse> Handle(RefreshAuthToken request, CancellationToken cancellationToken)
     {
         var refreshToken = await _refreshTokenRepository.GetUsersRefreshToken(request.RefreshToken);
         

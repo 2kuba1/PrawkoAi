@@ -1,6 +1,8 @@
 ﻿using Application.Features.Users.GoogleLogin;
 using Application.Features.Users.GuestLogin;
+using Application.Features.Users.RefreshAuthToken;
 using Application.Features.Users.RevokeRefreshTokens;
+using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -15,7 +17,10 @@ public static class AuthEndpoints
         app.MapGet("/api/account/login/google", GoogleLogin);
         app.MapGet("/api/account/login/google/callback", GoogleLoginCallback).WithName("GoogleLoginCallback");
         app.MapGet("/api/account/login/guest", GuestLogin);
-        app.MapDelete("/api/account/logout", Logout);
+        app.MapGet("/api/account/refresh-token", RefreshToken);
+        app.MapDelete("/api/account/logout", Logout)
+            .RequireAuthorization();
+        
     }
 
     private static IResult GoogleLogin(
@@ -47,9 +52,15 @@ public static class AuthEndpoints
         return Results.Ok(result);
     }
 
-    private static async Task<IResult> GuestLogin([FromQuery] string deviceId, [FromServices] IMediator mediator)
+    private static async Task<IResult> GuestLogin([FromQuery]string deviceId, [FromServices] IMediator mediator)
     {
         var tokens = await mediator.Send(new GuestLogin(deviceId));
         return Results.Ok(tokens);
+    }
+
+    private static async Task<IResult> RefreshToken([FromQuery]string refreshToken, [FromServices] IMediator mediator)
+    {
+        var newTokens = await mediator.Send(new RefreshAuthToken(refreshToken));
+        return Results.Ok(newTokens);
     }
 }

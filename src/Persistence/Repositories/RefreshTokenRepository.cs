@@ -17,7 +17,8 @@ public class RefreshTokenRepository : GenericRepository<RefreshToken>, IRefreshT
 
     public async Task<RefreshToken?> GetUsersRefreshToken(string refreshToken)
     {
-        var token = await _context.RefreshTokens.Include(r => r.User)
+        var token = await _context.RefreshTokens
+            .Include(r => r.User)
             .FirstOrDefaultAsync(r => r.Token == refreshToken);
         return token;
     }
