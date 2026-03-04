@@ -20,7 +20,9 @@ public class ExamAnswerHandler : IRequestHandler<ExamAnswer, Unit>
     
     public async Task<Unit> Handle(ExamAnswer request, CancellationToken cancellationToken)
     {
-        if (Utils.GetCurrentUserId(_httpContextAccessor) != request.ExamSessionId)
+        var isHttpContextAndRequestMatching = Utils.GetCurrentUserId(_httpContextAccessor) == request.UserId;
+        
+        if (!isHttpContextAndRequestMatching)
             throw new UnauthorizedAccessException("You are not allowed to update this exam");
 
         var examSession = await _examSessionRepository.GetByIdAsync(request.ExamSessionId);

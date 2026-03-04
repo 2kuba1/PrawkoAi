@@ -50,6 +50,7 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
         if(examQuestion.SelectedAnswerId is not null)
             throw new  ApplicationException("You have already answered this question!");
         
+        examQuestion.AnsweredAt = DateTime.UtcNow;
         examQuestion.SelectedAnswerId = selectedAnswerId;
         examQuestion.IsCorrect = selectedAnswerId == questionData.CorrectAnswerId;
 
