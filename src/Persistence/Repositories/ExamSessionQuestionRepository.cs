@@ -1,5 +1,6 @@
 ﻿using Application.Contracts.Repositories;
 using Application.Models;
+using Application.Models.DTOs;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Database;
@@ -59,5 +60,43 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
 
     public async Task<ExamSessionQuestion?> GetByQuestionAndSessionIdAsync(Guid questionId, Guid examSessionId)
         => await _context.ExamSessionQuestions.FirstOrDefaultAsync(q => q.QuestionId == questionId && q.ExamSessionId == examSessionId);
+
+    public async Task<ExamResultsDto> GetExamResultsAsync(Guid examSessionId)
+    {
+        var sessionData = await _context.ExamSessions
+            .AsNoTracking()
+            .Where(s => s.Id == examSessionId)
+            .Select(s => new {
+                s.StaredAt,
+                Questions = s.ExamSessionQuestions.Select(q => new {
+                    q.Id,
+                    q.QuestionId,
+                    q.SelectedAnswerId,
+                    q.IsCorrect,
+                    q.AnsweredAt,
+                    QuestionContent = q.Question.Content,
+                    QuestionPoints = q.Question.Points 
+                }).ToList()
+            })
+            .FirstOrDefaultAsync();
+
+        if (sessionData == null) throw new Exception("Sesja nie istnieje.");
+        
+
+        var results = sessionData.Questions
+            .GroupBy(q => q.IsCorrect == true)
+            .ToDictionary(g => g.Key, g => g.ToList());
     
+        var correct = results.GetValueOrDefault(true, new());
+        var incorrect = results.GetValueOrDefault(false, new());
+
+        var totalScore = correct.Sum(x => x.QuestionPoints);
+
+        return new ExamResultsDto(
+            CorrectAnswersCount: correct.Count,
+            CorrectAnswers: correct.Select(x => new AnswerDto(x.Id, x.QuestionId, x.QuestionContent, x.AnsweredAt ?? DateTime.UtcNow)).ToList(),
+            NotCorrectAnswers: incorrect.Select(x => new AnswerDto(x.Id, x.QuestionId, x.QuestionContent, x.AnsweredAt ?? DateTime.UtcNow)).ToList(),
+            Score: (int)totalScore 
+        );
+    }
 }
