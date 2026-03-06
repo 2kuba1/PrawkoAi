@@ -80,7 +80,7 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
             })
             .FirstOrDefaultAsync();
 
-        if (sessionData == null) throw new Exception("Sesja nie istnieje.");
+        if (sessionData == null) throw new ApplicationException("Session doesn't exist");
         
 
         var results = sessionData.Questions
@@ -92,11 +92,14 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
 
         var totalScore = correct.Sum(x => x.QuestionPoints);
 
-        return new ExamResultsDto(
-            CorrectAnswersCount: correct.Count,
-            CorrectAnswers: correct.Select(x => new AnswerDto(x.Id, x.QuestionId, x.QuestionContent, x.AnsweredAt ?? DateTime.UtcNow)).ToList(),
-            NotCorrectAnswers: incorrect.Select(x => new AnswerDto(x.Id, x.QuestionId, x.QuestionContent, x.AnsweredAt ?? DateTime.UtcNow)).ToList(),
-            Score: (int)totalScore 
-        );
+        return new ExamResultsDto
+        {
+            CorrectAnswersCount = correct.Count,
+            CorrectAnswers =  correct.Select(x => new AnswerDto(x.Id, x.QuestionId, x.QuestionContent,
+            x.AnsweredAt ?? DateTime.UtcNow)).ToList(),
+            NotCorrectAnswers = incorrect.Select(x => new AnswerDto(x.Id, x.QuestionId, x.QuestionContent,
+            x.AnsweredAt ?? DateTime.UtcNow)).ToList(),
+            Score =  (int)totalScore,
+        };
     }
 }
