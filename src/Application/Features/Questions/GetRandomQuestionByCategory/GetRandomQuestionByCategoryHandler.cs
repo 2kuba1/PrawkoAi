@@ -1,5 +1,6 @@
 ﻿using Application.Contracts.Repositories;
 using Application.Models;
+using Domain.Exceptions;
 using MediatR;
 
 namespace Application.Features.Questions.GetRandomQuestionByCategory;
@@ -20,10 +21,10 @@ internal sealed class GetRandomQuestionByCategoryHandler : IRequestHandler<GetRa
         var category = await _categoryRepository.GetCategoryByName(request.CategoryName);
 
         if (category is null)
-            throw new ArgumentException("Category doesn't exist");
+            throw new NotFoundException("Category doesn't exist");
 
         var question = await _questionRepository.GetRandomQuestionByCategory(category.Id);
 
-        return question is null ? throw new ApplicationException("No matching questions") : new QuestionWithAnswersResponse(question, question.Answers);
+        return question is null ? throw new NotFoundException("No matching questions") : new QuestionWithAnswersResponse(question, question.Answers);
     }
 }

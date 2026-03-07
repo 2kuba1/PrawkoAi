@@ -1,6 +1,7 @@
 ﻿using Application.Contracts.Repositories;
 using Application.Contracts.Services;
 using Application.Models;
+using Domain.Exceptions;
 using MediatR;
 
 namespace Application.Features.Users.RefreshAuthToken;
@@ -21,7 +22,7 @@ internal sealed class RefreshAuthTokenHandler : IRequestHandler<RefreshAuthToken
         var refreshToken = await _refreshTokenRepository.GetUsersRefreshToken(request.RefreshToken);
         
         if (refreshToken is null || refreshToken.ExpiresOnUtc < DateTime.UtcNow)
-            throw new ApplicationException("The refresh token has expired");
+            throw new RefreshTokenExpiredException("The refresh token has expired");
         
         var accessToken = _authService.CreateToken(refreshToken.User);
 

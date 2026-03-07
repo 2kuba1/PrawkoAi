@@ -1,5 +1,6 @@
 ﻿using Application.Contracts.Repositories;
 using Application.Shared;
+using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -23,20 +24,20 @@ public class ExamAnswerHandler : IRequestHandler<ExamAnswer, Unit>
         var isHttpContextAndRequestMatching = Utils.GetCurrentUserId(_httpContextAccessor) == request.UserId;
         
         if (!isHttpContextAndRequestMatching)
-            throw new UnauthorizedAccessException("You are not allowed to update this exam");
+            throw new UnauthorizedException("You are not allowed to update this exam");
 
         var examSession = await _examSessionRepository.GetByIdAsync(request.ExamSessionId);
         
         if(examSession is null || examSession.FinishedAt > DateTime.UtcNow)
-            throw new ApplicationException("Could not find exam session or is expired");
+            throw new NotFoundException("Could not find exam session or is expired");
 
         if(examSession.UserId != request.UserId)
-            throw new UnauthorizedAccessException("You are not allowed to update this exam");
+            throw new UnauthorizedException("You are not allowed to update this exam");
         
         var examQuestion = await _examSessionQuestionRepository.GetByQuestionAndSessionIdAsync(request.QuestionId, request.ExamSessionId);
         
         if(examQuestion is null)
-            throw new ApplicationException("Could not find exam question");
+            throw new NotFoundException("Could not find exam question");
         
         await _examSessionQuestionRepository.UpdateExamSessionQuestionAsync(examQuestion, examSession.Id, request.SelectedAnswerId);
         

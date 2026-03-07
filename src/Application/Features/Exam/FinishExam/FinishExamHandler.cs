@@ -1,6 +1,7 @@
 ﻿using Application.Contracts.Repositories;
 using Application.Models.DTOs;
 using Application.Shared;
+using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -24,23 +25,23 @@ public class FinishExamHandler : IRequestHandler<FinishExam, ExamResultsDto>
         var isHttpContextAndRequestMatching = Utils.GetCurrentUserId(_httpContextAccessor) == request.UserId;
         
         if (!isHttpContextAndRequestMatching)
-            throw new UnauthorizedAccessException("You are not allowed to update this exam");
+            throw new UnauthorizedException("You are not allowed to update this exam");
 
         var examSession = await _examSessionRepository.GetByIdAsync(request.ExamSessionId);
         
         if(examSession is null)
-            throw new ApplicationException($"Exam session with id {request.ExamSessionId} not found");
+            throw new NotFoundException($"Exam session with id {request.ExamSessionId} not found");
  
         if(examSession.UserId != request.UserId)
-            throw new UnauthorizedAccessException("You are not authorized to update this exam");
+            throw new UnauthorizedException("You are not authorized to update this exam");
 
         if (examSession.FinishedAt is not null)
-            throw new ApplicationException("This exam session has been finished");
+            throw new FinishedExamException("This exam session has been finished");
         
         if ((DateTime.UtcNow - examSession.StaredAt).TotalMinutes > 32)
         {
             examSession.FinishedAt ??= DateTime.UtcNow;
-            throw new ApplicationException("This exam session expired");
+            throw new FinishedExamException("This exam session expired");
         }
         
         var finishedAt = DateTime.UtcNow;

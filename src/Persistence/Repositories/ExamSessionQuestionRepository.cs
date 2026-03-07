@@ -2,6 +2,7 @@
 using Application.Models;
 using Application.Models.DTOs;
 using Domain.Entities;
+using Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Database;
 
@@ -42,14 +43,14 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
                                .Where(q => q.Id == updateDto.QuestionId)
                                .Select(q => new { q.CorrectAnswerId })
                                .FirstOrDefaultAsync() 
-                           ?? throw new ApplicationException("Invalid question");
+                           ?? throw new InvalidQuestionException("Invalid question");
 
         var examQuestion = await _context.ExamSessionQuestions
                                .FirstOrDefaultAsync(e => e.Id == updateDto.Id && e.ExamSessionId == examSessionId)
-                           ?? throw new ApplicationException("Invalid exam session or question");
+                           ?? throw new InvalidExamSessionOrQuestionException("Invalid exam session or question");
 
         if(examQuestion.SelectedAnswerId is not null)
-            throw new  ApplicationException("You have already answered this question!");
+            throw new  AnswerAlreadyAddedException("You have already answered this question!");
         
         examQuestion.AnsweredAt = DateTime.UtcNow;
         examQuestion.SelectedAnswerId = selectedAnswerId;
@@ -80,7 +81,7 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
             })
             .FirstOrDefaultAsync();
 
-        if (sessionData == null) throw new ApplicationException("Session doesn't exist");
+        if (sessionData == null) throw new NotFoundException("Session doesn't exist");
         
 
         var results = sessionData.Questions

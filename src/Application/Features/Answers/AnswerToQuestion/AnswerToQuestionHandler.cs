@@ -1,6 +1,7 @@
 ﻿using Application.Contracts.Repositories;
 using Application.Shared;
 using Domain;
+using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -24,13 +25,13 @@ public class AnswerToQuestionHandler : IRequestHandler<AnswerToQuestion, Unit>
     public async Task<Unit> Handle(AnswerToQuestion request, CancellationToken cancellationToken)
     {
         if(Guid.Parse(request.UserId) != Utils.GetCurrentUserId(_httpContextAccessor))
-            throw new ApplicationException("You are not authorized to answer as that user");
+            throw new UnauthorizedException("You are not authorized to answer as that user");
         
         if(!await _questionRepository.CheckIfQuestionExists(Guid.Parse(request.QuestionId)))
-            throw new ApplicationException("Question does not exist");
+            throw new NotFoundException("Question does not exist");
 
         if (!await _answerRepository.IsAnswerValid(Guid.Parse(request.SelectedAnswerId), Guid.Parse(request.QuestionId))) 
-            throw new ApplicationException("Answer does not exist");
+            throw new NotFoundException("Answer does not exist");
         
         await _userAnswerRepository.CreateAsync(new UserAnswer()
         {

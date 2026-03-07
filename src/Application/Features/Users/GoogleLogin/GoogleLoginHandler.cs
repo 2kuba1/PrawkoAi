@@ -4,6 +4,7 @@ using Application.Contracts.Services;
 using Application.Models;
 using Domain;
 using Domain.Entities;
+using Domain.Exceptions;
 using MediatR;
 
 namespace Application.Features.Users.GoogleLogin;
@@ -26,12 +27,12 @@ internal sealed class GoogleLoginHandler : IRequestHandler<GoogleLogin, TokenRes
     public async Task<TokenResponse> Handle(GoogleLogin request, CancellationToken cancellationToken)
     {
         if(request.Claims is null)
-            throw new ArgumentException("Claims cannot be null");
+            throw new NotFoundException("Claims cannot be null");
 
         var email = request.Claims.FindFirst(ClaimTypes.Email).Value;
         
         if(email is null)
-            throw new ArgumentException("Claims cannot be null");
+            throw new NullParametersException("Claims cannot be null");
 
         var user = await _userRepository.FindUserByEmailAsync(email);
 
@@ -40,7 +41,7 @@ internal sealed class GoogleLoginHandler : IRequestHandler<GoogleLogin, TokenRes
             var role = await _roleRepository.GetRoleByName("User");
             
             if(role is null)
-                throw new KeyNotFoundException($"Role does not exist");
+                throw new NotFoundException($"Role does not exist");
             
             var newUser = new User()
             {

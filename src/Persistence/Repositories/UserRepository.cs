@@ -1,6 +1,7 @@
 ﻿using Application.Contracts.Repositories;
 using Domain;
 using Domain.Entities;
+using Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Database;
 
@@ -29,12 +30,12 @@ public class UserRepository : GenericRepository<User>, IUserRepository
         var checkIfDeviceIdExists = await _context.Users.AnyAsync(x => x.DeviceId == deviceId);
 
         if (checkIfDeviceIdExists)
-            throw new ApplicationException("This user already exists");
+            throw new UserAlreadyExistsException("This user already exists");
 
         var role = await _context.Roles.FirstOrDefaultAsync(x => x.Name == "User");
         
         if(role is null)
-            throw new ApplicationException("This role does not exist");
+            throw new NotFoundException("This role does not exist");
         
         var newUser = new User()
         {
