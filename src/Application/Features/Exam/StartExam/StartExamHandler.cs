@@ -30,7 +30,7 @@ internal sealed class StartExamHandler : IRequestHandler<StartExam, StartExamRes
     {
         var currentUserId = Utils.GetCurrentUserId(_httpContextAccessor);
 
-        if (!currentUserId.HasValue || Guid.Parse(request.UserId) != currentUserId.Value)
+        if (!currentUserId.HasValue || request.UserId != currentUserId.Value)
             throw new UnauthorizedAccessException();
 
         var examSession = new ExamSession()

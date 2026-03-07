@@ -20,7 +20,7 @@ public static class ExamEndpoints
             .RequireAuthorization();
     }
 
-    private static async Task<IResult> StartExam([FromQuery]string userId, [FromServices] IMediator mediator)
+    private static async Task<IResult> StartExam([FromQuery]Guid userId, [FromServices] IMediator mediator)
     {
         var questions = await mediator.Send(new StartExam(userId));
         return Results.Ok(questions);

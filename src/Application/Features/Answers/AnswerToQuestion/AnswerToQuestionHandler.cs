@@ -24,20 +24,20 @@ public class AnswerToQuestionHandler : IRequestHandler<AnswerToQuestion, Unit>
     
     public async Task<Unit> Handle(AnswerToQuestion request, CancellationToken cancellationToken)
     {
-        if(Guid.Parse(request.UserId) != Utils.GetCurrentUserId(_httpContextAccessor))
+        if(request.UserId != Utils.GetCurrentUserId(_httpContextAccessor))
             throw new UnauthorizedException("You are not authorized to answer as that user");
         
-        if(!await _questionRepository.CheckIfQuestionExists(Guid.Parse(request.QuestionId)))
+        if(!await _questionRepository.CheckIfQuestionExists(request.QuestionId))
             throw new NotFoundException("Question does not exist");
 
-        if (!await _answerRepository.IsAnswerValid(Guid.Parse(request.SelectedAnswerId), Guid.Parse(request.QuestionId))) 
+        if (!await _answerRepository.IsAnswerValid(request.SelectedAnswerId, request.QuestionId)) 
             throw new NotFoundException("Answer does not exist");
         
         await _userAnswerRepository.CreateAsync(new UserAnswer()
         {
-            UserId = Guid.Parse(request.UserId),
-            SelectedAnswerId = Guid.Parse(request.SelectedAnswerId),
-            QuestionId = Guid.Parse(request.QuestionId)
+            UserId = request.UserId,
+            SelectedAnswerId = request.SelectedAnswerId,
+            QuestionId = request.QuestionId
         });
         
         return Unit.Value;

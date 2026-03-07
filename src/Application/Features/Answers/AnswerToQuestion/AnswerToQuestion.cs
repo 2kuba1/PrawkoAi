@@ -2,4 +2,4 @@
 
 namespace Application.Features.Answers.AnswerToQuestion;
 
-public record AnswerToQuestion(string QuestionId, string UserId, string SelectedAnswerId) : IRequest<Unit>;
+public record AnswerToQuestion(Guid QuestionId, Guid UserId, Guid SelectedAnswerId) : IRequest<Unit>;

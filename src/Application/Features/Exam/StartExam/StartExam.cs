@@ -4,4 +4,4 @@ using MediatR;
 
 namespace Application.Features.Exam.StartExam;
 
-public record StartExam(string UserId) : IRequest<StartExamResponse>;
+public record StartExam(Guid UserId) : IRequest<StartExamResponse>;

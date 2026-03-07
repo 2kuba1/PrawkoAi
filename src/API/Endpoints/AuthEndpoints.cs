@@ -46,9 +46,9 @@ public static class AuthEndpoints
         return Results.Ok(tokens);
     }
 
-    private static async Task<IResult> Logout([FromQuery]string userId, [FromServices] IMediator mediator)
+    private static async Task<IResult> Logout([FromQuery]Guid userId, [FromServices] IMediator mediator)
     {
-        var result = await mediator.Send(new RevokeRefreshTokens(Guid.Parse(userId)));
+        var result = await mediator.Send(new RevokeRefreshTokens(userId));
         return Results.Ok(result);
     }
 

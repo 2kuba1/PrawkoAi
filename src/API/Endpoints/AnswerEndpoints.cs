@@ -20,8 +20,8 @@ public static class AnswerEndpoints
     }
     
     private record AnswerToQuestionRequest(
-        string QuestionId, 
-        string SelectedAnswerId, 
-        string UserId
+        Guid QuestionId, 
+        Guid SelectedAnswerId, 
+        Guid UserId
     );
 }
