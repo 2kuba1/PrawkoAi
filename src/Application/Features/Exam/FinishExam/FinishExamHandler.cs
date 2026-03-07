@@ -34,7 +34,7 @@ public class FinishExamHandler : IRequestHandler<FinishExam, ExamResultsDto>
         if(examSession.UserId != request.UserId)
             throw new UnauthorizedAccessException("You are not authorized to update this exam");
 
-        if (examSession.FinishedAt is null)
+        if (examSession.FinishedAt is not null)
             throw new ApplicationException("This exam session has been finished");
         
         if ((DateTime.UtcNow - examSession.StaredAt).TotalMinutes > 32)
@@ -46,7 +46,7 @@ public class FinishExamHandler : IRequestHandler<FinishExam, ExamResultsDto>
         var finishedAt = DateTime.UtcNow;
         
         var results = await _examSessionQuestionRepository.GetExamResultsAsync(request.ExamSessionId);
-        var isPassed = await _examSessionRepository.CheckIfPassedAndSaveSession(examSession, finishedAt,results.Score);
+        var isPassed = await _examSessionRepository.CheckIfPassedAndSaveSession(examSession, finishedAt,results.Score, results.CorrectAnswersCount);
         
         results.StartedAt = examSession.StaredAt;
         results.FinishedAt = finishedAt;

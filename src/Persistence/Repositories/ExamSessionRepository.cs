@@ -13,12 +13,13 @@ public class ExamSessionRepository : GenericRepository<ExamSession>, IExamSessio
         _context = context;
     }
 
-    public async Task<bool> CheckIfPassedAndSaveSession(ExamSession examSession, DateTime finishedAt,int score)
+    public async Task<bool> CheckIfPassedAndSaveSession(ExamSession examSession, DateTime finishedAt,int score, int correctAnswerCount)
     {
         bool isPassed = score >= 68 ? true : false;
         examSession.IsPassed = isPassed;
         examSession.Score = score;
         examSession.FinishedAt = finishedAt;
+        _context.ExamSessions.Update(examSession);
         await _context.SaveChangesAsync();
         return isPassed;
     }
