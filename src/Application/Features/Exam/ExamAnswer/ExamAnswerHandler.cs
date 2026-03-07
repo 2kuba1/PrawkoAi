@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Application.Features.Exam.ExamAnswer;
 
-public class ExamAnswerHandler : IRequestHandler<ExamAnswer, Unit>
+internal sealed class ExamAnswerHandler : IRequestHandler<ExamAnswer, Unit>
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IExamSessionRepository _examSessionRepository;

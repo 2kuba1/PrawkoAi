@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Application.Features.Answers.AnswerToQuestion;
 
-public class AnswerToQuestionHandler : IRequestHandler<AnswerToQuestion, Unit>
+internal sealed class AnswerToQuestionHandler : IRequestHandler<AnswerToQuestion, Unit>
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IAnswerRepository _answerRepository;

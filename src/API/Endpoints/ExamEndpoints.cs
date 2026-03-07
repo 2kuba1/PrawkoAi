@@ -1,5 +1,6 @@
 ﻿using Application.Features.Exam.ExamAnswer;
 using Application.Features.Exam.FinishExam;
+using Application.Features.Exam.GetUserExamsSessionHistory;
 using Application.Features.Exam.StartExam;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +18,9 @@ public static class ExamEndpoints
             .RequireAuthorization();
 
         app.MapPut("/api/exam/finish", FinishExam)
+            .RequireAuthorization();
+
+        app.MapGet("/api/exam/userHistory", GetUserExamSessionsHistory)
             .RequireAuthorization();
     }
 
@@ -36,6 +40,12 @@ public static class ExamEndpoints
         [FromServices] IMediator mediator)
     {
         var results = await mediator.Send(new FinishExam(finishExamSession.UserId, finishExamSession.ExamSessionId));
+        return Results.Ok(results);
+    }
+
+    private static async Task<IResult> GetUserExamSessionsHistory([FromQuery] Guid userId,[FromServices] IMediator mediator)
+    {
+        var results = await mediator.Send(new GetUserExamsSessionHistory(userId));
         return Results.Ok(results);
     }
     

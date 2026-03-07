@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Application.Features.Exam.FinishExam;
 
-public class FinishExamHandler : IRequestHandler<FinishExam, ExamResultsDto>
+internal sealed class FinishExamHandler : IRequestHandler<FinishExam, ExamResultsDto>
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IExamSessionRepository _examSessionRepository;
