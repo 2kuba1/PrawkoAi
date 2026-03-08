@@ -1,5 +1,6 @@
 ﻿using Application.Features.Exam.ExamAnswer;
 using Application.Features.Exam.FinishExam;
+using Application.Features.Exam.GetUserExamSessionResults;
 using Application.Features.Exam.GetUserExamsSessionHistory;
 using Application.Features.Exam.StartExam;
 using MediatR;
@@ -22,6 +23,9 @@ public static class ExamEndpoints
 
         app.MapGet("/api/exam/userHistory", GetUserExamSessionsHistory)
             .RequireAuthorization();
+
+        app.MapGet("/api/exam/examResults", GetUserExamSessionResults)
+            .RequireAuthorization();
     }
 
     private static async Task<IResult> StartExam([FromQuery]Guid userId, [FromServices] IMediator mediator)
@@ -33,7 +37,7 @@ public static class ExamEndpoints
     private static async Task<IResult> AnswerToExamQuestion([FromBody]AnswerToQuestionRequest request, [FromServices] IMediator mediator)
     {
         await mediator.Send(new ExamAnswer(request.ExamSessionId, request.QuestionId, request.SelectedAnswerId, request.UserId));
-        return Results.Ok();
+        return Results.NoContent();
     }
 
     private static async Task<IResult> FinishExam([FromBody] FinishExamSession finishExamSession,
@@ -48,6 +52,13 @@ public static class ExamEndpoints
         var results = await mediator.Send(new GetUserExamsSessionHistory(userId));
         return Results.Ok(results);
     }
+
+    private static async Task<IResult> GetUserExamSessionResults([FromQuery] Guid userId,
+        [FromQuery] Guid examSessionId, [FromServices] IMediator mediator)
+    {
+        var results = await mediator.Send(new GetUserExamSessionResults(userId, examSessionId)); 
+        return Results.Ok(results);
+    }   
     
     private record FinishExamSession(
         Guid UserId,
