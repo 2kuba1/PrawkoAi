@@ -1,5 +1,6 @@
 ﻿using Application.Contracts.Repositories;
 using Application.Shared;
+using Domain;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -11,12 +12,14 @@ internal sealed class ExamAnswerHandler : IRequestHandler<ExamAnswer, Unit>
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IExamSessionRepository _examSessionRepository;
     private readonly IExamSessionQuestionRepository _examSessionQuestionRepository;
+    private readonly IUserAnswerRepository _userAnswerRepository;
 
-    public ExamAnswerHandler(IHttpContextAccessor httpContextAccessor, IExamSessionRepository examSessionRepository, IExamSessionQuestionRepository examSessionQuestionRepository)
+    public ExamAnswerHandler(IHttpContextAccessor httpContextAccessor, IExamSessionRepository examSessionRepository, IExamSessionQuestionRepository examSessionQuestionRepository, IUserAnswerRepository userAnswerRepository)
     {
         _httpContextAccessor = httpContextAccessor;
         _examSessionRepository = examSessionRepository;
         _examSessionQuestionRepository = examSessionQuestionRepository;
+        _userAnswerRepository = userAnswerRepository;
     }
     
     public async Task<Unit> Handle(ExamAnswer request, CancellationToken cancellationToken)
@@ -40,6 +43,14 @@ internal sealed class ExamAnswerHandler : IRequestHandler<ExamAnswer, Unit>
             throw new NotFoundException("Could not find exam question");
         
         await _examSessionQuestionRepository.UpdateExamSessionQuestionAsync(examQuestion, examSession.Id, request.SelectedAnswerId);
+        
+        await _userAnswerRepository.CreateAsync(new UserAnswer()
+        {
+            AnsweredAt = examQuestion.AnsweredAt ?? DateTime.UtcNow,
+            SelectedAnswerId = request.SelectedAnswerId,
+            UserId = request.UserId,
+            QuestionId = request.QuestionId,
+        });
         
         return Unit.Value;
     }
