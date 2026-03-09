@@ -46,14 +46,17 @@ public static class AuthEndpoints
         }
     }
 
-    private static IResult GoogleLogin(
-        [FromQuery] string? returnUrl,
-        HttpContext httpContext)
+    private static IResult GoogleLogin([FromQuery] string returnUrl, HttpContext httpContext)
     {
-        return Results.Challenge(new AuthenticationProperties()
+        var props = new AuthenticationProperties
         {
             RedirectUri = "/api/account/login/google/callback",
-        }, ["Google"]);
+            Items =
+            {
+                ["returnUrl"] = returnUrl
+            }
+        };
+        return Results.Challenge(props, ["Google"]);
     }
 
     private static async Task<IResult> GoogleLoginCallback(HttpContext httpContext,
@@ -64,9 +67,14 @@ public static class AuthEndpoints
         if (!result.Succeeded)
             return Results.Unauthorized();
 
+        var authenticateResult = await httpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+        var returnUrl = authenticateResult.Properties?.Items["returnUrl"];
+        
         var tokens = await mediator.Send(new GoogleLogin(result.Principal), CancellationToken.None);
-
-        return Results.Ok(tokens);
+        
+        var redirectTarget = $"{returnUrl}?token={tokens.AccessToken}&refreshToken={tokens.RefreshToken}";
+        
+        return Results.Ok(redirectTarget);
     }
 
     private static async Task<IResult> Logout([FromQuery] Guid userId, [FromServices] IMediator mediator)
