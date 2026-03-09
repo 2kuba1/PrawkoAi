@@ -3,6 +3,7 @@ using API.Endpoints;
 using Application;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Persistence;
 using Persistence.Extensions;
@@ -22,8 +23,15 @@ builder.Services.AddCors(opt =>
 {
     opt.AddPolicy("CorsPolicy", options =>
     {
-        options.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:5173");
+        options.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:8081/");
     });
+});
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
 });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

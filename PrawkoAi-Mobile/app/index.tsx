@@ -1,25 +1,43 @@
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import { Stack } from "expo-router";
+import * as AuthSession from "expo-auth-session";
+import * as Device from "expo-device";
+import * as Linking from "expo-linking";
+import * as WebBrowser from "expo-web-browser";
 import React, { useContext } from "react";
-import { Image, StatusBar, Text, TouchableOpacity, View } from "react-native";
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { StatusBar, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContext } from "./_layout";
 
-export default function LoginScreen() {
-  return (
-    <SafeAreaProvider>
-      <Stack.Screen options={{ headerShown: false }} />
-      <LoginContent />
-    </SafeAreaProvider>
-  );
-}
+WebBrowser.maybeCompleteAuthSession();
 
-function LoginContent() {
+export default function LoginScreen() {
   const insets = useSafeAreaInsets();
-  const { signIn } = useContext(AuthContext);
+  const { signIn: completeSignIn } = useContext(AuthContext);
+
+  const handleGoogleSignIn = async () => {
+    const redirectUri = AuthSession.makeRedirectUri({ scheme: "prawkoai" });
+    const deviceId = Device.osInternalBuildId ?? "dev_id";
+    const deviceName = Device.deviceName ?? "Mobile";
+
+    const apiUrl =
+      "https://commander-settle-reviewer-planners.trycloudflare.com/api/account/login/google";
+    const authUrl = `${apiUrl}?returnUrl=${encodeURIComponent(redirectUri)}&deviceId=${encodeURIComponent(deviceId)}&deviceName=${encodeURIComponent(deviceName)}`;
+
+    try {
+      const result = await WebBrowser.openAuthSessionAsync(
+        authUrl,
+        redirectUri,
+      );
+      if (result.type === "success" && result.url) {
+        const { queryParams } = Linking.parse(result.url);
+        if (queryParams?.token) {
+          await completeSignIn(queryParams.token as string);
+        }
+      }
+    } catch (error) {
+      console.error("Błąd sesji przeglądarki:", error);
+    }
+  };
 
   return (
     <View
@@ -33,13 +51,7 @@ function LoginContent() {
 
       <View className="w-full max-w-sm items-center">
         <View className="mb-10 w-32 h-32 items-center justify-center bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-blue-900/10 border border-slate-100 dark:border-slate-800 overflow-hidden">
-          <Image
-            source={{
-              uri: "",
-            }}
-            className="w-24 h-24"
-            resizeMode="contain"
-          />
+          <MaterialIcons name="auto-fix-high" size={60} color="#1544b2" />
         </View>
 
         <Text className="text-slate-900 dark:text-white tracking-tight text-3xl font-bold text-center mb-3">
@@ -51,7 +63,7 @@ function LoginContent() {
 
         <View className="w-full gap-4">
           <TouchableOpacity
-            onPress={signIn}
+            onPress={handleGoogleSignIn}
             activeOpacity={0.8}
             className="flex-row w-full items-center justify-center rounded-2xl h-16 bg-[#1544b2] px-6 gap-3 shadow-lg shadow-[#1544b2]/30"
           >

@@ -46,7 +46,7 @@ internal sealed class GoogleLoginHandler : IRequestHandler<GoogleLogin, TokenRes
             var newUser = new User()
             {
                 Email = email,
-                DeviceId = "123",
+                DeviceId = request.DeviceId,
                 RoleId =  role.Id,
             };
 

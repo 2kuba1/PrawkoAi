@@ -7,7 +7,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
-using Google.Apis;
 using Google.Apis.Auth;
 
 namespace API.Endpoints;
@@ -46,17 +45,23 @@ public static class AuthEndpoints
         }
     }
 
-    private static IResult GoogleLogin([FromQuery] string returnUrl, HttpContext httpContext)
+    private static IResult GoogleLogin(
+        [FromQuery] string returnUrl,
+        [FromQuery] string deviceId,
+        [FromQuery] string deviceName)
     {
         var props = new AuthenticationProperties
         {
-            RedirectUri = "/api/account/login/google/callback",
+            RedirectUri = "/api/account/login/google/callback", 
             Items =
             {
-                ["returnUrl"] = returnUrl
+                ["returnUrl"] = returnUrl,
+                ["device_id"] = deviceId,
+                ["device_name"] = deviceName
             }
         };
-        return Results.Challenge(props, ["Google"]);
+        
+        return Results.Challenge(props, new[] { GoogleDefaults.AuthenticationScheme });
     }
 
     private static async Task<IResult> GoogleLoginCallback(HttpContext httpContext,
@@ -70,15 +75,19 @@ public static class AuthEndpoints
         var authenticateResult = await httpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
         var returnUrl = authenticateResult.Properties?.Items["returnUrl"];
         
-        var tokens = await mediator.Send(new GoogleLogin(result.Principal), CancellationToken.None);
+        var deviceId = result.Properties?.Items["device_id"];
+        var deviceName = result.Properties?.Items["device_name"];
+        var expoRedirectUrl = result.Properties?.Items["returnUrl"];
         
-        var redirectTarget = $"{returnUrl}?token={tokens.AccessToken}&refreshToken={tokens.RefreshToken}";
+        var tokens = await mediator.Send(new GoogleLogin(result.Principal, deviceId), CancellationToken.None);
         
-        return Results.Ok(redirectTarget);
+        var finalUrl = $"{expoRedirectUrl}?token={tokens}&deviceId={deviceId}";        
+        return Results.Redirect(finalUrl);    
     }
 
-    private static async Task<IResult> Logout([FromQuery] Guid userId, [FromServices] IMediator mediator)
+    private static async Task<IResult> Logout([FromQuery] Guid userId, [FromServices] IMediator mediator, [FromServices] HttpContext httpContext)
     {
+        await httpContext.SignOutAsync(GoogleDefaults.AuthenticationScheme);
         var result = await mediator.Send(new RevokeRefreshTokens(userId));
         return Results.Ok(result);
     }

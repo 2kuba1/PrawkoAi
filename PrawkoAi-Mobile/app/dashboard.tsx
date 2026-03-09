@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
-import React from "react";
+import React, { useContext } from "react";
 import {
   Image,
   ScrollView,
@@ -13,6 +13,7 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import { AuthContext } from "./_layout";
 
 export default function LoginScreen() {
   return (
@@ -25,6 +26,7 @@ export default function LoginScreen() {
 
 function DashboardContent() {
   const insets = useSafeAreaInsets();
+  const { signOut, token } = useContext(AuthContext);
 
   return (
     <View className="flex-1 bg-[#f6f6f8] dark:bg-[#111621]">
@@ -93,7 +95,19 @@ function DashboardContent() {
             </View>
           </View>
         </View>
+        <View className="flex-1 items-center justify-center bg-white p-6">
+          <Text className="text-2xl font-bold mb-4">Witaj w Dashboardzie!</Text>
+          <Text className="text-slate-400 text-xs mb-8" numberOfLines={1}>
+            {token}
+          </Text>
 
+          <TouchableOpacity
+            onPress={signOut}
+            className="bg-red-500 w-full h-14 items-center justify-center rounded-xl"
+          >
+            <Text className="text-white font-bold">Wyloguj (API + Local)</Text>
+          </TouchableOpacity>
+        </View>
         {/* AI Recommendation Card */}
         <View className="px-4 py-2">
           <View className="relative overflow-hidden rounded-3xl bg-[#1544b2] p-6 shadow-xl shadow-[#1544b2]/20">
