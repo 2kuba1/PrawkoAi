@@ -39,11 +39,16 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (isLoading) return;
-    const inAuthGroup = segments[0] === "dashboard";
 
-    if (!token && inAuthGroup) {
+    const currentSegments = segments as string[];
+    const rootSegment = currentSegments[0];
+
+    const isAuthPage =
+      rootSegment === "dashboard" || rootSegment === "examRulesScreen";
+
+    if (!token && isAuthPage) {
       router.replace("/");
-    } else if (token && !inAuthGroup) {
+    } else if (token && (rootSegment === "index" || !rootSegment)) {
       router.replace("/dashboard");
     }
   }, [token, isLoading, segments]);
@@ -56,10 +61,8 @@ export default function RootLayout() {
       setToken(newToken);
     },
     signOut: async () => {
-      console.log("Rozpoczynam wylogowanie...");
       try {
-        const apiUrl =
-          "https://commander-settle-reviewer-planners.trycloudflare.com/api/account/logout";
+        const apiUrl = `${process.env.EXPO_PUBLIC_API_URL}/api/account/logout`;
 
         await fetch(apiUrl, {
           method: "POST",
@@ -83,6 +86,7 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
           <Stack.Screen name="dashboard" />
+          <Stack.Screen name="examRulesScreen" />
         </Stack>
       </SafeAreaProvider>
     </AuthContext.Provider>

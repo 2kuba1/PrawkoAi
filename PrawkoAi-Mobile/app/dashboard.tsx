@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import React, { useContext } from "react";
 import {
   Image,
@@ -27,6 +27,11 @@ export default function LoginScreen() {
 function DashboardContent() {
   const insets = useSafeAreaInsets();
   const { signOut, token } = useContext(AuthContext);
+  const router = useRouter();
+
+  const startExam = () => {
+    router.push("/examRulesScreen");
+  };
 
   return (
     <View className="flex-1 bg-[#f6f6f8] dark:bg-[#111621]">
@@ -95,12 +100,10 @@ function DashboardContent() {
             </View>
           </View>
         </View>
-        <View className="flex-1 items-center justify-center bg-white p-6">
-          <Text className="text-2xl font-bold mb-4">Witaj w Dashboardzie!</Text>
-          <Text className="text-slate-400 text-xs mb-8" numberOfLines={1}>
-            {token}
+        <View className="flex-1 items-center justify-center bg-white dark:bg-slate-900 p-6">
+          <Text className="text-2xl font-bold mb-4 text-slate-900 dark:text-white">
+            Witaj w Dashboardzie!
           </Text>
-
           <TouchableOpacity
             onPress={signOut}
             className="bg-red-500 w-full h-14 items-center justify-center rounded-xl"
@@ -158,7 +161,10 @@ function DashboardContent() {
             <MaterialIcons name="chevron-right" size={24} color="#cbd5e1" />
           </TouchableOpacity>
 
-          <TouchableOpacity className="flex-row items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#1544b2]/5 active:opacity-70">
+          <TouchableOpacity
+            onPress={startExam}
+            className="flex-row items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#1544b2]/5 active:opacity-70"
+          >
             <View className="w-14 h-14 rounded-2xl bg-orange-100 dark:bg-orange-900/20 items-center justify-center">
               <MaterialIcons
                 name="assignment-turned-in"

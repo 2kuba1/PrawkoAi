@@ -19,8 +19,7 @@ export default function LoginScreen() {
     const deviceId = Device.osInternalBuildId ?? "dev_id";
     const deviceName = Device.deviceName ?? "Mobile";
 
-    const apiUrl =
-      "https://commander-settle-reviewer-planners.trycloudflare.com/api/account/login/google";
+    const apiUrl = `${process.env.EXPO_PUBLIC_API_URL}/api/account/login/google`;
     const authUrl = `${apiUrl}?returnUrl=${encodeURIComponent(redirectUri)}&deviceId=${encodeURIComponent(deviceId)}&deviceName=${encodeURIComponent(deviceName)}`;
 
     try {
