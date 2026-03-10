@@ -38,7 +38,7 @@ internal sealed class FinishExamHandler : IRequestHandler<FinishExam, ExamResult
         if (examSession.FinishedAt is not null)
             throw new FinishedExamException("This exam session has been finished");
         
-        if ((DateTime.UtcNow - examSession.StaredAt).TotalMinutes > 32)
+        if ((DateTime.UtcNow - examSession.StaredAt).TotalMinutes > 25)
         {
             examSession.FinishedAt ??= DateTime.UtcNow;
             throw new FinishedExamException("This exam session expired");
