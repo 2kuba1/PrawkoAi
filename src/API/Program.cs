@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Persistence;
 using Persistence.Extensions;
+using Quartz;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +62,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddQuartz();
+
+builder.Services.AddQuartzHostedService(opt =>
+{
+    opt.WaitForJobsToComplete = true;
+});
 
 
 var app = builder.Build();
