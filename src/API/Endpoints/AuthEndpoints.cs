@@ -81,7 +81,7 @@ public static class AuthEndpoints
         
         var tokens = await mediator.Send(new GoogleLogin(result.Principal, deviceId), CancellationToken.None);
         
-        var finalUrl = $"{expoRedirectUrl}?token={tokens}&deviceId={deviceId}";        
+        var finalUrl = $"{expoRedirectUrl}?accessToken={tokens.AccessToken}&refreshToken={tokens.RefreshToken}&deviceId={deviceId}";
         return Results.Redirect(finalUrl);    
     }
 

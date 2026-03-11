@@ -30,7 +30,7 @@ function DashboardContent() {
   const router = useRouter();
 
   const startExam = () => {
-    router.push("/examRulesScreen");
+    router.push("/examRules");
   };
 
   return (

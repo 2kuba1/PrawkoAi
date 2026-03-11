@@ -1,14 +1,27 @@
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SecureStore from "expo-secure-store";
+import { jwtDecode } from "jwt-decode";
 import { createContext, useEffect, useState } from "react";
+import {
+  configureReanimatedLogger,
+  ReanimatedLogLevel,
+} from "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "./globals.css";
 
-interface AuthContextType {
-  signIn: (token: string) => Promise<void>;
+export interface AuthContextType {
+  signIn: (token: TokenResponse) => Promise<void>;
   signOut: () => Promise<void>;
-  token: string | null;
+  token: TokenResponse | null;
   isLoading: boolean;
+  user: User | null;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  deviceId: string;
+  role: string;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -16,19 +29,47 @@ export const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
   token: null,
   isLoading: true,
+  user: null,
+});
+
+export interface TokenResponse {
+  accessToken: string;
+  refreshToken: string;
+}
+
+configureReanimatedLogger({
+  level: ReanimatedLogLevel.warn,
+  strict: false,
 });
 
 export default function RootLayout() {
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<TokenResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
   const segments = useSegments();
+
+  const decodeAndSetUser = (token: string) => {
+    try {
+      const decoded = jwtDecode(token) as User;
+      setUser(decoded);
+    } catch (e) {
+      setUser(null);
+    }
+  };
 
   useEffect(() => {
     async function initAuth() {
       try {
         const savedToken = await SecureStore.getItemAsync("userToken");
-        if (savedToken) setToken(savedToken);
+        if (savedToken) {
+          const parsed = JSON.parse(savedToken) as TokenResponse;
+
+          if (parsed?.accessToken) {
+            setToken(parsed);
+            decodeAndSetUser(parsed.accessToken);
+          }
+        }
       } catch (e) {
       } finally {
         setIsLoading(false);
@@ -56,9 +97,11 @@ export default function RootLayout() {
   const authContextValue = {
     token,
     isLoading,
-    signIn: async (newToken: string) => {
-      await SecureStore.setItemAsync("userToken", newToken);
+    user,
+    signIn: async (newToken: TokenResponse) => {
+      await SecureStore.setItemAsync("userToken", JSON.stringify(newToken));
       setToken(newToken);
+      decodeAndSetUser(newToken.accessToken);
     },
     signOut: async () => {
       try {
@@ -67,7 +110,7 @@ export default function RootLayout() {
         await fetch(apiUrl, {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token?.accessToken}`,
             "Content-Type": "application/json",
           },
         });
@@ -86,7 +129,8 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
           <Stack.Screen name="dashboard" />
-          <Stack.Screen name="examRulesScreen" />
+          <Stack.Screen name="examRules" />
+          <Stack.Screen name="examSimulation" />
         </Stack>
       </SafeAreaProvider>
     </AuthContext.Provider>

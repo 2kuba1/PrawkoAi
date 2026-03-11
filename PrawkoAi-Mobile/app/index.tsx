@@ -1,7 +1,6 @@
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import * as AuthSession from "expo-auth-session";
 import * as Device from "expo-device";
-import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 import React, { useContext } from "react";
 import { StatusBar, Text, TouchableOpacity, View } from "react-native";
@@ -28,9 +27,16 @@ export default function LoginScreen() {
         redirectUri,
       );
       if (result.type === "success" && result.url) {
-        const { queryParams } = Linking.parse(result.url);
-        if (queryParams?.token) {
-          await completeSignIn(queryParams.token as string);
+        const url = new URL(result.url);
+
+        const accessToken = url.searchParams.get("accessToken");
+        const refreshToken = url.searchParams.get("refreshToken");
+
+        if (accessToken && refreshToken) {
+          await completeSignIn({
+            accessToken,
+            refreshToken,
+          });
         }
       }
     } catch (error) {

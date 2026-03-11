@@ -18,6 +18,10 @@ export default function ExamRulesScreen() {
   const colorScheme = useColorScheme();
   const iconColor = colorScheme === "dark" ? "#ffffff" : "#0f172a";
 
+  const startExam = () => {
+    router.push("/examSimulation");
+  };
+
   return (
     <View className="flex-1 bg-[#f6f6f8] dark:bg-[#111621]">
       <Stack.Screen options={{ headerShown: false }} />
@@ -157,6 +161,7 @@ export default function ExamRulesScreen() {
         className="absolute bottom-0 left-0 right-0 p-4 bg-white/95 dark:bg-slate-900/95 border-t border-slate-100 dark:border-slate-800"
       >
         <TouchableOpacity
+          onPress={startExam}
           activeOpacity={0.8}
           className="w-full bg-[#1544b2] h-16 rounded-2xl flex-row items-center justify-center shadow-lg shadow-[#1544b2]/30"
         >
