@@ -69,10 +69,16 @@ function ExamSimulation() {
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log("Token:", token?.accessToken);
+    console.log("User ID:", user?.id);
+    console.log(
+      "API URL:",
+      `${process.env.EXPO_PUBLIC_API_URL}api/exam/start?userId=${user?.id}`,
+    );
     const fetchExamData = async () => {
       try {
         const response = await fetch(
-          `https://amenities-implies-acquisition-drawings.trycloudflare.com/api/exam/start?userId=${user?.id}`,
+          `${process.env.EXPO_PUBLIC_API_URL}/api/exam/start?userId=${user?.id}`,
           {
             method: "GET",
             headers: {
@@ -155,8 +161,8 @@ function ExamSimulation() {
   if (!currentQuestion) return null;
 
   return (
-    <View className="flex-1 bg-[#f8fafc] dark:bg-[#0f172a]">
-      <StatusBar barStyle="dark-content" />
+    <View className="flex-1 bg-[#f6f6f8] dark:bg-[#111621]">
+      <StatusBar barStyle="default" />
 
       {/* --- HEADER --- */}
       <View
@@ -174,10 +180,12 @@ function ExamSimulation() {
               className="text-slate-500 dark:text-slate-400"
             />
           </TouchableOpacity>
+
           <View>
             <Text className="text-[10px] font-bold uppercase tracking-widest text-[#1544b2]">
               Prawko AI
             </Text>
+
             <Text className="text-[9px] font-medium text-slate-400 uppercase">
               Symulacja egzaminu word
             </Text>
@@ -186,6 +194,7 @@ function ExamSimulation() {
 
         <View className="flex-row items-center gap-2 bg-slate-50 dark:bg-slate-800 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700">
           <MaterialIcons name="timer" size={16} className="text-[#1544b2]" />
+
           <Text className="text-base font-bold tabular-nums dark:text-white">
             25:00
           </Text>
@@ -198,11 +207,12 @@ function ExamSimulation() {
 
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingBottom: 160 }}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 180 }}
       >
         {/* --- MEDIA SECTION --- */}
         <View className="p-4">
-          <View className="relative aspect-video rounded-3xl overflow-hidden bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-800">
+          <View className="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-xl border border-[#1544b2]/10">
             <ImageBackground
               source={{
                 uri:
@@ -211,35 +221,34 @@ function ExamSimulation() {
               }}
               className="flex-1 items-center justify-center"
             >
-              <View className="absolute inset-0 bg-black/10" />
-              <TouchableOpacity className="w-16 h-16 rounded-full bg-white/20 items-center justify-center border border-white/30 backdrop-blur-md">
-                <MaterialIcons name="play-arrow" size={40} color="white" />
+              <TouchableOpacity className="w-14 h-14 rounded-full bg-white/20 items-center justify-center border border-white/40 backdrop-blur-md">
+                <MaterialIcons name="play-arrow" size={36} color="white" />
               </TouchableOpacity>
             </ImageBackground>
           </View>
         </View>
 
-        {/* --- Question --- */}
+        {/* --- QUESTION CONTENT --- */}
         <View className="px-5">
-          <View className="flex-row items-center gap-2 mb-3">
-            <View className="px-2.5 py-1 bg-[#1544b2]/10 rounded-md">
-              <Text className="text-[#1544b2] text-[10px] font-black uppercase">
-                Pytanie {globalProgress} z {totalQuestions}
+          <View className="flex-row items-center gap-2 mb-4">
+            <View className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 rounded-full border border-blue-100 dark:border-blue-800">
+              <Text className="text-[#1544b2] dark:text-blue-400 text-[10px] font-bold uppercase tracking-tight">
+                Pytanie {globalProgress} / {totalQuestions}
               </Text>
             </View>
-            <View className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 rounded-md">
-              <Text className="text-slate-600 dark:text-slate-400 text-[10px] font-black uppercase">
+            <View className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full">
+              <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase">
                 Punkty: {currentQuestion.points}
               </Text>
             </View>
           </View>
 
-          <Text className="text-xl font-bold leading-snug text-slate-800 dark:text-slate-100 mb-8">
+          <Text className="text-xl font-bold leading-tight text-slate-900 dark:text-white mb-8">
             {currentQuestion.content}
           </Text>
 
-          {/* --- Answers --- */}
-          <View className="flex-col gap-3">
+          {/* --- ANSWERS --- */}
+          <View className="gap-3">
             {sortedAnswers.map((answer) => {
               const isSelected = selectedAnswerId === answer.id;
               const isBinary = sortedAnswers.length === 2;
@@ -248,19 +257,19 @@ function ExamSimulation() {
                 <TouchableOpacity
                   key={answer.id}
                   onPress={() => setSelectedAnswerId(answer.id)}
-                  activeOpacity={0.7}
-                  className={`min-h-[64px] px-6 rounded-3xl border-2 flex-row items-center justify-between transition-all ${
+                  activeOpacity={0.8}
+                  className={`p-5 rounded-2xl border-2 flex-row items-center justify-between ${
                     isSelected
-                      ? "border-[#1544b2] bg-[#1544b2]/5"
-                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                      ? "border-[#1544b2] bg-blue-50/50 dark:bg-blue-900/20"
+                      : "border-white dark:border-slate-800 bg-white dark:bg-slate-800 shadow-sm"
                   }`}
                 >
                   <Text
-                    className={`text-lg flex-1 font-bold ${
+                    className={`text-base flex-1 font-bold ${
                       isSelected
-                        ? "text-[#1544b2]"
-                        : "text-slate-800 dark:text-slate-200"
-                    } ${isBinary ? "text-center text-xl uppercase" : ""}`}
+                        ? "text-[#1544b2] dark:text-blue-400"
+                        : "text-slate-700 dark:text-slate-200"
+                    } ${isBinary ? "text-center text-xl uppercase tracking-widest" : ""}`}
                   >
                     {answer.content}
                   </Text>
@@ -276,40 +285,38 @@ function ExamSimulation() {
             })}
           </View>
 
-          {/* Next BUTTON*/}
-          <View className="flex-row items-center justify-end mt-10">
-            <TouchableOpacity
-              onPress={handleNext}
-              className={
-                "flex-row items-center gap-2 px-8 py-4 rounded-2xl shadow-lg bg-[#1544b2] shadow-[#1544b2]/30"
-              }
-            >
-              <Text className="text-white font-bold text-lg">
-                {currentScope === "specialized" &&
-                currentIndex === questions.length - 1
-                  ? "Zakończ"
-                  : "Następne"}
-              </Text>
-              <MaterialIcons name="chevron-right" size={24} color="white" />
-            </TouchableOpacity>
-          </View>
+          {/* NEXT BUTTON */}
+          <TouchableOpacity
+            onPress={handleNext}
+            activeOpacity={0.9}
+            className="mt-10 bg-[#1544b2] h-14 rounded-xl flex-row items-center justify-center shadow-lg shadow-blue-900/30"
+          >
+            <Text className="text-white font-bold text-base mr-2">
+              {currentScope === "specialized" &&
+              currentIndex === questions.length - 1
+                ? "Zakończ egzamin"
+                : "Następne pytanie"}
+            </Text>
+            <MaterialIcons name="arrow-forward" size={20} color="white" />
+          </TouchableOpacity>
         </View>
       </ScrollView>
 
       {/* --- FOOTER PROGRESS --- */}
       <View
-        style={{ paddingBottom: insets.bottom + 20 }}
-        className="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 p-5"
+        style={{ paddingBottom: insets.bottom + 16 }}
+        className="absolute bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 border-t border-[#1544b2]/10 p-5"
       >
-        <View className="flex-row items-center justify-center gap-6">
+        <View className="flex-row gap-4">
+          {/* Podstawowe */}
           <View
             className={`flex-1 ${currentScope !== "standard" ? "opacity-30" : ""}`}
           >
             <View className="flex-row justify-between mb-2">
-              <Text className="text-[9px] font-black uppercase text-slate-400">
+              <Text className="text-[9px] font-bold uppercase text-slate-400">
                 Podstawowe
               </Text>
-              <Text className="text-[9px] font-black text-[#1544b2]">
+              <Text className="text-[9px] font-bold text-[#1544b2]">
                 {currentScope === "standard" ? currentIndex + 1 : totalStandard}
                 /{totalStandard}
               </Text>
@@ -324,21 +331,22 @@ function ExamSimulation() {
             </View>
           </View>
 
+          {/* SPECIALIZED */}
           <View
             className={`flex-1 ${currentScope !== "specialized" ? "opacity-30" : ""}`}
           >
             <View className="flex-row justify-between mb-2">
-              <Text className="text-[9px] font-black uppercase text-slate-400">
+              <Text className="text-[9px] font-bold uppercase text-slate-400">
                 Specjalistyczne
               </Text>
-              <Text className="text-[9px] font-black text-slate-400">
+              <Text className="text-[9px] font-bold text-slate-500">
                 {currentScope === "specialized" ? currentIndex + 1 : 0}/
                 {totalSpecialized}
               </Text>
             </View>
             <View className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
               <View
-                className="h-full bg-slate-400"
+                className="h-full bg-[#1544b2]"
                 style={{
                   width: `${currentScope === "specialized" ? ((currentIndex + 1) / totalSpecialized) * 100 : 0}%`,
                 }}

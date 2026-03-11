@@ -1,4 +1,4 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import React from "react";
 import {
@@ -6,7 +6,6 @@ import {
   StatusBar,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -15,9 +14,6 @@ export default function ExamRulesScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const colorScheme = useColorScheme();
-  const iconColor = colorScheme === "dark" ? "#ffffff" : "#0f172a";
-
   const startExam = () => {
     router.push("/examSimulation");
   };
@@ -25,132 +21,141 @@ export default function ExamRulesScreen() {
   return (
     <View className="flex-1 bg-[#f6f6f8] dark:bg-[#111621]">
       <Stack.Screen options={{ headerShown: false }} />
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="default" />
 
       {/* Header */}
       <View
         style={{ paddingTop: insets.top }}
-        className="flex-row items-center justify-between px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800"
+        className="flex-row items-center p-4 bg-[#f6f6f8]/80 dark:bg-[#111621]/80 backdrop-blur-md border-b border-[#1544b2]/10"
       >
         <TouchableOpacity
           onPress={() => router.back()}
-          className="p-2 rounded-full active:bg-slate-200 dark:active:bg-slate-800"
+          className="p-2 hover:bg-[#1544b2]/10 rounded-full"
         >
-          <MaterialIcons name="arrow-back" size={24} color={iconColor} />
+          <MaterialIcons name="arrow-back" size={24} color="#1544b2" />
         </TouchableOpacity>
-        <Text className="text-[#0f172a] dark:text-white text-lg font-bold tracking-tight flex-1 text-center pr-10">
+        <Text className="text-xl font-bold ml-2 text-slate-900 dark:text-white">
           Zasady Egzaminu
         </Text>
       </View>
 
       <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 120 }}
+        className="flex-1 px-4"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingTop: 20, paddingBottom: 150 }}
       >
-        {/* General information */}
-        <Text className="text-[#0f172a] dark:text-white text-2xl font-bold mt-6 mb-4">
-          Ogólne informacje
-        </Text>
+        {/* General Information */}
+        <View className="flex-row justify-between items-center mb-4">
+          <Text className="text-lg font-bold text-slate-800 dark:text-slate-200">
+            Ogólne informacje
+          </Text>
+        </View>
 
-        <View className="space-y-4">
-          <View className="flex-row items-center bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-800 mb-3">
-            <View className="w-12 h-12 items-center justify-center rounded-lg bg-[#1544b2]/10 mr-4">
-              <MaterialIcons name="quiz" size={28} color="#1544b2" />
+        <View className="space-y-3">
+          <View className="flex-row items-center bg-white dark:bg-slate-800 p-4 rounded-xl border border-[#1544b2]/5 shadow-sm mb-3">
+            <View className="w-12 h-12 rounded-lg bg-blue-50 dark:bg-blue-900/20 items-center justify-center">
+              <MaterialIcons name="quiz" size={26} color="#1544b2" />
             </View>
-            <View className="flex-1">
-              <Text className="text-[#0f172a] dark:text-white text-base font-bold">
+            <View className="ml-4">
+              <Text className="text-slate-900 dark:text-white font-bold text-base">
                 Liczba pytań: 32
               </Text>
               <Text className="text-slate-500 dark:text-slate-400 text-xs">
-                Całkowita liczba pytań w teście
+                Pełna baza oficjalna
               </Text>
             </View>
           </View>
 
-          <View className="flex-row items-center bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-800">
-            <View className="w-12 h-12 items-center justify-center rounded-lg bg-[#1544b2]/10 mr-4">
-              <MaterialIcons name="timer" size={28} color="#1544b2" />
+          <View className="flex-row items-center bg-white dark:bg-slate-800 p-4 rounded-xl border border-[#1544b2]/5 shadow-sm mb-3">
+            <View className="w-12 h-12 rounded-lg bg-blue-50 dark:bg-blue-900/20 items-center justify-center">
+              <MaterialIcons name="timer" size={26} color="#1544b2" />
             </View>
-            <View className="flex-1">
-              <Text className="text-[#0f172a] dark:text-white text-base font-bold">
-                Czas egzaminu: maks. 25 min
+            <View className="ml-4">
+              <Text className="text-slate-900 dark:text-white font-bold text-base">
+                Czas trwania: 25 min
               </Text>
               <Text className="text-slate-500 dark:text-slate-400 text-xs">
-                Całkowity czas na rozwiązanie
+                Odliczanie w czasie rzeczywistym
               </Text>
             </View>
           </View>
         </View>
 
-        {/* Question structure */}
-        <Text className="text-[#0f172a] dark:text-white text-2xl font-bold mt-8 mb-4">
-          Struktura pytań
+        {/* Question Structure*/}
+        <Text className="text-lg font-bold text-slate-800 dark:text-slate-200 mt-6 mb-4">
+          Struktura testu
         </Text>
 
-        <View className="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-800 mb-3 flex-row justify-between items-start">
-          <View>
-            <Text className="text-[#1544b2] font-bold text-xs tracking-widest uppercase">
-              Pytania podstawowe
-            </Text>
-            <Text className="text-[#0f172a] dark:text-white text-lg font-bold mt-1">
-              20 pytań
-            </Text>
+        <View className="bg-white dark:bg-slate-800 rounded-xl border border-[#1544b2]/5 shadow-sm overflow-hidden mb-3">
+          <View className="p-4 border-b border-slate-50 dark:border-slate-700 flex-row justify-between items-center">
+            <View>
+              <Text className="text-[#1544b2] font-bold text-[10px] uppercase tracking-widest">
+                Podstawowe
+              </Text>
+              <Text className="text-slate-900 dark:text-white font-bold text-lg">
+                20 pytań
+              </Text>
+            </View>
+            <View className="bg-slate-50 dark:bg-slate-700 px-3 py-1 rounded-full">
+              <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-bold">
+                35s / pytanie
+              </Text>
+            </View>
           </View>
-          <View className="bg-[#1544b2]/5 px-2 py-1 rounded">
-            <Text className="text-[#1544b2] text-[10px] font-semibold">
-              35 sek / pytanie
-            </Text>
-          </View>
-        </View>
-
-        <View className="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-800 mb-3 flex-row justify-between items-start">
-          <View>
-            <Text className="text-[#1544b2] font-bold text-xs tracking-widest uppercase">
-              Pytania specjalistyczne
-            </Text>
-            <Text className="text-[#0f172a] dark:text-white text-lg font-bold mt-1">
-              12 pytań
-            </Text>
-          </View>
-          <View className="bg-[#1544b2]/5 px-2 py-1 rounded">
-            <Text className="text-[#1544b2] text-[10px] font-semibold">
-              50 sek / pytanie
-            </Text>
+          <View className="p-4 flex-row justify-between items-center">
+            <View>
+              <Text className="text-[#1544b2] font-bold text-[10px] uppercase tracking-widest">
+                Specjalistyczne
+              </Text>
+              <Text className="text-slate-900 dark:text-white font-bold text-lg">
+                12 pytań
+              </Text>
+            </View>
+            <View className="bg-slate-50 dark:bg-slate-700 px-3 py-1 rounded-full">
+              <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-bold">
+                50s / pytanie
+              </Text>
+            </View>
           </View>
         </View>
 
         {/* Points */}
-        <Text className="text-[#0f172a] dark:text-white text-2xl font-bold mt-8 mb-4">
-          Punktacja
-        </Text>
+        <View className="mt-8 rounded-xl bg-[#1544b2] p-6 shadow-xl shadow-blue-900/20 relative overflow-hidden">
+          <View className="absolute -right-6 -bottom-6 opacity-10">
+            <MaterialCommunityIcons name="seal" size={120} color="white" />
+          </View>
 
-        <View className="bg-[#1544b2] rounded-3xl p-6 shadow-xl overflow-hidden relative">
-          <View className="flex-row justify-between items-center border-b border-white/20 pb-3 mb-3">
-            <Text className="text-white/80 font-medium">Każde pytanie</Text>
-            <Text className="text-white text-xl font-bold">1, 2 lub 3 pkt</Text>
+          <Text className="text-white/70 text-[10px] font-bold uppercase tracking-[2px] mb-4">
+            System Oceniania
+          </Text>
+
+          <View className="flex-row justify-between items-end mb-4">
+            <View>
+              <Text className="text-white/80 text-xs">Suma punktów</Text>
+              <Text className="text-white text-3xl font-bold">74 pkt</Text>
+            </View>
+            <View className="items-end">
+              <Text className="text-white/80 text-xs">Próg zaliczenia</Text>
+              <Text className="text-white text-3xl font-bold">68 pkt</Text>
+            </View>
           </View>
-          <View className="flex-row justify-between items-center border-b border-white/20 pb-3 mb-3">
-            <Text className="text-white/80 font-medium">Suma punktów</Text>
-            <Text className="text-white text-xl font-bold">74 pkt</Text>
-          </View>
-          <View className="flex-row justify-between items-center bg-white/10 p-3 rounded-lg">
-            <Text className="text-white font-bold">Warunek zdania</Text>
-            <Text className="text-white text-2xl font-black italic">
-              min. 68 pkt
+
+          <View className="h-[1px] bg-white/20 w-full mb-4" />
+
+          <View className="flex-row items-center">
+            <MaterialIcons name="stars" size={20} color="#fbbf24" />
+            <Text className="text-white/90 text-sm ml-2 font-medium">
+              Pytania punktowane za 1, 2 lub 3 pkt
             </Text>
-          </View>
-
-          <View className="absolute -right-4 -bottom-4 opacity-10">
-            <MaterialIcons name="military-tech" size={100} color="white" />
           </View>
         </View>
 
         {/* Info Box */}
-        <View className="mt-8 flex-row items-center space-x-3 p-4 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-900/30 rounded-xl">
-          <MaterialIcons name="info" size={20} color="#ca8a04" />
-          <Text className="flex-1 text-[11px] text-yellow-800 dark:text-yellow-500 font-medium leading-4">
-            Pamiętaj, że po zatwierdzeniu odpowiedzi nie możesz do niej wrócić.
-            Skup się i uważnie czytaj każde pytanie.
+        <View className="mt-6 flex-row items-start p-4 bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/20 rounded-xl">
+          <MaterialIcons name="info" size={20} color="#ea580c" />
+          <Text className="flex-1 text-[12px] text-orange-800 dark:text-orange-400 ml-3 leading-5">
+            Uwaga: Po zatwierdzeniu odpowiedzi nie ma możliwości powrotu do
+            pytania. Czytaj uważnie treść i analizuj materiały wideo.
           </Text>
         </View>
       </ScrollView>
@@ -158,17 +163,17 @@ export default function ExamRulesScreen() {
       {/* Sticky Footer */}
       <View
         style={{ paddingBottom: insets.bottom + 16 }}
-        className="absolute bottom-0 left-0 right-0 p-4 bg-white/95 dark:bg-slate-900/95 border-t border-slate-100 dark:border-slate-800"
+        className="absolute bottom-0 left-0 right-0 p-4 bg-[#f6f6f8]/95 dark:bg-[#111621]/95 border-t border-[#1544b2]/10"
       >
         <TouchableOpacity
           onPress={startExam}
-          activeOpacity={0.8}
-          className="w-full bg-[#1544b2] h-16 rounded-2xl flex-row items-center justify-center shadow-lg shadow-[#1544b2]/30"
+          activeOpacity={0.9}
+          className="w-full bg-[#1544b2] h-14 rounded-xl flex-row items-center justify-center shadow-lg shadow-blue-900/30"
         >
-          <Text className="text-white font-bold text-lg mr-2">
-            Rozpocznij Egzamin
+          <Text className="text-white font-bold text-base mr-2">
+            Zatwierdzam i zaczynam
           </Text>
-          <MaterialIcons name="play-arrow" size={24} color="white" />
+          <MaterialIcons name="chevron-right" size={24} color="white" />
         </TouchableOpacity>
       </View>
     </View>

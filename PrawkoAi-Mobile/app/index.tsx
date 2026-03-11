@@ -55,36 +55,39 @@ export default function LoginScreen() {
       <View className="absolute -bottom-20 -left-20 w-80 h-80 bg-[#1544b2]/5 rounded-full blur-3xl" />
 
       <View className="w-full max-w-sm items-center">
-        <View className="mb-10 w-32 h-32 items-center justify-center bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-blue-900/10 border border-slate-100 dark:border-slate-800 overflow-hidden">
-          <MaterialIcons name="auto-fix-high" size={60} color="#1544b2" />
+        <View className="mb-6 w-24 h-24 items-center justify-center bg-white dark:bg-slate-800 rounded-[28px] shadow-sm border border-[#1544b2]/10">
+          <MaterialIcons name="auto-fix-high" size={48} color="#1544b2" />
         </View>
 
-        <Text className="text-slate-900 dark:text-white tracking-tight text-3xl font-bold text-center mb-3">
-          Witaj w Prawko AI
-        </Text>
-        <Text className="text-slate-600 dark:text-slate-400 text-lg text-center leading-6 mb-12 px-4">
+        <View className="items-center">
+          <Text className="text-slate-900 dark:text-white text-3xl font-bold tracking-tight text-center">
+            Prawko <Text className="text-[#1544b2]">AI</Text>
+          </Text>
+          <View className="h-1 w-6 bg-[#1544b2] rounded-full mt-1" />
+        </View>
+        <Text className="text-slate-500 dark:text-slate-400 text-base text-center mt-4 px-4 leading-6">
           Zacznij naukę na prawo jazdy z pomocą AI
         </Text>
 
-        <View className="w-full gap-4">
+        <View className="w-full gap-4 mt-4">
           <TouchableOpacity
             onPress={handleGoogleSignIn}
-            activeOpacity={0.8}
-            className="flex-row w-full items-center justify-center rounded-2xl h-16 bg-[#1544b2] px-6 gap-3 shadow-lg shadow-[#1544b2]/30"
+            activeOpacity={0.9}
+            className="flex-row w-full items-center justify-center rounded-2xl h-14 bg-[#1544b2] shadow-lg shadow-blue-900/20"
           >
-            <FontAwesome5 name="google" size={20} color="white" />
-            <Text className="text-white text-base font-bold tracking-wide">
-              Zaloguj przez Google
+            <FontAwesome5 name="google" size={16} color="white" />
+            <Text className="text-white text-base font-bold ml-3">
+              Kontynuuj z Google
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             activeOpacity={0.7}
-            className="flex-row w-full items-center justify-center rounded-2xl h-16 bg-[#1544b2]/10 dark:bg-[#1544b2]/20 px-6 gap-2"
+            className="flex-row w-full items-center justify-center rounded-2xl h-14 bg-white dark:bg-slate-800 border border-[#1544b2]/10 shadow-sm"
           >
-            <MaterialIcons name="person-outline" size={22} color="#1544b2" />
-            <Text className="text-[#1544b2] dark:text-blue-400 text-base font-semibold">
-              Kontynuuj jako gość
+            <MaterialIcons name="person-outline" size={20} color="#64748b" />
+            <Text className="text-slate-600 dark:text-slate-300 text-sm font-semibold ml-2">
+              Wypróbuj jako gość
             </Text>
           </TouchableOpacity>
         </View>

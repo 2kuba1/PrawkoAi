@@ -74,6 +74,7 @@ export default function RootLayout() {
       } finally {
         setIsLoading(false);
       }
+      await SecureStore.deleteItemAsync("userToken");
     }
     initAuth();
   }, []);
@@ -131,6 +132,7 @@ export default function RootLayout() {
           <Stack.Screen name="dashboard" />
           <Stack.Screen name="examRules" />
           <Stack.Screen name="examSimulation" />
+          <Stack.Screen name="examHistory" />
         </Stack>
       </SafeAreaProvider>
     </AuthContext.Provider>

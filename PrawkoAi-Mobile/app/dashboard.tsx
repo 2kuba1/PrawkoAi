@@ -1,24 +1,29 @@
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+
 import { Stack, useRouter } from "expo-router";
+
 import React, { useContext } from "react";
+
 import {
-  Image,
   ScrollView,
   StatusBar,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+
 import { AuthContext } from "./_layout";
 
-export default function LoginScreen() {
+export default function DashboardScreen() {
   return (
     <SafeAreaProvider>
       <Stack.Screen options={{ headerShown: false }} />
+
       <DashboardContent />
     </SafeAreaProvider>
   );
@@ -26,7 +31,9 @@ export default function LoginScreen() {
 
 function DashboardContent() {
   const insets = useSafeAreaInsets();
-  const { signOut, token } = useContext(AuthContext);
+
+  const { signOut } = useContext(AuthContext);
+
   const router = useRouter();
 
   const startExam = () => {
@@ -35,179 +42,195 @@ function DashboardContent() {
 
   return (
     <View className="flex-1 bg-[#f6f6f8] dark:bg-[#111621]">
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="#111621"
-        translucent
-      />
+      <StatusBar barStyle="default" />
 
       {/* Header */}
+
       <View
         style={{ paddingTop: insets.top }}
-        className="px-4 py-4 flex-row items-center justify-between border-b border-[#1544b2]/10 bg-white dark:bg-slate-900"
+        className="px-4 pb-4 flex-row items-center justify-between bg-[#f6f6f8]/80 dark:bg-[#111621]/80 border-b border-[#1544b2]/10"
       >
         <View className="flex-row items-center gap-3">
-          <View className="w-10 h-10 rounded-full bg-[#1544b2]/10 items-center justify-center overflow-hidden border border-[#1544b2]/20">
-            <Image
-              source={{
-                uri: "",
-              }}
-              className="w-full h-full"
-            />
+          <View className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 items-center justify-center border border-[#1544b2]/10 shadow-sm">
+            <MaterialIcons name="person" size={24} color="#1544b2" />
           </View>
+
           <View>
             <Text className="text-lg font-bold text-slate-900 dark:text-white leading-none">
               PrawkoAi
             </Text>
+
             <Text className="text-[10px] text-[#1544b2] font-bold uppercase tracking-wider">
-              Premium
+              Konto Premium
             </Text>
           </View>
         </View>
-        <TouchableOpacity className="w-10 h-10 rounded-full items-center justify-center bg-white dark:bg-slate-800 shadow-sm border border-slate-100">
-          <MaterialIcons name="notifications-none" size={24} color="#64748b" />
+
+        <TouchableOpacity className="p-2 hover:bg-[#1544b2]/10 rounded-full">
+          <MaterialIcons name="notifications-none" size={26} color="#1544b2" />
         </TouchableOpacity>
       </View>
 
       <ScrollView
         className="flex-1"
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
       >
-        {/* Progress Section */}
+        {/* Progress */}
+
         <View className="p-4">
-          <View className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-[#1544b2]/5">
+          <View className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-[#1544b2]/5 shadow-sm">
             <View className="flex-row items-center justify-between mb-4">
-              <Text className="font-bold text-slate-800 dark:text-slate-100">
-                Twój progres
+              <Text className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                Twój progres nauki
               </Text>
-              <Text className="text-[#1544b2] font-black text-xl">65%</Text>
+
+              <Text className="text-[#1544b2] font-bold text-xl">65%</Text>
             </View>
-            <View className="w-full bg-[#1544b2]/10 rounded-full h-3 mb-3 overflow-hidden">
-              <View
-                className="bg-[#1544b2] h-full rounded-full"
-                style={{ width: "65%" }}
-              />
+
+            <View className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 mb-3 overflow-hidden">
+              <View className="bg-[#1544b2] h-full" style={{ width: "65%" }} />
             </View>
+
             <View className="flex-row justify-between items-center">
-              <Text className="text-xs text-slate-500 font-medium">
-                130/200 przerobionych pytań
+              <Text className="text-[11px] text-slate-400 font-medium">
+                130 z 200 pytań opanowanych
               </Text>
-              <View className="px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded-full">
-                <Text className="text-[10px] font-bold text-green-700 dark:text-green-400">
-                  +12 dzisiaj
-                </Text>
-              </View>
+
+              <Text className="text-[11px] text-green-600 font-bold">
+                +12 dziś
+              </Text>
             </View>
           </View>
         </View>
-        <View className="flex-1 items-center justify-center bg-white dark:bg-slate-900 p-6">
-          <Text className="text-2xl font-bold mb-4 text-slate-900 dark:text-white">
-            Witaj w Dashboardzie!
-          </Text>
-          <TouchableOpacity
-            onPress={signOut}
-            className="bg-red-500 w-full h-14 items-center justify-center rounded-xl"
-          >
-            <Text className="text-white font-bold">Wyloguj (API + Local)</Text>
-          </TouchableOpacity>
-        </View>
-        {/* AI Recommendation Card */}
-        <View className="px-4 py-2">
-          <View className="relative overflow-hidden rounded-3xl bg-[#1544b2] p-6 shadow-xl shadow-[#1544b2]/20">
-            <View className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-3xl" />
 
-            <View className="flex-row items-center gap-2 mb-3">
-              <MaterialCommunityIcons name="brain" size={18} color="white" />
-              <Text className="text-[10px] font-black tracking-[2px] uppercase text-white/90">
-                Rekomendacja AI
+        {/* AI Recommendation Card  */}
+
+        <View className="px-4 py-2">
+          <View className="relative overflow-hidden rounded-xl bg-[#1544b2] p-6 shadow-md">
+            <View className="flex-row items-center gap-2 mb-2">
+              <MaterialCommunityIcons name="brain" size={16} color="white" />
+
+              <Text className="text-[10px] font-bold tracking-widest uppercase text-white/80">
+                Sugestia AI
               </Text>
             </View>
-            <Text className="text-2xl font-bold text-white mb-2">
-              Dzienny plan AI
+
+            <Text className="text-xl font-bold text-white mb-2">
+              Dzienny plan
             </Text>
-            <Text className="text-white/80 text-[15px] leading-5 mb-5">
-              Patrząc na twoje wyniki powinieneś skupić się na
+
+            <Text className="text-white/80 text-sm mb-5 leading-5">
+              Skup się dzisiaj na dziale{" "}
               <Text className="font-bold text-white underline">
-                {" "}
-                'skrzyżowaniach'{" "}
-              </Text>{" "}
+                skrzyżowania
+              </Text>
+              , tam masz najwięcej błędów.
             </Text>
-            <TouchableOpacity className="bg-white self-start px-6 py-2.5 rounded-xl">
-              <Text className="text-[#1544b2] font-bold text-sm uppercase tracking-tight">
-                Powtórz teraz
+
+            <TouchableOpacity className="bg-white px-5 py-2 rounded-lg self-start active:opacity-90">
+              <Text className="text-[#1544b2] font-bold text-xs uppercase">
+                Trenuj teraz
               </Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Main Actions */}
+
         <View className="p-4">
-          <Text className="text-slate-900 dark:text-white font-bold mb-4 px-1 text-lg">
+          <Text className="text-slate-800 dark:text-slate-200 font-bold mb-3 px-1">
             Menu główne
           </Text>
 
-          <TouchableOpacity className="flex-row items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#1544b2]/5 mb-4 active:opacity-70">
-            <View className="w-14 h-14 rounded-2xl bg-[#1544b2]/10 items-center justify-center">
-              <MaterialIcons name="local-library" size={30} color="#1544b2" />
+          <TouchableOpacity className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-[#1544b2]/5 shadow-sm mb-3 flex-row items-center justify-between active:scale-[0.98]">
+            <View className="flex-row items-center gap-4">
+              <View className="w-12 h-12 rounded-lg bg-blue-50 dark:bg-blue-900/20 items-center justify-center">
+                <MaterialIcons name="local-library" size={26} color="#1544b2" />
+              </View>
+
+              <View>
+                <Text className="font-bold text-slate-900 dark:text-white text-base">
+                  Zacznij naukę
+                </Text>
+
+                <Text className="text-xs text-slate-500">Kontynuuj kurs</Text>
+              </View>
             </View>
-            <View className="flex-1">
-              <Text className="font-bold text-slate-900 dark:text-white text-lg">
-                Zacznij naukę
-              </Text>
-              <Text className="text-sm text-slate-500">
-                Kontynuuj gdzie skończyłeś
-              </Text>
-            </View>
-            <MaterialIcons name="chevron-right" size={24} color="#cbd5e1" />
+
+            <MaterialIcons name="chevron-right" size={20} color="#cbd5e1" />
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={startExam}
-            className="flex-row items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#1544b2]/5 active:opacity-70"
+            className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-[#1544b2]/5 shadow-sm mb-3 flex-row items-center justify-between active:scale-[0.98]"
           >
-            <View className="w-14 h-14 rounded-2xl bg-orange-100 dark:bg-orange-900/20 items-center justify-center">
-              <MaterialIcons
-                name="assignment-turned-in"
-                size={30}
-                color="#ea580c"
-              />
+            <View className="flex-row items-center gap-4">
+              <View className="w-12 h-12 rounded-lg bg-green-50 dark:bg-green-900/20 items-center justify-center">
+                <MaterialIcons
+                  name="assignment-turned-in"
+                  size={26}
+                  color="#ea580c"
+                />
+              </View>
+
+              <View>
+                <Text className="font-bold text-slate-900 dark:text-white text-base">
+                  Symulacja egazminu word
+                </Text>
+
+                <Text className="text-xs text-slate-500">
+                  Oficjalna baza pytań
+                </Text>
+              </View>
             </View>
-            <View className="flex-1">
-              <Text className="font-bold text-slate-900 dark:text-white text-lg">
-                Symulacja egzaminu
-              </Text>
-              <Text className="text-sm text-slate-500">
-                Pełny egzamin pod presją czasu
-              </Text>
-            </View>
-            <MaterialIcons name="chevron-right" size={24} color="#cbd5e1" />
+
+            <MaterialIcons name="chevron-right" size={20} color="#cbd5e1" />
           </TouchableOpacity>
         </View>
 
         {/* Quick Stats */}
+
         <View className="px-4 py-2 flex-row gap-4">
-          <View className="flex-1 bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-[#1544b2]/5">
+          <View className="flex-1 bg-white dark:bg-slate-800 p-4 rounded-xl border border-[#1544b2]/5 shadow-sm">
             <Text className="text-[10px] font-bold text-slate-400 mb-2 uppercase">
-              Aktualny Streak
+              Streak
             </Text>
+
             <View className="flex-row items-center gap-2">
-              <MaterialCommunityIcons name="fire" size={22} color="#f97316" />
-              <Text className="text-xl font-black dark:text-white">5 Dni</Text>
+              <MaterialCommunityIcons name="fire" size={20} color="#f97316" />
+
+              <Text className="text-lg font-bold text-slate-900 dark:text-white">
+                5 Dni
+              </Text>
             </View>
           </View>
-          <View className="flex-1 bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-[#1544b2]/5">
+
+          <View className="flex-1 bg-white dark:bg-slate-800 p-4 rounded-xl border border-[#1544b2]/5 shadow-sm">
             <Text className="text-[10px] font-bold text-slate-400 mb-2 uppercase">
-              Średni wynik egzaminu
+              Średni wynik
             </Text>
+
             <View className="flex-row items-center gap-2">
-              <MaterialIcons name="verified" size={22} color="#1544b2" />
-              <Text className="text-xl font-black dark:text-white">84%</Text>
+              <MaterialIcons name="trending-up" size={20} color="#1544b2" />
+
+              <Text className="text-lg font-bold text-slate-900 dark:text-white">
+                84%
+              </Text>
             </View>
           </View>
         </View>
+
+        <TouchableOpacity
+          onPress={signOut}
+          className="mt-6 mx-4 p-4 rounded-xl border border-red-100 dark:border-red-900/20 items-center"
+        >
+          <Text className="text-red-600 font-bold">Wyloguj się</Text>
+        </TouchableOpacity>
       </ScrollView>
 
       {/* Bottom Navigation */}
+
       <View className="absolute bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 border-t border-slate-100 dark:border-slate-800 px-6 pb-10 pt-3 flex-row justify-between items-center">
         <TouchableOpacity className="items-center">
           <MaterialIcons name="home" size={24} color="#1544b2" />
@@ -237,7 +260,10 @@ function DashboardContent() {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="items-center">
+        <TouchableOpacity
+          className="items-center"
+          onPress={() => router.push("/examHistory")}
+        >
           <MaterialIcons name="account-circle" size={24} color="#94a3b8" />
           <Text className="text-[10px] font-bold text-slate-400 mt-1">
             Profil
