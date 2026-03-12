@@ -85,12 +85,10 @@ export default function RootLayout() {
     const currentSegments = segments as string[];
     const rootSegment = currentSegments[0];
 
-    const isAuthPage =
-      rootSegment === "dashboard" || rootSegment === "examRulesScreen";
-
-    if (!token && isAuthPage) {
+    const isLoginPage = rootSegment === "index" || rootSegment === undefined;
+    if (!token && !isLoginPage) {
       router.replace("/");
-    } else if (token && (rootSegment === "index" || !rootSegment)) {
+    } else if (token && isLoginPage) {
       router.replace("/dashboard");
     }
   }, [token, isLoading, segments]);
@@ -130,9 +128,10 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
           <Stack.Screen name="dashboard" />
-          <Stack.Screen name="examRules" />
-          <Stack.Screen name="examSimulation" />
-          <Stack.Screen name="examHistory" />
+          <Stack.Screen name="exam/examHistory" />
+          <Stack.Screen name="exam/examRules" />
+          <Stack.Screen name="exam/examSimulation" />
+          <Stack.Screen name="exam/examResult/[id]" />
         </Stack>
       </SafeAreaProvider>
     </AuthContext.Provider>

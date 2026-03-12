@@ -46,7 +46,7 @@ internal sealed class StartExamHandler : IRequestHandler<StartExam, StartExamRes
             
         await _examSessionRepository.CreateAsync(examSession);
         
-        var scheduler = await _schedulerFactory.GetScheduler();
+        var scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
 
         var job = JobBuilder.Create<AutoFinishExamJob>()
             .WithIdentity($"Job-{examSession.Id}")

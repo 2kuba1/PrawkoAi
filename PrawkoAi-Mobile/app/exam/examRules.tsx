@@ -15,7 +15,7 @@ export default function ExamRulesScreen() {
   const router = useRouter();
 
   const startExam = () => {
-    router.push("/examSimulation");
+    router.push("/exam/examSimulation");
   };
 
   return (

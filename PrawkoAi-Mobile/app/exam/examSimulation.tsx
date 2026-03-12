@@ -1,5 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -10,11 +10,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
-import { AuthContext } from "./_layout";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AuthContext } from "../_layout";
 
 export interface Answer {
   id: string;
@@ -47,15 +44,6 @@ export interface ExamData {
 }
 
 export default function ExamSimulationScreen() {
-  return (
-    <SafeAreaProvider>
-      <Stack.Screen options={{ headerShown: false }} />
-      <ExamSimulation />
-    </SafeAreaProvider>
-  );
-}
-
-function ExamSimulation() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { token, user } = useContext(AuthContext);
@@ -69,12 +57,6 @@ function ExamSimulation() {
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log("Token:", token?.accessToken);
-    console.log("User ID:", user?.id);
-    console.log(
-      "API URL:",
-      `${process.env.EXPO_PUBLIC_API_URL}api/exam/start?userId=${user?.id}`,
-    );
     const fetchExamData = async () => {
       try {
         const response = await fetch(
@@ -87,7 +69,8 @@ function ExamSimulation() {
             },
           },
         );
-        const result = await response.json();
+        const result: ExamData = await response.json();
+        console.log("Pobrane dane egzaminu:", result.examSession);
         setExamData(result);
       } catch (e) {
         console.error("Błąd pobierania danych:", e);
@@ -136,14 +119,54 @@ function ExamSimulation() {
   const handleNext = () => {
     setSelectedAnswerId(null);
 
+    submitAnswer();
+
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else if (currentScope === "standard") {
       setCurrentScope("specialized");
       setCurrentIndex(0);
     } else {
-      alert("Egzamin zakończony! Wyniki zostaną przeliczone.");
-      router.back();
+      finishExamSession();
+      router.push(`/exam/examResult/${examData?.examSession.id}`);
+    }
+  };
+
+  const submitAnswer = async () => {
+    try {
+      await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/exam/answer`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token?.accessToken}`,
+        },
+        body: JSON.stringify({
+          examSessionId: examData?.examSession.id,
+          questionId: currentQuestion?.id,
+          selectedAnswerId: selectedAnswerId,
+          userId: user?.id,
+        }),
+      });
+    } catch (e) {
+      console.error("Błąd wysyłania odpowiedzi:", e);
+    }
+  };
+
+  const finishExamSession = async () => {
+    try {
+      await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/exam/finish`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token?.accessToken}`,
+        },
+        body: JSON.stringify({
+          examSessionId: examData?.examSession.id,
+          userId: user?.id,
+        }),
+      });
+    } catch (e) {
+      console.error("Błąd kończenia sesji:", e);
     }
   };
 

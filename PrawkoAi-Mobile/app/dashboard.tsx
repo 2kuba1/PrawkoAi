@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 
 import React, { useContext } from "react";
 
@@ -12,24 +12,11 @@ import {
   View,
 } from "react-native";
 
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AuthContext } from "./_layout";
 
 export default function DashboardScreen() {
-  return (
-    <SafeAreaProvider>
-      <Stack.Screen options={{ headerShown: false }} />
-
-      <DashboardContent />
-    </SafeAreaProvider>
-  );
-}
-
-function DashboardContent() {
   const insets = useSafeAreaInsets();
 
   const { signOut } = useContext(AuthContext);
@@ -37,7 +24,7 @@ function DashboardContent() {
   const router = useRouter();
 
   const startExam = () => {
-    router.push("/examRules");
+    router.push("/exam/examRules");
   };
 
   return (
@@ -262,7 +249,7 @@ function DashboardContent() {
 
         <TouchableOpacity
           className="items-center"
-          onPress={() => router.push("/examHistory")}
+          onPress={() => router.push("/exam/examHistory")}
         >
           <MaterialIcons name="account-circle" size={24} color="#94a3b8" />
           <Text className="text-[10px] font-bold text-slate-400 mt-1">
