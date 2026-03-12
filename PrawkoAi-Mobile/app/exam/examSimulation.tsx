@@ -70,7 +70,6 @@ export default function ExamSimulationScreen() {
           },
         );
         const result: ExamData = await response.json();
-        console.log("Pobrane dane egzaminu:", result.examSession);
         setExamData(result);
       } catch (e) {
         console.error("Błąd pobierania danych:", e);
@@ -307,29 +306,27 @@ export default function ExamSimulationScreen() {
               );
             })}
           </View>
-
-          {/* NEXT BUTTON */}
-          <TouchableOpacity
-            onPress={handleNext}
-            activeOpacity={0.9}
-            className="mt-10 bg-[#1544b2] h-14 rounded-xl flex-row items-center justify-center shadow-lg shadow-blue-900/30"
-          >
-            <Text className="text-white font-bold text-base mr-2">
-              {currentScope === "specialized" &&
-              currentIndex === questions.length - 1
-                ? "Zakończ egzamin"
-                : "Następne pytanie"}
-            </Text>
-            <MaterialIcons name="arrow-forward" size={20} color="white" />
-          </TouchableOpacity>
         </View>
       </ScrollView>
 
       {/* --- FOOTER PROGRESS --- */}
       <View
         style={{ paddingBottom: insets.bottom + 16 }}
-        className="absolute bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 border-t border-[#1544b2]/10 p-5"
+        className="absolute bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 border-t border-[#1544b2]/10 gap-4 p-4"
       >
+        <TouchableOpacity
+          onPress={handleNext}
+          activeOpacity={0.9}
+          className="bg-[#1544b2] h-14 rounded-xl flex-row items-center justify-center shadow-lg shadow-blue-900/30"
+        >
+          <Text className="text-white font-bold text-base mr-2">
+            {currentScope === "specialized" &&
+            currentIndex === questions.length - 1
+              ? "Zakończ egzamin"
+              : "Następne pytanie"}
+          </Text>
+          <MaterialIcons name="arrow-forward" size={20} color="white" />
+        </TouchableOpacity>
         <View className="flex-row gap-4">
           {/* Podstawowe */}
           <View
