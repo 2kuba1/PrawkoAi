@@ -1,19 +1,114 @@
+import { AuthContext } from "@/app/_layout";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useLocalSearchParams } from "expo-router/build/hooks";
-import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import React, { useContext, useEffect, useMemo } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function ExamResultDetail() {
+interface PossibleAnswer {
+  id: string;
+  content: string;
+}
+
+interface AnswerDetail {
+  id: string | null;
+  questionId: string;
+  content: string;
+  createdAt: string;
+  selectedAnswerId: string | null;
+  answers: PossibleAnswer[];
+  questionPoints: number;
+}
+
+interface ExamResultDetail {
+  correctAnswersCount: number;
+  correctAnswers: AnswerDetail[];
+  incorrectAnswers: AnswerDetail[];
+  unanswered: AnswerDetail[];
+  score: number;
+  startedAt: string;
+  finishedAt: string;
+  isPassed: boolean;
+}
+
+export default function ExamResultDetailPage() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { user, token } = useContext(AuthContext);
+  const [examResult, setExamResult] = React.useState<ExamResultDetail | null>(
+    null,
+  );
+  const [loading, setLoading] = React.useState(true);
+
+  useEffect(() => {
+    const fetchExamResult = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.EXPO_PUBLIC_API_URL}/api/exam/examResults?userId=${user?.id}&examSessionId=${id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token?.accessToken}`,
+            },
+          },
+        );
+        const data: ExamResultDetail = await response.json();
+        setExamResult(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchExamResult();
+  }, [id]);
+
+  const sortedQuestions = useMemo(() => {
+    if (!examResult) return [];
+
+    const all = [
+      ...(examResult.correctAnswers ?? []).map((q) => ({
+        ...q,
+        type: "correct" as const,
+      })),
+      ...(examResult.incorrectAnswers ?? []).map((q) => ({
+        ...q,
+        type: "incorrect" as const,
+      })),
+      ...(examResult.unanswered ?? []).map((q) => ({
+        ...q,
+        type: "unanswered" as const,
+      })),
+    ];
+
+    return all.sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateA - dateB;
+    });
+  }, [examResult]);
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-[#f6f6f8] dark:bg-[#111621]">
+        <ActivityIndicator size="large" color="#1544b2" />
+        <Text className="mt-4 text-slate-500">Ładowanie wyników...</Text>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-[#f6f6f8] dark:bg-[#111621]">
-      {/* Header */}
       <View
         style={{ paddingTop: insets.top }}
         className="flex-row items-center p-4 bg-[#f6f6f8]/80 dark:bg-[#111621]/80 backdrop-blur-md border-b border-[#1544b2]/10"
@@ -56,7 +151,13 @@ export default function ExamResultDetail() {
                     Data podejścia
                   </Text>
                   <Text className="text-slate-900 dark:text-slate-100 text-base font-semibold">
-                    12 marca 2026, 14:20
+                    {new Date(examResult!.finishedAt).toLocaleString("pl-PL", {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </Text>
                 </View>
                 <View className="items-end">
@@ -64,9 +165,15 @@ export default function ExamResultDetail() {
                     Status
                   </Text>
                   <View className="bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-0.5 rounded-full mt-1">
-                    <Text className="text-emerald-700 dark:text-emerald-400 text-[10px] font-bold">
-                      POZYTYWNY
-                    </Text>
+                    {examResult?.isPassed ? (
+                      <Text className="text-emerald-700 dark:text-emerald-400 text-[10px] font-bold">
+                        POZYTYWNY
+                      </Text>
+                    ) : (
+                      <Text className="text-red-700 dark:text-red-400 text-[10px] font-bold">
+                        NEGATYWNY
+                      </Text>
+                    )}
                   </View>
                 </View>
               </View>
@@ -78,7 +185,7 @@ export default function ExamResultDetail() {
                   Wynik końcowy
                 </Text>
                 <Text className="text-[#1544b2] text-3xl font-bold">
-                  68 / 74{" "}
+                  {examResult?.score} / 74{" "}
                   <Text className="text-sm font-normal text-slate-400">
                     pkt
                   </Text>
@@ -94,29 +201,23 @@ export default function ExamResultDetail() {
           </Text>
           <View className="bg-slate-200 dark:bg-slate-800 px-2 py-1 rounded">
             <Text className="text-[10px] font-medium text-slate-500">
-              32 pytania
+              {sortedQuestions.length} pytań
             </Text>
           </View>
         </View>
 
-        {/* Question list */}
         <View className="pb-20">
-          <QuestionItem
-            index={1}
-            points={2}
-            isCorrect={true}
-            question="Czy w tej sytuacji masz obowiązek zachować szczególną ostrożność zbliżając się do przejścia dla pieszych?"
-            yourAnswer="Tak"
-          />
-
-          <QuestionItem
-            index={2}
-            points={3}
-            isCorrect={false}
-            question="Jaka jest dopuszczalna prędkość pojazdu na obszarze zabudowanym w godzinach 23:00 - 05:00?"
-            yourAnswer="60 km/h"
-            correctAnswer="50 km/h"
-          />
+          {sortedQuestions.map((item, index) => (
+            <QuestionItem
+              key={item.questionId + index}
+              index={index + 1}
+              points={item.questionPoints}
+              type={item.type}
+              question={item.content}
+              selectedAnswerId={item.selectedAnswerId}
+              possibleAnswers={item.answers ?? []}
+            />
+          ))}
         </View>
       </ScrollView>
     </View>
@@ -126,19 +227,35 @@ export default function ExamResultDetail() {
 function QuestionItem({
   index,
   points,
-  isCorrect,
+  type,
   question,
-  yourAnswer,
-  correctAnswer,
-}: any) {
+  selectedAnswerId,
+  possibleAnswers,
+}: {
+  index: number;
+  points: number;
+  type: "correct" | "incorrect" | "unanswered";
+  question: string;
+  selectedAnswerId: string | null;
+  possibleAnswers: PossibleAnswer[];
+}) {
+  const isCorrect = type === "correct";
+  const isUnanswered = type === "unanswered";
+
   return (
     <View className="bg-white dark:bg-slate-900 px-4 py-5 border-b border-slate-100 dark:border-slate-800">
       <View className="flex-row gap-4">
         <View
-          className={`size-10 rounded-lg items-center justify-center ${isCorrect ? "bg-emerald-100 dark:bg-emerald-900/30" : "bg-red-100 dark:bg-red-900/30"}`}
+          className={`size-10 rounded-lg items-center justify-center ${
+            isCorrect
+              ? "bg-emerald-100 dark:bg-emerald-900/30"
+              : "bg-red-100 dark:bg-red-900/30"
+          }`}
         >
           <MaterialIcons
-            name={isCorrect ? "check-circle" : "cancel"}
+            name={
+              isCorrect ? "check-circle" : isUnanswered ? "timer-off" : "cancel"
+            }
             size={24}
             color={isCorrect ? "#10b981" : "#ef4444"}
           />
@@ -148,42 +265,63 @@ function QuestionItem({
           <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-1">
             Pytanie {index} • {points} pkt
           </Text>
-          <Text className="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-relaxed mb-3">
+
+          <Text className="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-relaxed mb-4">
             {question}
           </Text>
 
-          <View
-            className={`px-3 py-2 rounded-lg border ${isCorrect ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100" : "bg-red-50 dark:bg-red-900/20 border-red-100"}`}
-          >
-            <View className="flex-row items-center gap-2">
-              <MaterialIcons
-                name={isCorrect ? "done" : "close"}
-                size={16}
-                color={isCorrect ? "#065f46" : "#991b1b"}
-              />
-              <View>
-                <Text
-                  className={`text-[11px] font-bold ${isCorrect ? "text-emerald-800 dark:text-emerald-300" : "text-red-800 dark:text-red-300"}`}
+          <View className="gap-2">
+            {possibleAnswers.map((answer) => {
+              const isUserChoice = answer.id === selectedAnswerId;
+
+              let containerClass =
+                "bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800";
+              let textClass = "text-slate-700 dark:text-slate-300";
+              let icon = null;
+
+              if (isUserChoice) {
+                if (isCorrect) {
+                  containerClass =
+                    "bg-emerald-50 dark:bg-emerald-900/40 border-emerald-500";
+                  textClass =
+                    "text-emerald-900 dark:text-emerald-100 font-bold";
+                  icon = (
+                    <MaterialIcons
+                      name="check-circle"
+                      size={16}
+                      color="#059669"
+                    />
+                  );
+                } else {
+                  containerClass =
+                    "bg-red-50 dark:bg-red-900/40 border-red-500";
+                  textClass = "text-red-900 dark:text-red-100 font-bold";
+                  icon = (
+                    <MaterialIcons name="cancel" size={16} color="#dc2626" />
+                  );
+                }
+              }
+
+              return (
+                <View
+                  key={answer.id}
+                  className={`flex-row items-center justify-between px-4 py-3 rounded-xl border-2 ${containerClass}`}
                 >
-                  Twoja odpowiedź: {yourAnswer}
-                </Text>
-                <Text
-                  className={`text-[10px] ${isCorrect ? "text-emerald-600/80" : "text-red-600/80"}`}
-                >
-                  {isCorrect ? "Poprawna odpowiedź" : "Błędna odpowiedź"}
-                </Text>
-              </View>
-            </View>
+                  <Text className={`text-[13px] flex-1 pr-2 ${textClass}`}>
+                    {answer.content}
+                  </Text>
+                  {icon}
+                </View>
+              );
+            })}
           </View>
 
-          {!isCorrect && (
-            <View className="mt-2 px-3 py-2 rounded-lg border border-dashed border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-900/10">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="check-circle" size={16} color="#10b981" />
-                <Text className="text-[11px] font-medium text-emerald-800 dark:text-emerald-300">
-                  Poprawna: {correctAnswer}
-                </Text>
-              </View>
+          {isUnanswered && (
+            <View className="mt-3 py-2 px-3 bg-red-50 dark:bg-red-900/20 rounded-lg flex-row items-center">
+              <MaterialIcons name="error-outline" size={14} color="#ef4444" />
+              <Text className="ml-2 text-[11px] font-bold text-red-600 uppercase">
+                Brak Twojej odpowiedzi
+              </Text>
             </View>
           )}
         </View>

@@ -87,13 +87,18 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
             .FirstOrDefaultAsync();
 
         if (sessionData == null) throw new NotFoundException("Session doesn't exist");
-        
-        var results = sessionData.Questions
-            .GroupBy(q => q.IsCorrect == true)
-            .ToDictionary(g => g.Key, g => g.ToList());
     
-        var correct = results.GetValueOrDefault(true, new());
-        var incorrect = results.GetValueOrDefault(false, new());
+        var correct = sessionData.Questions
+            .Where(q => q.SelectedAnswerId != null && q.IsCorrect == true)
+            .ToList();
+
+        var incorrect = sessionData.Questions
+            .Where(q => q.SelectedAnswerId != null && q.IsCorrect == false)
+            .ToList();
+
+        var unanswered = sessionData.Questions
+            .Where(q => q.SelectedAnswerId == null)
+            .ToList();
 
         var totalScore = correct.Sum(x => x.QuestionPoints);
 
@@ -102,20 +107,35 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
             CorrectAnswersCount = correct.Count,
             CorrectAnswers = correct.Select(x => new AnswerDto(
                 x.Id, 
+                x.SelectedAnswerId,
+                x.QuestionPoints,
                 x.QuestionId, 
                 x.QuestionContent,
                 x.AnsweredAt ?? DateTime.UtcNow, 
                 x.Answers.Select(a => new ExamResultAnswerDto(a.Id, a.Content))
             )).ToList(),
-    
-            NotCorrectAnswers = incorrect.Select(x => new AnswerDto(
+
+            IncorrectAnswers = incorrect.Select(x => new AnswerDto(
                 x.Id, 
+                x.SelectedAnswerId,
+                x.QuestionPoints,
                 x.QuestionId, 
                 x.QuestionContent,
                 x.AnsweredAt ?? DateTime.UtcNow, 
                 x.Answers.Select(a => new ExamResultAnswerDto(a.Id, a.Content))
             )).ToList(),
-            Score =  (int)totalScore,
+
+            Unanswered = unanswered.Select(x => new AnswerDto(
+                x.Id, 
+                x.SelectedAnswerId,
+                x.QuestionPoints,
+                x.QuestionId, 
+                x.QuestionContent,
+                x.AnsweredAt ?? DateTime.UtcNow, 
+                x.Answers.Select(a => new ExamResultAnswerDto(a.Id, a.Content))
+            )).ToList(),
+
+            Score = (int)totalScore,
         };
     }
 }
