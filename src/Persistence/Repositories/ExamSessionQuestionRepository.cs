@@ -75,6 +75,11 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
                     q.SelectedAnswerId,
                     q.IsCorrect,
                     q.AnsweredAt,
+                    Answers = q.Question.Answers.Select(a => new 
+                    {
+                        a.Id,
+                        a.Content,
+                    }).ToList(),
                     QuestionContent = q.Question.Content,
                     QuestionPoints = q.Question.Points 
                 }).ToList()
@@ -83,7 +88,6 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
 
         if (sessionData == null) throw new NotFoundException("Session doesn't exist");
         
-
         var results = sessionData.Questions
             .GroupBy(q => q.IsCorrect == true)
             .ToDictionary(g => g.Key, g => g.ToList());
@@ -96,10 +100,21 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
         return new ExamResultsDto
         {
             CorrectAnswersCount = correct.Count,
-            CorrectAnswers =  correct.Select(x => new AnswerDto(x.Id, x.QuestionId, x.QuestionContent,
-            x.AnsweredAt ?? DateTime.UtcNow)).ToList(),
-            NotCorrectAnswers = incorrect.Select(x => new AnswerDto(x.Id, x.QuestionId, x.QuestionContent,
-            x.AnsweredAt ?? DateTime.UtcNow)).ToList(),
+            CorrectAnswers = correct.Select(x => new AnswerDto(
+                x.Id, 
+                x.QuestionId, 
+                x.QuestionContent,
+                x.AnsweredAt ?? DateTime.UtcNow, 
+                x.Answers.Select(a => new ExamResultAnswerDto(a.Id, a.Content))
+            )).ToList(),
+    
+            NotCorrectAnswers = incorrect.Select(x => new AnswerDto(
+                x.Id, 
+                x.QuestionId, 
+                x.QuestionContent,
+                x.AnsweredAt ?? DateTime.UtcNow, 
+                x.Answers.Select(a => new ExamResultAnswerDto(a.Id, a.Content))
+            )).ToList(),
             Score =  (int)totalScore,
         };
     }

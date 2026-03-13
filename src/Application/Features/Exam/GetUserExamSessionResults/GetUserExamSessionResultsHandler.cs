@@ -39,7 +39,11 @@ internal sealed class GetUserExamSessionResultsHandler : IRequestHandler<GetUser
             throw new FinishedExamException("This exam session didn't finish");
         
         var results = await _examSessionQuestionRepository.GetExamResultsAsync(request.ExamSessionId);
-
+        
+        results.StartedAt = examSession.StaredAt;
+        results.FinishedAt = examSession.FinishedAt;
+        results.IsPassed = examSession.IsPassed;
+        
         return results;
     }
 }
