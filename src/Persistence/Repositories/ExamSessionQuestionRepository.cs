@@ -37,7 +37,7 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
         await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateExamSessionQuestionAsync(ExamSessionQuestion updateDto, Guid examSessionId, Guid selectedAnswerId)
+    public async Task UpdateExamSessionQuestionAsync(ExamSessionQuestion updateDto, Guid examSessionId, Guid? selectedAnswerId)
     {
         var questionData = await _context.Questions
                                .Where(q => q.Id == updateDto.QuestionId)

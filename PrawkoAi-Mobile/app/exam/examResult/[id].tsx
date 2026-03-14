@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import api from "../utils/api";
 
 interface PossibleAnswer {
   id: string;
@@ -51,28 +52,27 @@ export default function ExamResultDetailPage() {
 
   useEffect(() => {
     const fetchExamResult = async () => {
+      if (!id || !user?.id) return;
       try {
-        const response = await fetch(
-          `${process.env.EXPO_PUBLIC_API_URL}/api/exam/examResults?userId=${user?.id}&examSessionId=${id}`,
+        const response = await api.get<ExamResultDetail>(
+          "/api/exam/examResults",
           {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token?.accessToken}`,
+            params: {
+              userId: user.id,
+              examSessionId: id,
             },
           },
         );
-        const data: ExamResultDetail = await response.json();
-        setExamResult(data);
+        setExamResult(response.data);
       } catch (error) {
-        console.error(error);
+        console.error("Błąd pobierania wyników egzaminu:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchExamResult();
-  }, [id]);
 
+    fetchExamResult();
+  }, [id, user?.id]);
   const sortedQuestions = useMemo(() => {
     if (!examResult) return [];
 

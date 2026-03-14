@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContext } from "../_layout";
+import api from "./utils/api";
 
 interface ExamHistory {
   userId: string;
@@ -36,18 +37,14 @@ export default function ExamHistoryScreen() {
 
   useEffect(() => {
     const getExams = async () => {
+      if (!user?.id) return;
       try {
-        const response = await fetch(
-          `${process.env.EXPO_PUBLIC_API_URL}/api/exam/userHistory?userId=${user?.id}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token?.accessToken}`,
-            },
-          },
-        );
-        const data: ExamHistory[] = await response.json();
+        const response = await api.get<ExamHistory[]>("/api/exam/userHistory", {
+          params: { userId: user.id },
+        });
+
+        const data = response.data;
+
         setExams(
           data.sort(
             (a, b) =>
@@ -59,9 +56,9 @@ export default function ExamHistoryScreen() {
         console.error("Error fetching exam history:", error);
       }
     };
-    getExams();
-  }, []);
 
+    getExams();
+  }, [user?.id]);
   return (
     <View className="flex-1 bg-[#f6f6f8] dark:bg-[#111621]">
       <StatusBar barStyle="dark-content" />

@@ -85,9 +85,8 @@ public static class AuthEndpoints
         return Results.Redirect(finalUrl);    
     }
 
-    private static async Task<IResult> Logout([FromQuery] Guid userId, [FromServices] IMediator mediator, [FromServices] HttpContext httpContext)
+    private static async Task<IResult> Logout([FromQuery] Guid userId, IMediator mediator)
     {
-        await httpContext.SignOutAsync(GoogleDefaults.AuthenticationScheme);
         var result = await mediator.Send(new RevokeRefreshTokens(userId));
         return Results.Ok(result);
     }

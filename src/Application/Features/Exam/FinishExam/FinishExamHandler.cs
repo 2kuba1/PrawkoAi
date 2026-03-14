@@ -48,12 +48,11 @@ internal sealed class FinishExamHandler : IRequestHandler<FinishExam, ExamResult
         
         var results = await _examSessionQuestionRepository.GetExamResultsAsync(request.ExamSessionId);
         
-        results.StartedAt = examSession.StaredAt;
-        results.FinishedAt = finishedAt;
-        
         var isPassed = await _examSessionRepository.CheckIfPassedAndSaveSession(examSession, finishedAt,results.Score, results.CorrectAnswersCount);
         
         results.IsPassed = isPassed;
+        results.StartedAt = examSession.StaredAt;
+        results.FinishedAt = finishedAt;
         
         return results;
     }

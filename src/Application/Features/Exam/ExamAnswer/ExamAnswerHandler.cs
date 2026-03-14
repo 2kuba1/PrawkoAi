@@ -1,6 +1,7 @@
 ﻿using Application.Contracts.Repositories;
 using Application.Shared;
 using Domain;
+using Domain.Entities;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Http;

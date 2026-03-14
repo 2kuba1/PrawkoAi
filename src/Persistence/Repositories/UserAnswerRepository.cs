@@ -1,5 +1,6 @@
 ﻿using Application.Contracts.Repositories;
 using Domain;
+using Domain.Entities;
 using Persistence.Database;
 
 namespace Persistence.Repositories;

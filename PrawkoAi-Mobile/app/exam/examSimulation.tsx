@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContext } from "../_layout";
+import api from "./utils/api";
 
 export interface Answer {
   id: string;
@@ -57,28 +58,27 @@ export default function ExamSimulationScreen() {
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log(user?.id);
+    console.log(token?.accessToken);
     const fetchExamData = async () => {
+      if (!user?.id) return;
+
       try {
-        const response = await fetch(
-          `${process.env.EXPO_PUBLIC_API_URL}/api/exam/start?userId=${user?.id}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token?.accessToken}`,
-            },
-          },
-        );
-        const result: ExamData = await response.json();
-        setExamData(result);
+        const response = await api.get<ExamData>("/api/exam/start", {
+          params: { userId: user.id },
+        });
+
+        setExamData(response.data);
+        console.log(response.data.examSession.id);
       } catch (e) {
         console.error("Błąd pobierania danych:", e);
       } finally {
         setLoading(false);
       }
     };
+
     fetchExamData();
-  }, []);
+  }, [user?.id]);
 
   const questions = useMemo(() => {
     if (!examData) return [];
@@ -115,10 +115,10 @@ export default function ExamSimulationScreen() {
       : totalStandard + currentIndex + 1;
   const totalQuestions = totalStandard + totalSpecialized;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     setSelectedAnswerId(null);
 
-    submitAnswer();
+    await submitAnswer();
 
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(currentIndex + 1);
@@ -126,25 +126,22 @@ export default function ExamSimulationScreen() {
       setCurrentScope("specialized");
       setCurrentIndex(0);
     } else {
-      finishExamSession();
+      await finishExamSession();
       router.push(`/exam/examResult/${examData?.examSession.id}`);
     }
   };
 
   const submitAnswer = async () => {
+    if (!examData?.examSession.id || !currentQuestion?.id || !user?.id) {
+      console.warn("Brak wymaganych danych do wysłania odpowiedzi");
+      return;
+    }
     try {
-      await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/exam/answer`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token?.accessToken}`,
-        },
-        body: JSON.stringify({
-          examSessionId: examData?.examSession.id,
-          questionId: currentQuestion?.id,
-          selectedAnswerId: selectedAnswerId,
-          userId: user?.id,
-        }),
+      await api.post("/api/exam/answer", {
+        examSessionId: examData.examSession.id,
+        questionId: currentQuestion.id,
+        selectedAnswerId: selectedAnswerId,
+        userId: user.id,
       });
     } catch (e) {
       console.error("Błąd wysyłania odpowiedzi:", e);
@@ -153,16 +150,9 @@ export default function ExamSimulationScreen() {
 
   const finishExamSession = async () => {
     try {
-      await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/exam/finish`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token?.accessToken}`,
-        },
-        body: JSON.stringify({
-          examSessionId: examData?.examSession.id,
-          userId: user?.id,
-        }),
+      await api.put("/api/exam/finish", {
+        examSessionId: examData?.examSession.id,
+        userId: user?.id,
       });
     } catch (e) {
       console.error("Błąd kończenia sesji:", e);

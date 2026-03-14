@@ -7,6 +7,7 @@ import {
   ReanimatedLogLevel,
 } from "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import api from "./exam/utils/api";
 import "./globals.css";
 
 export interface AuthContextType {
@@ -74,7 +75,6 @@ export default function RootLayout() {
       } finally {
         setIsLoading(false);
       }
-      await SecureStore.deleteItemAsync("userToken");
     }
     initAuth();
   }, []);
@@ -103,21 +103,17 @@ export default function RootLayout() {
       decodeAndSetUser(newToken.accessToken);
     },
     signOut: async () => {
+      console.log("Signing out user:", user);
+      console.log("Current token:", token);
       try {
-        const apiUrl = `${process.env.EXPO_PUBLIC_API_URL}/api/account/logout`;
-
-        await fetch(apiUrl, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token?.accessToken}`,
-            "Content-Type": "application/json",
-          },
-        });
+        await api.delete(`/api/account/logout?userId=${user?.id}`);
       } catch (e) {
         console.log(e);
       } finally {
         await SecureStore.deleteItemAsync("userToken");
         setToken(null);
+        setUser(null);
+        router.replace("/");
       }
     },
   };

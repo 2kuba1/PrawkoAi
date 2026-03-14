@@ -1,12 +1,11 @@
-﻿using Domain.Entities;
-using Domain.Shared;
+﻿using Domain.Shared;
 
-namespace Domain;
+namespace Domain.Entities;
 
 public class UserAnswer : BaseEntity
 {
     public Guid UserId { get; set; }
-    public Guid SelectedAnswerId { get; set; }
+    public Guid? SelectedAnswerId { get; set; }
     public Guid QuestionId { get; set; }
     public DateTime AnsweredAt { get; set; } =  DateTime.UtcNow;
     

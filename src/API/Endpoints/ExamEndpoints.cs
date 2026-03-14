@@ -66,7 +66,7 @@ public static class ExamEndpoints
 
     private record AnswerToQuestionRequest(
         Guid QuestionId,
-        Guid SelectedAnswerId,
+        Guid? SelectedAnswerId,
         Guid UserId,
         Guid ExamSessionId);
 }
