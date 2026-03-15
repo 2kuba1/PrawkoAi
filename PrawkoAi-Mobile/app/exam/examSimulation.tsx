@@ -56,6 +56,8 @@ export default function ExamSimulationScreen() {
     "standard",
   );
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
+  const [pendingRequests, setPendingRequests] = useState<Promise<any>[]>([]);
+  const [isFinishing, setIsFinishing] = useState(false);
 
   useEffect(() => {
     console.log(user?.id);
@@ -116,9 +118,12 @@ export default function ExamSimulationScreen() {
   const totalQuestions = totalStandard + totalSpecialized;
 
   const handleNext = async () => {
+    const nextAnswerId = selectedAnswerId;
     setSelectedAnswerId(null);
 
-    await submitAnswer();
+    const request = submitAnswer(nextAnswerId);
+
+    setPendingRequests((prev) => [...prev, request]);
 
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(currentIndex + 1);
@@ -126,21 +131,18 @@ export default function ExamSimulationScreen() {
       setCurrentScope("specialized");
       setCurrentIndex(0);
     } else {
-      await finishExamSession();
-      router.push(`/exam/examResult/${examData?.examSession.id}`);
+      await handleFinishExam();
     }
   };
 
-  const submitAnswer = async () => {
-    if (!examData?.examSession.id || !currentQuestion?.id || !user?.id) {
-      console.warn("Brak wymaganych danych do wysłania odpowiedzi");
-      return;
-    }
+  const submitAnswer = async (answerId: string | null) => {
+    if (!examData?.examSession.id || !currentQuestion?.id || !user?.id) return;
+
     try {
-      await api.post("/api/exam/answer", {
+      return await api.post("/api/exam/answer", {
         examSessionId: examData.examSession.id,
         questionId: currentQuestion.id,
-        selectedAnswerId: selectedAnswerId,
+        selectedAnswerId: answerId,
         userId: user.id,
       });
     } catch (e) {
@@ -156,6 +158,22 @@ export default function ExamSimulationScreen() {
       });
     } catch (e) {
       console.error("Błąd kończenia sesji:", e);
+    }
+  };
+
+  const handleFinishExam = async () => {
+    setIsFinishing(true);
+    try {
+      console.log("Czekam na zaległe odpowiedzi...");
+      await Promise.all(pendingRequests);
+
+      await finishExamSession();
+
+      router.push(`/exam/examResult/${examData?.examSession.id}`);
+    } catch (e) {
+      console.error("Błąd podczas finalizacji:", e);
+    } finally {
+      setIsFinishing(false);
     }
   };
 
@@ -310,11 +328,14 @@ export default function ExamSimulationScreen() {
           className="bg-[#1544b2] h-14 rounded-xl flex-row items-center justify-center shadow-lg shadow-blue-900/30"
         >
           <Text className="text-white font-bold text-base mr-2">
-            {currentScope === "specialized" &&
-            currentIndex === questions.length - 1
-              ? "Zakończ egzamin"
-              : "Następne pytanie"}
+            {isFinishing
+              ? "Trwa zapisywanie..."
+              : currentScope === "specialized" &&
+                  currentIndex === questions.length - 1
+                ? "Zakończ egzamin"
+                : "Następne pytanie"}
           </Text>
+          {isFinishing && <ActivityIndicator color="white" size="small" />}
           <MaterialIcons name="arrow-forward" size={20} color="white" />
         </TouchableOpacity>
         <View className="flex-row gap-4">
