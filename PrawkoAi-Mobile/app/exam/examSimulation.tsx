@@ -59,28 +59,46 @@ export default function ExamSimulationScreen() {
   const [pendingRequests, setPendingRequests] = useState<Promise<any>[]>([]);
   const [isFinishing, setIsFinishing] = useState(false);
 
+  const [timeLeft, setTimeLeft] = useState(35);
+
   useEffect(() => {
-    console.log(user?.id);
-    console.log(token?.accessToken);
     const fetchExamData = async () => {
       if (!user?.id) return;
-
       try {
         const response = await api.get<ExamData>("/api/exam/start", {
           params: { userId: user.id },
         });
-
         setExamData(response.data);
-        console.log(response.data.examSession.id);
       } catch (e) {
         console.error("Błąd pobierania danych:", e);
       } finally {
         setLoading(false);
       }
     };
-
     fetchExamData();
   }, [user?.id]);
+
+  useEffect(() => {
+    if (!loading && examData) {
+      const initialTime = currentScope === "standard" ? 35 : 50;
+      setTimeLeft(initialTime);
+    }
+  }, [currentIndex, currentScope, loading]);
+
+  useEffect(() => {
+    if (loading || isFinishing) return;
+
+    if (timeLeft <= 0) {
+      handleNext();
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft, loading, isFinishing]);
 
   const questions = useMemo(() => {
     if (!examData) return [];
@@ -93,7 +111,6 @@ export default function ExamSimulationScreen() {
 
   const sortedAnswers = useMemo(() => {
     if (!currentQuestion?.answers) return [];
-
     const answers = [...currentQuestion.answers];
 
     if (currentScope === "standard" && answers.length === 2) {
@@ -105,7 +122,6 @@ export default function ExamSimulationScreen() {
         );
       });
     }
-
     return answers;
   }, [currentQuestion, currentScope]);
 
@@ -122,7 +138,6 @@ export default function ExamSimulationScreen() {
     setSelectedAnswerId(null);
 
     const request = submitAnswer(nextAnswerId);
-
     setPendingRequests((prev) => [...prev, request]);
 
     if (currentIndex < questions.length - 1) {
@@ -137,7 +152,6 @@ export default function ExamSimulationScreen() {
 
   const submitAnswer = async (answerId: string | null) => {
     if (!examData?.examSession.id || !currentQuestion?.id || !user?.id) return;
-
     try {
       return await api.post("/api/exam/answer", {
         examSessionId: examData.examSession.id,
@@ -150,25 +164,14 @@ export default function ExamSimulationScreen() {
     }
   };
 
-  const finishExamSession = async () => {
+  const handleFinishExam = async () => {
+    setIsFinishing(true);
     try {
+      await Promise.all(pendingRequests);
       await api.put("/api/exam/finish", {
         examSessionId: examData?.examSession.id,
         userId: user?.id,
       });
-    } catch (e) {
-      console.error("Błąd kończenia sesji:", e);
-    }
-  };
-
-  const handleFinishExam = async () => {
-    setIsFinishing(true);
-    try {
-      console.log("Czekam na zaległe odpowiedzi...");
-      await Promise.all(pendingRequests);
-
-      await finishExamSession();
-
       router.push(`/exam/examResult/${examData?.examSession.id}`);
     } catch (e) {
       console.error("Błąd podczas finalizacji:", e);
@@ -204,33 +207,39 @@ export default function ExamSimulationScreen() {
             onPress={() => router.back()}
             className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800"
           >
-            <MaterialIcons
-              name="close"
-              size={20}
-              className="text-slate-500 dark:text-slate-400"
-            />
+            <MaterialIcons name="close" size={20} color="#64748b" />
           </TouchableOpacity>
 
           <View>
             <Text className="text-[10px] font-bold uppercase tracking-widest text-[#1544b2]">
               Prawko AI
             </Text>
-
             <Text className="text-[9px] font-medium text-slate-400 uppercase">
               Symulacja egzaminu word
             </Text>
           </View>
         </View>
 
-        <View className="flex-row items-center gap-2 bg-slate-50 dark:bg-slate-800 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700">
-          <MaterialIcons name="timer" size={16} className="text-[#1544b2]" />
-
-          <Text className="text-base font-bold tabular-nums dark:text-white">
-            25:00
+        {/* --- TIMER UI --- */}
+        <View
+          className={`flex-row items-center gap-2 px-3 py-2 rounded-xl border ${timeLeft <= 5 ? "bg-red-50 border-red-200" : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"}`}
+        >
+          <MaterialIcons
+            name="timer"
+            size={16}
+            color={timeLeft <= 5 ? "#ef4444" : "#1544b2"}
+          />
+          <Text
+            className={`text-base font-bold tabular-nums ${timeLeft <= 5 ? "text-red-600" : "dark:text-white"}`}
+          >
+            0:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}
           </Text>
         </View>
 
-        <TouchableOpacity className="bg-red-500 px-4 py-3 rounded-lg">
+        <TouchableOpacity
+          onPress={handleFinishExam}
+          className="bg-red-500 px-4 py-3 rounded-lg"
+        >
           <Text className="text-white text-xs font-bold">Zakończ</Text>
         </TouchableOpacity>
       </View>
@@ -282,7 +291,6 @@ export default function ExamSimulationScreen() {
             {sortedAnswers.map((answer) => {
               const isSelected = selectedAnswerId === answer.id;
               const isBinary = sortedAnswers.length === 2;
-
               return (
                 <TouchableOpacity
                   key={answer.id}
@@ -324,6 +332,7 @@ export default function ExamSimulationScreen() {
       >
         <TouchableOpacity
           onPress={handleNext}
+          disabled={isFinishing}
           activeOpacity={0.9}
           className="bg-[#1544b2] h-14 rounded-xl flex-row items-center justify-center shadow-lg shadow-blue-900/30"
         >
@@ -335,11 +344,14 @@ export default function ExamSimulationScreen() {
                 ? "Zakończ egzamin"
                 : "Następne pytanie"}
           </Text>
-          {isFinishing && <ActivityIndicator color="white" size="small" />}
-          <MaterialIcons name="arrow-forward" size={20} color="white" />
+          {isFinishing ? (
+            <ActivityIndicator color="white" size="small" />
+          ) : (
+            <MaterialIcons name="arrow-forward" size={20} color="white" />
+          )}
         </TouchableOpacity>
+
         <View className="flex-row gap-4">
-          {/* Podstawowe */}
           <View
             className={`flex-1 ${currentScope !== "standard" ? "opacity-30" : ""}`}
           >
@@ -362,7 +374,6 @@ export default function ExamSimulationScreen() {
             </View>
           </View>
 
-          {/* SPECIALIZED */}
           <View
             className={`flex-1 ${currentScope !== "specialized" ? "opacity-30" : ""}`}
           >
