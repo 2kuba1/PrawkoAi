@@ -203,13 +203,6 @@ export default function ExamSimulationScreen() {
         className="flex-row items-center justify-between px-4 py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm"
       >
         <View className="flex-row items-center gap-3">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800"
-          >
-            <MaterialIcons name="close" size={20} color="#64748b" />
-          </TouchableOpacity>
-
           <View>
             <Text className="text-[10px] font-bold uppercase tracking-widest text-[#1544b2]">
               Prawko AI
@@ -220,28 +213,29 @@ export default function ExamSimulationScreen() {
           </View>
         </View>
 
-        {/* --- TIMER UI --- */}
-        <View
-          className={`flex-row items-center gap-2 px-3 py-2 rounded-xl border ${timeLeft <= 5 ? "bg-red-50 border-red-200" : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"}`}
-        >
-          <MaterialIcons
-            name="timer"
-            size={16}
-            color={timeLeft <= 5 ? "#ef4444" : "#1544b2"}
-          />
-          <Text
-            className={`text-base font-bold tabular-nums ${timeLeft <= 5 ? "text-red-600" : "dark:text-white"}`}
+        <View className="flex-row gap-2">
+          <View
+            className={`flex-row items-center gap-2 px-3 py-2 rounded-xl border ${timeLeft <= 5 ? "bg-red-50 border-red-200" : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"}`}
           >
-            0:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}
-          </Text>
-        </View>
+            <MaterialIcons
+              name="timer"
+              size={16}
+              color={timeLeft <= 5 ? "#ef4444" : "#1544b2"}
+            />
+            <Text
+              className={`text-base font-bold tabular-nums ${timeLeft <= 5 ? "text-red-600" : "dark:text-white"}`}
+            >
+              0:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}
+            </Text>
+          </View>
 
-        <TouchableOpacity
-          onPress={handleFinishExam}
-          className="bg-red-500 px-4 py-3 rounded-lg"
-        >
-          <Text className="text-white text-xs font-bold">Zakończ</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleFinishExam}
+            className="bg-red-500 px-4 py-3 rounded-lg"
+          >
+            <Text className="text-white text-xs font-bold">Zakończ</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
