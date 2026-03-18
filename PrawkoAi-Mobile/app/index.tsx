@@ -5,7 +5,7 @@ import * as WebBrowser from "expo-web-browser";
 import React, { useContext } from "react";
 import { StatusBar, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { AuthContext } from "./_layout";
+import { AuthContext, TokenResponse } from "./_layout";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -41,6 +41,30 @@ export default function LoginScreen() {
       }
     } catch (error) {
       console.error("Błąd sesji przeglądarki:", error);
+    }
+  };
+
+  const handleGuestSignIn = async () => {
+    const deviceId = Device.osInternalBuildId ?? "dev_id";
+
+    const apiUrl = `${process.env.EXPO_PUBLIC_API_URL}/api/account/login/guest`;
+
+    const response = await fetch(
+      `${apiUrl}?deviceId=${encodeURIComponent(deviceId)}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    const data: TokenResponse = await response.json();
+
+    if (response.ok) {
+      await completeSignIn(data);
+    } else {
+      console.error("Błąd logowania jako gość:", data);
     }
   };
 
@@ -82,6 +106,7 @@ export default function LoginScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
+            onPress={handleGuestSignIn}
             activeOpacity={0.7}
             className="flex-row w-full items-center justify-center rounded-2xl h-14 bg-white dark:bg-slate-800 border border-[#1544b2]/10 shadow-sm"
           >
