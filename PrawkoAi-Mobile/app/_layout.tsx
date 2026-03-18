@@ -1,7 +1,9 @@
+import * as Notifications from "expo-notifications";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { jwtDecode } from "jwt-decode";
 import { createContext, useEffect, useState } from "react";
+import { AppState, AppStateStatus } from "react-native";
 import {
   configureReanimatedLogger,
   ReanimatedLogLevel,
@@ -42,6 +44,22 @@ configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
   strict: false,
 });
+
+async function scheduleInactivityNotification() {
+  await Notifications.cancelAllScheduledNotificationsAsync();
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "Wróć do nauki! 📚",
+      body: "Twoje testy czekają. Nie pozwól, aby wiedza wyparowała!",
+      sound: true,
+      priority: Notifications.AndroidNotificationPriority.HIGH,
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      seconds: 30,
+    },
+  });
+}
 
 export default function RootLayout() {
   const [token, setToken] = useState<TokenResponse | null>(null);
@@ -93,6 +111,21 @@ export default function RootLayout() {
     }
   }, [token, isLoading, segments]);
 
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      "change",
+      (state: AppStateStatus) => {
+        if (state === "background") {
+          scheduleInactivityNotification();
+        }
+      },
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   const authContextValue = {
     token,
     isLoading,
@@ -103,8 +136,6 @@ export default function RootLayout() {
       decodeAndSetUser(newToken.accessToken);
     },
     signOut: async () => {
-      console.log("Signing out user:", user);
-      console.log("Current token:", token);
       try {
         await api.delete(`/api/account/logout?userId=${user?.id}`);
       } catch (e) {
@@ -113,10 +144,44 @@ export default function RootLayout() {
         await SecureStore.deleteItemAsync("userToken");
         setToken(null);
         setUser(null);
+        await Notifications.cancelAllScheduledNotificationsAsync();
         router.replace("/");
       }
     },
   };
+
+  useEffect(() => {
+    const requestPermissions = async () => {
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status !== "granted") {
+        await Notifications.requestPermissionsAsync();
+      }
+    };
+
+    requestPermissions();
+
+    const handleAppStateChange = (nextAppState: AppStateStatus) => {
+      if (
+        token &&
+        (nextAppState === "background" || nextAppState === "inactive")
+      ) {
+        scheduleInactivityNotification();
+      }
+
+      if (nextAppState === "active") {
+        Notifications.cancelAllScheduledNotificationsAsync();
+      }
+    };
+
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange,
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, [token]);
 
   return (
     <AuthContext.Provider value={authContextValue}>
