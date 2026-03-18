@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContext } from "../_layout";
-import api from "./utils/api";
+import api from "../utils/api";
 
 interface ExamHistory {
   userId: string;

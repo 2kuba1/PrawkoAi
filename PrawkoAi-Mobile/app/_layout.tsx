@@ -7,8 +7,8 @@ import {
   ReanimatedLogLevel,
 } from "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import api from "./exam/utils/api";
 import "./globals.css";
+import api from "./utils/api";
 
 export interface AuthContextType {
   signIn: (token: TokenResponse) => Promise<void>;

@@ -12,7 +12,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import api from "../utils/api";
+import api from "../../utils/api";
 
 interface PossibleAnswer {
   id: string;
