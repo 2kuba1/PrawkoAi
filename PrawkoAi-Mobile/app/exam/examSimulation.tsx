@@ -86,7 +86,7 @@ export default function ExamSimulationScreen() {
   }, [currentIndex, currentScope, loading]);
 
   useEffect(() => {
-    if (loading || isFinishing) return;
+    if (loading || isFinishing || !examData) return;
 
     if (timeLeft <= 0) {
       handleNext();
@@ -98,7 +98,7 @@ export default function ExamSimulationScreen() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft, loading, isFinishing]);
+  }, [timeLeft, loading, isFinishing, examData]);
 
   const questions = useMemo(() => {
     if (!examData) return [];
@@ -165,6 +165,8 @@ export default function ExamSimulationScreen() {
   };
 
   const handleFinishExam = async () => {
+    if (isFinishing) return;
+
     setIsFinishing(true);
     try {
       await Promise.all(pendingRequests);
@@ -172,10 +174,9 @@ export default function ExamSimulationScreen() {
         examSessionId: examData?.examSession.id,
         userId: user?.id,
       });
-      router.push(`/exam/examResult/${examData?.examSession.id}`);
+      router.replace(`/exam/examResult/${examData?.examSession.id}`);
     } catch (e) {
       console.error("Błąd podczas finalizacji:", e);
-    } finally {
       setIsFinishing(false);
     }
   };
