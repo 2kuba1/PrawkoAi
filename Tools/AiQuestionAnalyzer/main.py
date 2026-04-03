@@ -5,15 +5,7 @@ import time
 import os
 
 API_KEYS = [
-    "AIzaSyAueT5l673NrUGi7jahGfMDvmkFVvWGmGI",
-    "AIzaSyDQgc3EzwSvAna4cIjh816I6DT8AAB8pdY",
-    "AIzaSyA75JhuoFw9D-OO9nOls__OhTSzWPkRuHM",
-    "AIzaSyCEb4Q1Rq9FNQx_QcqIM5-ggXkSip2LZLI",
-    "AIzaSyB68S43Bt9yo1dZnc0sG6Zz7dQE-Uv8wRY",
-    "AIzaSyBkLddJqqXTZbaLlp3UTlMcTtWlxxmcT0I",
-    "AIzaSyB68S43Bt9yo1dZnc0sG6Zz7dQE-Uv8wRY",
-    "AIzaSyCXYDv7NEeQnS9hfFIub893RMq5viL3sXQ",
-    "AIzaSyBnedGk76IyjNuMl02n5aaUPrQblrierRo"
+
 ]
 
 INPUT_FILE = r"C:\Users\jakub\Desktop\PrawkoAi\Tools\AiQuestionAnalyzer\script\questions.txt"
