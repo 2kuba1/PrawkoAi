@@ -8,5 +8,5 @@ public interface IQuestionRepository : IGenericRepository<Question>
 {
     Task<Question?> GetRandomQuestionByCategory(Guid categoryId);
     Task<bool> CheckIfQuestionExists(Guid questionId);
-    Task<ExamQuestions> GetExamSimulationQuestions();
+    Task<ExamQuestions> GetExamSimulationQuestions(string category, string? locale);
 }

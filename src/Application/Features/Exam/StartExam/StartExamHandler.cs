@@ -1,5 +1,5 @@
-﻿using API.Jobs;
-using Application.Contracts.Repositories;
+﻿using Application.Contracts.Repositories;
+using Application.Jobs;
 using Application.Models;
 using Application.Models.DTOs;
 using Application.Shared;
@@ -60,7 +60,7 @@ internal sealed class StartExamHandler : IRequestHandler<StartExam, StartExamRes
 
         await scheduler.ScheduleJob(job, trigger, cancellationToken);
         
-        var questions = await _questionRepository.GetExamSimulationQuestions();
+        var questions = await _questionRepository.GetExamSimulationQuestions(request.Category, request.Locale);
 
         await _examSessionQuestionRepository.SaveExamSessionQuestionsAsync(questions, examSession.Id);
         

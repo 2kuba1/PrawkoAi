@@ -2,7 +2,7 @@
 using MediatR;
 using Quartz;
 
-namespace API.Jobs;
+namespace Application.Jobs;
 
 public class AutoFinishExamJob : IJob
 {

@@ -1,7 +1,6 @@
 ﻿using Application.Contracts.Repositories;
 using Application.Models;
 using Application.Models.DTOs;
-using Domain;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Database;
@@ -43,38 +42,57 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
     public async Task<bool> CheckIfQuestionExists(Guid questionId)
         => await _context.Questions.AsNoTracking().AnyAsync(x => x.Id == questionId);
 
-    public async Task<ExamQuestions> GetExamSimulationQuestions()
+    public async Task<ExamQuestions> GetExamSimulationQuestions(string category, string? locale)
     {
         var allIds = await _context.Questions
+            .Where(q => q.Categories.Any(c => c.Name == category))
             .Select(q => new { q.Id, q.Points, AnsCount = q.Answers.Count })
             .ToListAsync();
 
         var rnd = new Random();
-
-        var standardIds = allIds.Where(x => x.AnsCount == 2);
-        var specializedIds = allIds.Where(x => x.AnsCount == 3);
+        var standardIds = allIds.Where(x => x.AnsCount == 2).ToList();
+        var specializedIds = allIds.Where(x => x.AnsCount == 3).ToList();
 
         var pickedIds = new List<Guid>();
-        pickedIds.AddRange(standardIds.Where(x => x.Points == 3).OrderBy(_ => rnd.Next()).Take(10).Select(x => x.Id));
-        pickedIds.AddRange(standardIds.Where(x => x.Points == 2).OrderBy(_ => rnd.Next()).Take(6).Select(x => x.Id));
-        pickedIds.AddRange(standardIds.Where(x => x.Points == 1).OrderBy(_ => rnd.Next()).Take(4).Select(x => x.Id));
-    
-        pickedIds.AddRange(specializedIds.Where(x => x.Points == 3).OrderBy(_ => rnd.Next()).Take(6).Select(x => x.Id));
-        pickedIds.AddRange(specializedIds.Where(x => x.Points == 2).OrderBy(_ => rnd.Next()).Take(4).Select(x => x.Id));
-        pickedIds.AddRange(specializedIds.Where(x => x.Points == 2).OrderBy(_ => rnd.Next()).Take(2).Select(x => x.Id));
+        void Pick(List<Guid> target, IEnumerable<Guid> source, int count) =>
+            target.AddRange(source.OrderBy(_ => rnd.Next()).Take(count));
+
+        Pick(pickedIds, standardIds.Where(x => x.Points == 3).Select(x => x.Id), 10);
+        Pick(pickedIds, standardIds.Where(x => x.Points == 2).Select(x => x.Id), 6);
+        Pick(pickedIds, standardIds.Where(x => x.Points == 1).Select(x => x.Id), 4);
+
+        Pick(pickedIds, specializedIds.Where(x => x.Points == 3).Select(x => x.Id), 6);
+        Pick(pickedIds, specializedIds.Where(x => x.Points == 2).Select(x => x.Id), 4);
+        Pick(pickedIds, specializedIds.Where(x => x.Points == 1).Select(x => x.Id), 2);
+
+        var lang = locale?.ToUpper() ?? "PL";
 
         var resultQuestions = await _context.Questions
             .AsNoTracking()
-            .Include(q => q.Answers)
             .Where(q => pickedIds.Contains(q.Id))
             .Select(q => new QuestionDto(
-                q.Id, q.ContentPl, q.QuestionNumber, q.CategoryType, q.Points, q.MediaUrl,
-                q.Answers.Select(a => new AnswerDto(a.Id, a.QuestionId, a.ContentPl, a.CreatedAt)).ToList()
+                q.Id,
+                (lang == "EN" ? q.ContentEn :
+                    lang == "DE" ? q.ContentDe :
+                    lang == "UA" ? (string.IsNullOrEmpty(q.ContentUa) ? q.ContentPl : q.ContentUa) : q.ContentEn)!,
+                q.QuestionNumber,
+                q.CategoryType,
+                q.Points,
+                q.MediaUrl,
+                q.Answers.Select(a => new AnswerDto(
+                    a.Id,
+                    a.QuestionId,
+                    (lang == "EN" ? a.ContentEn :
+                        lang == "DE" ? a.ContentDe :
+                        lang == "UA" ? (string.IsNullOrEmpty(a.ContentUa) ? a.ContentPl : a.ContentUa) : a.ContentEn)!,
+                    a.CreatedAt
+                )).ToList()
             ))
-            .ToListAsync(); 
-        
+            .ToListAsync();
+
         return new ExamQuestions(
-            Standard: resultQuestions.Where(q => q.Answers.Count == 2).ToList(),
-            Specialized: resultQuestions.Where(q => q.Answers.Count == 3).ToList());
+            Standard: resultQuestions.Where(q => q.Answers.Count == 2).OrderBy(_ => rnd.Next()).ToList(),
+            Specialized: resultQuestions.Where(q => q.Answers.Count == 3).OrderBy(_ => rnd.Next()).ToList()
+        );
     }
 }
