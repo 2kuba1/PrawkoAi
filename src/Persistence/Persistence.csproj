@@ -27,10 +27,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Data\questions_processed.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Remove="Data\questions.txt" />
     <Content Include="Data\questions.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Remove="Data\output_questions.json" />
+    <None Remove="Data\final_questions_cleaned.txt" />
+    <None Remove="Data\questions_processed.txt" />
   </ItemGroup>
 
 </Project>

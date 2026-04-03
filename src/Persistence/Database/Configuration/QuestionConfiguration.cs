@@ -12,7 +12,7 @@ internal sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
 
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.Content)
+        builder.Property(x => x.ContentPl)
             .IsRequired();
         
         builder.HasMany(x => x.Answers)

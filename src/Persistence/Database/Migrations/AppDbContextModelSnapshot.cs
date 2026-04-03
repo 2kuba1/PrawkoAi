@@ -45,8 +45,21 @@ namespace Persistence.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("Content")
+                    b.Property<string>("ContentDe")
+                        .IsUnicode(true)
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ContentEn")
+                        .IsUnicode(true)
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ContentPl")
                         .IsRequired()
+                        .IsUnicode(true)
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ContentUa")
+                        .IsUnicode(true)
                         .HasColumnType("longtext");
 
                     b.Property<DateTime>("CreatedAt")
@@ -76,6 +89,7 @@ namespace Persistence.Database.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .IsUnicode(true)
                         .HasColumnType("varchar(255)");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -168,8 +182,33 @@ namespace Persistence.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("Content")
+                    b.Property<string>("AiContext")
+                        .IsUnicode(true)
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("CategoryTag")
+                        .IsUnicode(true)
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("CategoryType")
+                        .IsUnicode(true)
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ContentDe")
+                        .IsUnicode(true)
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ContentEn")
+                        .IsUnicode(true)
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ContentPl")
                         .IsRequired()
+                        .IsUnicode(true)
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ContentUa")
+                        .IsUnicode(true)
                         .HasColumnType("longtext");
 
                     b.Property<Guid?>("CorrectAnswerId")
@@ -179,6 +218,7 @@ namespace Persistence.Database.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("MediaUrl")
+                        .IsUnicode(true)
                         .HasColumnType("longtext");
 
                     b.Property<float>("Points")
@@ -187,7 +227,20 @@ namespace Persistence.Database.Migrations
                     b.Property<float>("QuestionNumber")
                         .HasColumnType("float");
 
-                    b.Property<string>("StructureScope")
+                    b.Property<string>("StaticResponseDe")
+                        .IsUnicode(true)
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("StaticResponseEn")
+                        .IsUnicode(true)
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("StaticResponsePl")
+                        .IsUnicode(true)
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("StaticResponseUa")
+                        .IsUnicode(true)
                         .HasColumnType("longtext");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -215,6 +268,7 @@ namespace Persistence.Database.Migrations
                     b.Property<string>("Token")
                         .IsRequired()
                         .HasMaxLength(200)
+                        .IsUnicode(true)
                         .HasColumnType("varchar(200)");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -245,6 +299,7 @@ namespace Persistence.Database.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(128)
+                        .IsUnicode(true)
                         .HasColumnType("varchar(128)");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -266,10 +321,12 @@ namespace Persistence.Database.Migrations
 
                     b.Property<string>("DeviceId")
                         .IsRequired()
+                        .IsUnicode(true)
                         .HasColumnType("longtext");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
+                        .IsUnicode(true)
                         .HasColumnType("varchar(256)");
 
                     b.Property<Guid>("RoleId")

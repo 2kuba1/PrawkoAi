@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using Domain;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Database;
@@ -15,64 +14,86 @@ internal static class QuestionsSeeder
         if (await context.Questions.AnyAsync())
             return;
 
-        var filePath = Path.Combine(AppContext.BaseDirectory, "Data", "questions.txt");
+        var filePath = Path.Combine(AppContext.BaseDirectory, "Data", "questions_processed.txt");
         if (!File.Exists(filePath))
             throw new FileNotFoundException($"File not found: {filePath}");
 
-        var lines = await File.ReadAllLinesAsync(filePath);
-
         context.ChangeTracker.AutoDetectChangesEnabled = false;
 
-        var existingCategories = await context.Categories.ToListAsync();
-        var categoryDictionary = existingCategories.ToDictionary(c => c.Name, c => c);
+        var categoryDictionary = await context.Categories.ToDictionaryAsync(c => c.Name, c => c);
+        var questionsToProcess = new List<(Question Question, string CorrectRaw)>();
 
-        var questionsToProcess = new List<(Domain.Entities.Question Question, string CorrectRaw)>();
+        var lines = await File.ReadAllLinesAsync(filePath);
 
         foreach (var line in lines)
         {
-            var parts = line.Split('@');
-            if (parts.Length < 10) continue;
+            if (string.IsNullOrWhiteSpace(line)) continue;
 
-            var questionNumber = ParseFloatSafe(parts[0]);
-            var points = ParseFloatSafe(parts[8]);
+            var d = line.Split('@').ToList();
+            
+            if (d.Count < 28) continue;
 
-            var questionText = parts[1].Trim();
-            var answerA = IsInvalid(parts[2]) ? null : parts[2].Trim();
-            var answerB = IsInvalid(parts[3]) ? null : parts[3].Trim();
-            var answerC = IsInvalid(parts[4]) ? null : parts[4].Trim();
-            var correctRaw = parts[5].Trim().ToUpper();
-            var media = IsInvalid(parts[6]) ? null : parts[6].Trim();
-            var structureScope = IsInvalid(parts[7]) ? null : parts[7].Trim();
-            var categoriesRaw = parts[9].Trim();
-
+            var questionId = Guid.NewGuid();
             var question = new Question
             {
-                Id = Guid.NewGuid(),
-                QuestionNumber = questionNumber,
-                Content = questionText,
-                StructureScope = structureScope,
-                Points = points,
-                MediaUrl = media,
-                CorrectAnswerId = null, 
+                Id = questionId,
+                // 0: ID
+                QuestionNumber = ParseFloatSafe(d[0]),
+                // 1: Question PL
+                ContentPl = d[1].Trim(),
+                
+                // 11: Question EN (indeks 10)
+                ContentEn = GetValueSafe(d, 10),
+                // 15: Question DE (indeks 14)
+                ContentDe = GetValueSafe(d, 14),
+                // 19: Question UA
+                ContentUa = GetValueSafe(d, 18),
+                
+                // 7: Media
+                MediaUrl = GetValueSafe(d, 6),
+                // 8: Category
+                CategoryType = GetValueSafe(d, 7),
+                // 9: Points
+                Points = ParseFloatSafe(GetValueSafe(d, 8)),
+                
+                // 23: Ai Context 
+                AiContext = GetValueSafe(d, 22),       
+                // 24: Kategoria/Tag
+                CategoryTag = GetValueSafe(d, 23),     
+                // 25: Static response pl
+                StaticResponsePl = GetValueSafe(d, 24), 
+                // 26: Static response en
+                StaticResponseEn = GetValueSafe(d, 25), 
+                // 27: Static response de
+                StaticResponseDe = GetValueSafe(d, 26), 
+                // 28: Static response ua
+                StaticResponseUa = GetValueSafe(d, 27), 
+                
                 Answers = new List<Answer>(),
                 Categories = new List<Category>()
             };
 
-            if (!string.IsNullOrWhiteSpace(answerA) || !string.IsNullOrWhiteSpace(answerB) || !string.IsNullOrWhiteSpace(answerC))
+            // PL: 2,3,4 | EN: 11,12,13 | DE: 15,16,17 | UA: 19,20,21
+            var isMultipleChoice = !IsInvalid(d[2]) || !IsInvalid(d[3]) || !IsInvalid(d[4]);
+
+            if (isMultipleChoice)
             {
-                if (!string.IsNullOrWhiteSpace(answerA)) question.Answers.Add(new Answer { Id = Guid.NewGuid(), Content = answerA, QuestionId = question.Id });
-                if (!string.IsNullOrWhiteSpace(answerB)) question.Answers.Add(new Answer { Id = Guid.NewGuid(), Content = answerB, QuestionId = question.Id });
-                if (!string.IsNullOrWhiteSpace(answerC)) question.Answers.Add(new Answer { Id = Guid.NewGuid(), Content = answerC, QuestionId = question.Id });
+                question.Answers.Add(CreateAnswer(question.Id, d[2], d[11], d[15], d[19]));
+                question.Answers.Add(CreateAnswer(question.Id, d[3], d[12], d[16], d[20]));
+                question.Answers.Add(CreateAnswer(question.Id, d[4], d[13], d[17], d[21]));
             }
             else
             {
-                question.Answers.Add(new Answer { Id = Guid.NewGuid(), Content = "Tak", QuestionId = question.Id });
-                question.Answers.Add(new Answer { Id = Guid.NewGuid(), Content = "Nie", QuestionId = question.Id });
+                question.Answers.Add(new Answer { Id = Guid.NewGuid(), QuestionId = question.Id, ContentPl = "Tak", ContentEn = "Yes", ContentDe = "Ja", ContentUa = "Так" });
+                question.Answers.Add(new Answer { Id = Guid.NewGuid(), QuestionId = question.Id, ContentPl = "Nie", ContentEn = "No", ContentDe = "Nein", ContentUa = "НІ" });
             }
 
+            var categoriesRaw = GetValueSafe(d, 9);
             if (!string.IsNullOrWhiteSpace(categoriesRaw))
             {
-                var names = categoriesRaw.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(c => c.Trim());
+                var names = categoriesRaw.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                         .Select(c => c.Trim().ToUpper());
+
                 foreach (var name in names)
                 {
                     if (!categoryDictionary.TryGetValue(name, out var category))
@@ -85,25 +106,26 @@ internal static class QuestionsSeeder
                 }
             }
 
-            questionsToProcess.Add((question, correctRaw));
+            // 6: Correct answer
+            questionsToProcess.Add((question, GetValueSafe(d, 5).ToUpper()));
         }
 
-        var allQuestions = questionsToProcess.Select(x => x.Question).ToList();
-        await context.Questions.AddRangeAsync(allQuestions);
+        await context.Questions.AddRangeAsync(questionsToProcess.Select(x => x.Question));
         await context.SaveChangesAsync();
-        
+
         foreach (var item in questionsToProcess)
         {
             var q = item.Question;
             var raw = item.CorrectRaw;
 
-            if (q.Answers.Count == 2)
+            if (q.Answers.Count == 2) // Y/N
             {
-                q.CorrectAnswerId = (raw == "T" || raw == "TAK")
-                    ? q.Answers.First(a => a.Content == "Tak").Id
-                    : q.Answers.First(a => a.Content == "Nie").Id;
+                var isTrue = raw == "T" || raw == "TAK";
+                q.CorrectAnswerId = isTrue 
+                    ? q.Answers.First(a => a.ContentPl == "Tak").Id 
+                    : q.Answers.First(a => a.ContentPl == "Nie").Id;
             }
-            else
+            else // A/B/C
             {
                 var index = raw switch { "A" => 0, "B" => 1, "C" => 2, _ => -1 };
                 if (index >= 0 && index < q.Answers.Count)
@@ -115,18 +137,32 @@ internal static class QuestionsSeeder
         await context.SaveChangesAsync();
     }
 
+    private static Answer CreateAnswer(Guid qId, string pl, string en, string de, string uk) => new()
+    {
+        Id = Guid.NewGuid(),
+        QuestionId = qId,
+        ContentPl = IsInvalid(pl) ? "" : pl.Trim(),
+        ContentEn = IsInvalid(en) ? null : en.Trim(),
+        ContentDe = IsInvalid(de) ? null : de.Trim(),
+        ContentUa = IsInvalid(uk) ? null : uk.Trim()
+    };
+
+    private static string GetValueSafe(List<string> data, int index)
+    {
+        if (index < 0 || index >= data.Count) return "";
+        var val = data[index];
+        return IsInvalid(val) ? "" : val.Trim();
+    }
+
     private static float ParseFloatSafe(string value)
     {
-        if (string.IsNullOrWhiteSpace(value) || value.Trim().ToLower() == "nan")
-            return 0f;
-
-        if (float.TryParse(value.Replace(',', '.').Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
-        {
-            return float.IsNaN(result) || float.IsInfinity(result) ? 0f : result;
-        }
-        return 0f;
+        if (IsInvalid(value)) return 0f;
+        var cleaned = value.Replace(',', '.').Trim();
+        return float.TryParse(cleaned, NumberStyles.Any, CultureInfo.InvariantCulture, out var result) ? result : 0f;
     }
 
     private static bool IsInvalid(string value) =>
-        string.IsNullOrWhiteSpace(value) || value.Trim().ToLower() == "nan";
+        string.IsNullOrWhiteSpace(value) || 
+        value.Trim().ToLower() == "nan" || 
+        value.Trim().ToLower() == "null";
 }

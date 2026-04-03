@@ -13,7 +13,7 @@ internal sealed class AnswerConfiguration : IEntityTypeConfiguration<Answer>
 
         builder.HasKey(a => a.Id);
 
-        builder.Property(a => a.Content)
+        builder.Property(a => a.ContentPl)
             .IsRequired();
 
         builder.HasIndex(a => a.QuestionId);

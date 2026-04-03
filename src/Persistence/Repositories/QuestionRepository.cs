@@ -68,8 +68,8 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
             .Include(q => q.Answers)
             .Where(q => pickedIds.Contains(q.Id))
             .Select(q => new QuestionDto(
-                q.Id, q.Content, q.QuestionNumber, q.StructureScope, q.Points, q.MediaUrl,
-                q.Answers.Select(a => new AnswerDto(a.Id, a.QuestionId, a.Content, a.CreatedAt)).ToList()
+                q.Id, q.ContentPl, q.QuestionNumber, q.CategoryType, q.Points, q.MediaUrl,
+                q.Answers.Select(a => new AnswerDto(a.Id, a.QuestionId, a.ContentPl, a.CreatedAt)).ToList()
             ))
             .ToListAsync(); 
         
