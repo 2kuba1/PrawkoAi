@@ -2,7 +2,7 @@ import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import * as AuthSession from "expo-auth-session";
 import * as Device from "expo-device";
 import * as WebBrowser from "expo-web-browser";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { StatusBar, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContext, TokenResponse } from "./_layout";
@@ -12,6 +12,16 @@ WebBrowser.maybeCompleteAuthSession();
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const { signIn: completeSignIn } = useContext(AuthContext);
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedLang, setSelectedLang] = useState({ code: "PL", flag: "🇵🇱" });
+
+  const languages = [
+    { code: "PL", flag: "🇵🇱", label: "Polski" },
+    { code: "EN", flag: "🇬🇧", label: "English" },
+    { code: "DE", flag: "🇩🇪", label: "Deutsch" },
+    { code: "UA", flag: "🇺🇦", label: "Українська" },
+  ];
 
   const handleGoogleSignIn = async () => {
     const redirectUri = AuthSession.makeRedirectUri({ scheme: "prawkoai" });
@@ -68,6 +78,11 @@ export default function LoginScreen() {
     }
   };
 
+  const selectLanguage = (lang: { code: string; flag: string }) => {
+    setSelectedLang(lang);
+    setIsOpen(false);
+  };
+
   return (
     <View
       className="flex-1 bg-[#f6f6f8] dark:bg-[#111621] items-center justify-center p-6"
@@ -77,6 +92,53 @@ export default function LoginScreen() {
 
       <View className="absolute -top-10 -right-10 w-64 h-64 bg-[#1544b2]/5 rounded-full blur-3xl" />
       <View className="absolute -bottom-20 -left-20 w-80 h-80 bg-[#1544b2]/5 rounded-full blur-3xl" />
+
+      <View
+        className="absolute z-50 items-end"
+        style={{ top: insets.top + 10, right: 20 }}
+      >
+        <TouchableOpacity
+          onPress={() => setIsOpen(!isOpen)}
+          activeOpacity={0.8}
+          className="flex-row items-center gap-2 px-3 py-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm"
+        >
+          <Text className="text-base">{selectedLang.flag}</Text>
+          <Text className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-tight">
+            {selectedLang.code}
+          </Text>
+          <MaterialIcons
+            name={isOpen ? "expand-less" : "expand-more"}
+            size={18}
+            color="#94a3b8"
+          />
+        </TouchableOpacity>
+
+        {isOpen && (
+          <View className="mt-2 w-40 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl overflow-hidden">
+            {languages.map((lang) => (
+              <TouchableOpacity
+                key={lang.code}
+                onPress={() => selectLanguage(lang)}
+                className={`flex-row items-center gap-3 px-4 py-3 border-b border-slate-50 dark:border-slate-700/50 last:border-b-0 ${
+                  selectedLang.code === lang.code
+                    ? "bg-slate-50 dark:bg-slate-700"
+                    : ""
+                }`}
+              >
+                <Text className="text-lg">{lang.flag}</Text>
+                <View>
+                  <Text className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                    {lang.code}
+                  </Text>
+                  <Text className="text-[10px] text-slate-400 uppercase font-medium">
+                    {lang.label}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </View>
 
       <View className="w-full max-w-sm items-center">
         <View className="mb-6 w-24 h-24 items-center justify-center bg-white dark:bg-slate-800 rounded-[28px] shadow-sm border border-[#1544b2]/10">
