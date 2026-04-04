@@ -1,11 +1,14 @@
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as AuthSession from "expo-auth-session";
 import * as Device from "expo-device";
+import { getLocales } from "expo-localization";
 import * as WebBrowser from "expo-web-browser";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { StatusBar, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContext, TokenResponse } from "./_layout";
+import i18n from "./utils/translations";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -13,8 +16,7 @@ export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const { signIn: completeSignIn } = useContext(AuthContext);
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedLang, setSelectedLang] = useState({ code: "PL", flag: "🇵🇱" });
+  const deviceLanguage = getLocales()[0].languageCode;
 
   const languages = [
     { code: "PL", flag: "🇵🇱", label: "Polski" },
@@ -22,6 +24,30 @@ export default function LoginScreen() {
     { code: "DE", flag: "🇩🇪", label: "Deutsch" },
     { code: "UA", flag: "🇺🇦", label: "Українська" },
   ];
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedLang, setSelectedLang] = useState({
+    code: deviceLanguage ? deviceLanguage.toUpperCase() : "EN",
+    flag: languages.find((l) => l.code.toLowerCase() === deviceLanguage)?.flag
+      ? languages.find((l) => l.code.toLowerCase() === deviceLanguage)?.flag
+      : "🇬🇧",
+  });
+  const [locale, setLocale] = useState(i18n.locale);
+
+  useEffect(() => {
+    const initLang = async () => {
+      const saved = await AsyncStorage.getItem("user-language");
+      if (saved) {
+        changeLanguage(saved);
+      } else {
+        const deviceLang = getLocales()[0].languageCode?.toUpperCase();
+        if (deviceLang && languages.find((l) => l.code === deviceLang)) {
+          changeLanguage(deviceLang);
+        }
+      }
+    };
+    initLang();
+  }, []);
 
   const handleGoogleSignIn = async () => {
     const redirectUri = AuthSession.makeRedirectUri({ scheme: "prawkoai" });
@@ -78,11 +104,18 @@ export default function LoginScreen() {
     }
   };
 
-  const selectLanguage = (lang: { code: string; flag: string }) => {
-    setSelectedLang(lang);
-    setIsOpen(false);
+  const changeLanguage = (code: string) => {
+    i18n.locale = code;
+    setLocale(code);
+    const langObj = languages.find((l) => l.code === code) || languages[0];
+    setSelectedLang(langObj);
   };
 
+  const selectLanguage = async (lang: { code: string; flag: string }) => {
+    changeLanguage(lang.code);
+    setIsOpen(false);
+    await AsyncStorage.setItem("user-language", lang.code);
+  };
   return (
     <View
       className="flex-1 bg-[#f6f6f8] dark:bg-[#111621] items-center justify-center p-6"
@@ -152,7 +185,7 @@ export default function LoginScreen() {
           <View className="h-1 w-6 bg-[#1544b2] rounded-full mt-1" />
         </View>
         <Text className="text-slate-500 dark:text-slate-400 text-base text-center mt-4 px-4 leading-6">
-          Zacznij naukę na prawo jazdy z pomocą AI
+          {i18n.t("welcome")}
         </Text>
 
         <View className="w-full gap-4 mt-4">
@@ -163,7 +196,7 @@ export default function LoginScreen() {
           >
             <FontAwesome5 name="google" size={16} color="white" />
             <Text className="text-white text-base font-bold ml-3">
-              Kontynuuj z Google
+              {i18n.t("google_btn")}
             </Text>
           </TouchableOpacity>
 
@@ -174,14 +207,14 @@ export default function LoginScreen() {
           >
             <MaterialIcons name="person-outline" size={20} color="#64748b" />
             <Text className="text-slate-600 dark:text-slate-300 text-sm font-semibold ml-2">
-              Wypróbuj jako gość
+              {i18n.t("guest_btn")}
             </Text>
           </TouchableOpacity>
         </View>
 
         <View className="mt-16 pt-8 border-t border-slate-200 dark:border-slate-800 w-full items-center">
           <Text className="text-[10px] text-slate-400 dark:text-slate-500 mb-6 uppercase tracking-[3px] font-bold">
-            Inteligentny Asystent Kierowcy
+            {i18n.t("footer")}
           </Text>
 
           <View className="flex-row gap-3">

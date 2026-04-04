@@ -1,4 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
@@ -66,7 +67,11 @@ export default function ExamSimulationScreen() {
       if (!user?.id) return;
       try {
         const response = await api.get<ExamData>("/api/exam/start", {
-          params: { userId: user.id },
+          params: {
+            userId: user.id,
+            category: "B",
+            locale: (await AsyncStorage.getItem("user-language")) || "PL",
+          },
         });
         setExamData(response.data);
       } catch (e) {
