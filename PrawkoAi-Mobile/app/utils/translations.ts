@@ -8,7 +8,7 @@ const translations = {
     guest_btn: "Wypróbuj jako gość",
     footer: "Inteligentny Asystent Kierowcy",
 
-    // Dashboard - Header & Stats
+    // Dashboard
     premium_account: "Konto Premium",
     learning_progress: "Twój progres nauki",
     questions_mastered: "pytań opanowanych",
@@ -16,15 +16,11 @@ const translations = {
     streak: "Streak",
     days: "Dni",
     avg_score: "Średni wynik",
-
-    // Dashboard - AI Card
     ai_suggestion: "Sugestia AI",
     daily_plan: "Dzienny plan",
     ai_recommendation_text:
       "Skup się dzisiaj na dziale skrzyżowania, tam masz najwięcej błędów.",
     train_now: "Trenuj teraz",
-
-    // Dashboard - Menu
     main_menu: "Menu główne",
     start_learning: "Zacznij naukę",
     continue_course: "Kontynuuj kurs",
@@ -38,6 +34,18 @@ const translations = {
     nav_learn: "Nauka",
     nav_school: "Szkoła",
     nav_profile: "Profil",
+
+    // Exam Screen
+    generating_sheet: "Generowanie arkusza...",
+    exam_simulation_word: "Symulacja egzaminu WORD",
+    finish_btn: "Zakończ",
+    question_count: "Pytanie",
+    points_label: "Punkty",
+    next_question: "Następne pytanie",
+    finish_exam: "Zakończ egzamin",
+    saving: "Trwa zapisywanie...",
+    basic_scope: "Podstawowe",
+    specialized_scope: "Specjalistyczne",
   },
   EN: {
     welcome: "Start learning for your driving license with AI",
@@ -52,13 +60,11 @@ const translations = {
     streak: "Streak",
     days: "Days",
     avg_score: "Avg score",
-
     ai_suggestion: "AI Suggestion",
     daily_plan: "Daily plan",
     ai_recommendation_text:
       "Focus today on the intersections section, that's where you have the most mistakes.",
     train_now: "Train now",
-
     main_menu: "Main menu",
     start_learning: "Start learning",
     continue_course: "Continue course",
@@ -66,11 +72,23 @@ const translations = {
     official_database: "Official question bank",
     logout: "Log out",
 
+    // Navigation
     nav_home: "Home",
     nav_stats: "Stats",
     nav_learn: "Learn",
     nav_school: "School",
     nav_profile: "Profile",
+
+    generating_sheet: "Generating sheet...",
+    exam_simulation_word: "WORD exam simulation",
+    finish_btn: "Finish",
+    question_count: "Question",
+    points_label: "Points",
+    next_question: "Next question",
+    finish_exam: "Finish exam",
+    saving: "Saving...",
+    basic_scope: "Basic",
+    specialized_scope: "Specialized",
   },
   DE: {
     welcome: "Lerne für deinen Führerschein mit AI",
@@ -85,13 +103,11 @@ const translations = {
     streak: "Streak",
     days: "Tage",
     avg_score: "Durchschnitt",
-
     ai_suggestion: "KI-Vorschlag",
     daily_plan: "Tagesplan",
     ai_recommendation_text:
       "Konzentrieren Sie sich heute auf den Bereich Kreuzungen, dort machen Sie die meisten Fehler.",
     train_now: "Jetzt trainieren",
-
     main_menu: "Hauptmenü",
     start_learning: "Lernen starten",
     continue_course: "Kurs fortsetzen",
@@ -99,11 +115,23 @@ const translations = {
     official_database: "Offizielle Fragenbank",
     logout: "Abmelden",
 
-    nav_home: "Home",
+    // Navigation
+    nav_home: "Start",
     nav_stats: "Statistiken",
     nav_learn: "Lernen",
     nav_school: "Fahrschule",
     nav_profile: "Profil",
+
+    generating_sheet: "Blatt wird generiert...",
+    exam_simulation_word: "WORD Prüfungssimulation",
+    finish_btn: "Beenden",
+    question_count: "Frage",
+    points_label: "Punkte",
+    next_question: "Nächste Frage",
+    finish_exam: "Prüfung beenden",
+    saving: "Speichern...",
+    basic_scope: "Grundlagen",
+    specialized_scope: "Spezialisiert",
   },
   UA: {
     welcome: "Почніть навчання на посвідчення водія з AI",
@@ -118,13 +146,11 @@ const translations = {
     streak: "Серія",
     days: "Днів",
     avg_score: "Сер. результат",
-
     ai_suggestion: "Пропозиція AI",
-    daily_plan: "Денний план",
+    daily_plan: "Денний plan",
     ai_recommendation_text:
       "Зосередьтеся сьогодні на розділі перехрестя, там у вас найбільше помилок.",
     train_now: "Тренуватися зараз",
-
     main_menu: "Головне меню",
     start_learning: "Почати навчання",
     continue_course: "Продовжити курс",
@@ -132,11 +158,23 @@ const translations = {
     official_database: "Офіційна база питань",
     logout: "Вийти",
 
+    // Navigation
     nav_home: "Головна",
     nav_stats: "Статистика",
     nav_learn: "Навчання",
     nav_school: "Автошкола",
     nav_profile: "Профіль",
+
+    generating_sheet: "Генерація листа...",
+    exam_simulation_word: "Симуляція іспиту WORD",
+    finish_btn: "Завершити",
+    question_count: "Питання",
+    points_label: "Бали",
+    next_question: "Наступне питання",
+    finish_exam: "Завершити іспит",
+    saving: "Збереження...",
+    basic_scope: "Основне",
+    specialized_scope: "Спеціалізоване",
   },
 };
 

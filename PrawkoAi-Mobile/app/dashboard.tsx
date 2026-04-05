@@ -13,8 +13,8 @@ import {
 } from "react-native";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
 import { AuthContext } from "./_layout";
+import Footer from "./components/footer";
 import i18n from "./utils/translations";
 
 export default function DashboardScreen() {
@@ -183,45 +183,7 @@ export default function DashboardScreen() {
         </TouchableOpacity>
       </ScrollView>
 
-      <View className="absolute bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 border-t border-slate-100 dark:border-slate-800 px-6 pb-10 pt-3 flex-row justify-between items-center">
-        <TouchableOpacity className="items-center">
-          <MaterialIcons name="home" size={24} color="#1544b2" />
-          <Text className="text-[10px] font-bold text-[#1544b2] mt-1">
-            {i18n.t("nav_home")}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity className="items-center">
-          <MaterialIcons name="leaderboard" size={24} color="#94a3b8" />
-          <Text className="text-[10px] font-bold text-slate-400 mt-1">
-            {i18n.t("nav_stats")}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity className="items-center">
-          <MaterialCommunityIcons name="controller" size={24} color="#94a3b8" />
-          <Text className="text-[10px] font-bold text-slate-400 mt-1">
-            {i18n.t("nav_learn")}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity className="items-center">
-          <MaterialIcons name="school" size={24} color="#94a3b8" />
-          <Text className="text-[10px] font-bold text-slate-400 mt-1">
-            {i18n.t("nav_school")}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          className="items-center"
-          onPress={() => router.push("/exam/examHistory")}
-        >
-          <MaterialIcons name="account-circle" size={24} color="#94a3b8" />
-          <Text className="text-[10px] font-bold text-slate-400 mt-1">
-            {i18n.t("nav_profile")}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <Footer />
     </View>
   );
 }

@@ -72,9 +72,11 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
             .Where(q => pickedIds.Contains(q.Id))
             .Select(q => new QuestionDto(
                 q.Id,
-                (lang == "EN" ? q.ContentEn :
+                (lang == "PL" ? q.ContentPl :
+                    lang == "EN" ? q.ContentEn :
                     lang == "DE" ? q.ContentDe :
-                    lang == "UA" ? (string.IsNullOrEmpty(q.ContentUa) ? q.ContentPl : q.ContentUa) : q.ContentEn)!,
+                    lang == "UA" ? (string.IsNullOrEmpty(q.ContentUa) ? q.ContentPl : q.ContentUa) : 
+                    q.ContentEn)!,
                 q.QuestionNumber,
                 q.CategoryType,
                 q.Points,
@@ -82,9 +84,11 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
                 q.Answers.Select(a => new AnswerDto(
                     a.Id,
                     a.QuestionId,
-                    (lang == "EN" ? a.ContentEn :
+                    (lang == "PL" ? a.ContentPl :
+                        lang == "EN" ? a.ContentEn :
                         lang == "DE" ? a.ContentDe :
-                        lang == "UA" ? (string.IsNullOrEmpty(a.ContentUa) ? a.ContentPl : a.ContentUa) : a.ContentEn)!,
+                        lang == "UA" ? (string.IsNullOrEmpty(a.ContentUa) ? a.ContentPl : a.ContentUa) : 
+                        a.ContentEn)!,
                     a.CreatedAt
                 )).ToList()
             ))

@@ -14,7 +14,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import api from "../../utils/api";
 
-interface PossibleAnswer {
+export interface PossibleAnswer {
   id: string;
   content: string;
 }
@@ -216,6 +216,7 @@ export default function ExamResultDetailPage() {
               question={item.content}
               selectedAnswerId={item.selectedAnswerId}
               possibleAnswers={item.answers ?? []}
+              questionId={item.questionId}
             />
           ))}
         </View>
@@ -231,6 +232,7 @@ function QuestionItem({
   question,
   selectedAnswerId,
   possibleAnswers,
+  questionId,
 }: {
   index: number;
   points: number;
@@ -238,12 +240,20 @@ function QuestionItem({
   question: string;
   selectedAnswerId: string | null;
   possibleAnswers: PossibleAnswer[];
+  questionId: string;
 }) {
   const isCorrect = type === "correct";
   const isUnanswered = type === "unanswered";
 
+  const router = useRouter();
+
   return (
-    <View className="bg-white dark:bg-slate-900 px-4 py-5 border-b border-slate-100 dark:border-slate-800">
+    <TouchableOpacity
+      onPress={() =>
+        router.push(`/question/examQuestionWithAnswer/${questionId}`)
+      }
+      className="bg-white dark:bg-slate-900 px-4 py-5 border-b border-slate-100 dark:border-slate-800"
+    >
       <View className="flex-row gap-4">
         <View
           className={`size-10 rounded-lg items-center justify-center ${
@@ -326,6 +336,6 @@ function QuestionItem({
           )}
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
