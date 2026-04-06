@@ -91,5 +91,6 @@ app.MapQuestionsEndpoints();
 app.MapAuthEndpoints();
 app.MapAnswerEndpoints();
 app.MapExamEndpoints();
+app.MapAiEndpoints();
 
 app.Run();

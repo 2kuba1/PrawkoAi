@@ -11,4 +11,5 @@ public interface IQuestionRepository : IGenericRepository<Question>
     Task<bool> CheckIfQuestionExists(Guid questionId);
     Task<ExamQuestions> GetExamSimulationQuestions(string category, string? locale);
     Task<GetQuestionAdditionalDataDto?> GetQuestionAdditionalData(Guid questionId, string locale);
+    Task<AiRequiredDataDto?> GetRequiredAiData(Guid questionId, string locale);
 }

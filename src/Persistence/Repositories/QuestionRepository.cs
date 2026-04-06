@@ -116,4 +116,26 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
         
         return mediaAndStaticResponse;
     }
+
+    public async Task<AiRequiredDataDto?> GetRequiredAiData(Guid questionId, string locale)
+    {
+        var  lang = locale.ToUpper();
+
+        var result = await _context.Questions.Where(q => q.Id == questionId)
+            .Select(q => new AiRequiredDataDto(
+                q.AiContext,
+                lang == "PL" ? q.StaticResponsePl :
+                lang == "EN" ? q.StaticResponseEn :
+                lang == "DE" ? q.StaticResponseDe :
+                lang == "UA" ? (string.IsNullOrEmpty(q.StaticResponseUa) ? q.StaticResponsePl : q.StaticResponseUa) :
+                q.StaticResponseEn,
+                lang == "PL" ? q.ContentPl :
+                lang == "EN" ? q.ContentEn :
+                lang == "DE" ? q.ContentDe :
+                lang == "UA" ? (string.IsNullOrEmpty(q.ContentUa) ? q.ContentPl : q.ContentUa) :
+                q.ContentEn
+            )).FirstOrDefaultAsync();
+        
+        return result;
+    }
 }
