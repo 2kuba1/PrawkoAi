@@ -1,5 +1,6 @@
 import { AuthContext } from "@/app/_layout";
 import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useLocalSearchParams } from "expo-router/build/hooks";
@@ -61,6 +62,7 @@ export default function ExamResultDetailPage() {
             params: {
               userId: user.id,
               examSessionId: id,
+              locale: await AsyncStorage.getItem("user-language"),
             },
           },
         );
@@ -255,7 +257,7 @@ function QuestionItem({
     <TouchableOpacity
       onPress={() =>
         router.push({
-          pathname: `/question/examQuestionWithAnswer/${questionId}`,
+          pathname: `/question/examQuestionWithAnswer/${questionId}` as any,
           params: {
             questionId: questionId,
             questionNumber: questionNumber.toString(),

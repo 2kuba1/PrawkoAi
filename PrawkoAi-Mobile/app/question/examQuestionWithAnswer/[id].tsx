@@ -1,11 +1,13 @@
 import Footer from "@/app/components/footer";
 import { PossibleAnswer } from "@/app/exam/examResult/[id]";
 import api from "@/app/utils/api";
+import i18n from "@/app/utils/translations";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   ImageBackground,
   ScrollView,
   StatusBar,
@@ -34,6 +36,7 @@ interface QuestionWithAnswerParams {
 export default function ExamQuestionWithAnswer() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
 
   const params = useLocalSearchParams<{
     questionId: string;
@@ -61,24 +64,42 @@ export default function ExamQuestionWithAnswer() {
     useState<MediaAndExplanationResponse | null>(null);
 
   useEffect(() => {
-    const fetchdMediaAndStaticResonse = async () => {
+    const fetchData = async () => {
       try {
+        const savedLanguage = await AsyncStorage.getItem("user-language");
+        if (savedLanguage) {
+          i18n.locale = savedLanguage;
+        }
+
         const response = await api.get<MediaAndExplanationResponse>(
           "/api/questions/getQuestionAdditionalData",
           {
             params: {
               questionId: questionData.questionId,
-              locale: await AsyncStorage.getItem("user-language"),
+              locale: savedLanguage || "PL",
             },
           },
         );
         setMediaAndExplanation(response.data);
       } catch (error) {
         console.error("Error fetching media and explanation:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
-    fetchdMediaAndStaticResonse();
+    fetchData();
   }, [questionData.questionId]);
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#f6f6f8] dark:bg-[#111621]">
+        <ActivityIndicator size="large" color="#1544b2" />
+        <Text className="mt-4 text-slate-500 dark:text-slate-400 font-medium">
+          {i18n.t("exam_question_with_answers.loading")}
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-[#f6f6f8] dark:bg-[#111621]">
@@ -98,10 +119,11 @@ export default function ExamQuestionWithAnswer() {
         </TouchableOpacity>
         <View>
           <Text className="text-lg font-bold text-slate-900 dark:text-white">
-            Pytanie {questionData.questionNumber}
+            {i18n.t("exam_question_with_answers.question")}{" "}
+            {questionData.questionNumber}
           </Text>
           <Text className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-            Symulacja Egzaminu
+            {i18n.t("exam_question_with_answers.simulation")}
           </Text>
         </View>
       </View>
@@ -115,7 +137,9 @@ export default function ExamQuestionWithAnswer() {
           <View className="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-xl">
             <ImageBackground
               source={{
-                uri: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=1000",
+                uri:
+                  mediaAndExplanation?.mediaUrl ||
+                  "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=1000",
               }}
               className="flex-1 items-center justify-center"
             >
@@ -130,7 +154,8 @@ export default function ExamQuestionWithAnswer() {
           <View className="flex-row items-center gap-2 mb-4">
             <View className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 rounded-full border border-blue-100 dark:border-blue-800">
               <Text className="text-[#1544b2] dark:text-blue-400 text-[10px] font-bold uppercase">
-                Punkty: {questionData.points}
+                {i18n.t("exam_question_with_answers.points")}:{" "}
+                {questionData.points}
               </Text>
             </View>
           </View>
@@ -198,12 +223,11 @@ export default function ExamQuestionWithAnswer() {
                 color="#1544b2"
               />
               <Text className="text-sm font-black text-[#1544b2] uppercase tracking-tighter">
-                Wyjaśnienie
+                {i18n.t("exam_question_with_answers.explanation")}
               </Text>
             </View>
             <Text className="text-slate-600 dark:text-slate-300 leading-6 font-medium">
-              {mediaAndExplanation?.staticResponse ||
-                "Ładowanie wyjaśnienia..."}
+              {mediaAndExplanation?.staticResponse}
             </Text>
           </View>
         </View>

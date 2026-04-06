@@ -187,6 +187,7 @@ export default function ExamSimulationScreen() {
       await api.put("/api/exam/finish", {
         examSessionId: examData?.examSession.id,
         userId: user?.id,
+        locale: await AsyncStorage.getItem("user-language"),
       });
       router.replace(`/exam/examResult/${examData?.examSession.id}`);
     } catch (e) {
@@ -200,7 +201,7 @@ export default function ExamSimulationScreen() {
       <View className="flex-1 items-center justify-center bg-white dark:bg-slate-950">
         <ActivityIndicator size="large" color="#1544b2" />
         <Text className="mt-4 text-slate-500 font-medium">
-          {i18n.t("generating_sheet")}
+          {i18n.t("exam.generating_sheet")}
         </Text>
       </View>
     );
@@ -223,7 +224,7 @@ export default function ExamSimulationScreen() {
               Prawko AI
             </Text>
             <Text className="text-[9px] font-medium text-slate-400 uppercase">
-              {i18n.t("exam_simulation_word")}
+              {i18n.t("exam.exam_simulation_word")}
             </Text>
           </View>
         </View>
@@ -249,7 +250,7 @@ export default function ExamSimulationScreen() {
             className="bg-red-500 px-4 py-3 rounded-lg"
           >
             <Text className="text-white text-xs font-bold">
-              {i18n.t("finish_btn")}
+              {i18n.t("exam.finish_btn")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -283,12 +284,13 @@ export default function ExamSimulationScreen() {
           <View className="flex-row items-center gap-2 mb-4">
             <View className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 rounded-full border border-blue-100 dark:border-blue-800">
               <Text className="text-[#1544b2] dark:text-blue-400 text-[10px] font-bold uppercase tracking-tight">
-                {i18n.t("question_count")} {globalProgress} / {totalQuestions}
+                {i18n.t("exam.question_count")} {globalProgress} /{" "}
+                {totalQuestions}
               </Text>
             </View>
             <View className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full">
               <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase">
-                {i18n.t("points_label")}: {currentQuestion.points}
+                {i18n.t("exam.points_label")}: {currentQuestion.points}
               </Text>
             </View>
           </View>
@@ -349,11 +351,11 @@ export default function ExamSimulationScreen() {
         >
           <Text className="text-white font-bold text-base mr-2">
             {isFinishing
-              ? i18n.t("saving")
+              ? i18n.t("exam.saving")
               : currentScope === "specialized" &&
                   currentIndex === questions.length - 1
-                ? i18n.t("finish_exam")
-                : i18n.t("next_question")}
+                ? i18n.t("exam.finish_exam")
+                : i18n.t("exam.next_question")}
           </Text>
           {isFinishing ? (
             <ActivityIndicator color="white" size="small" />
@@ -368,7 +370,7 @@ export default function ExamSimulationScreen() {
           >
             <View className="flex-row justify-between mb-2">
               <Text className="text-[9px] font-bold uppercase text-slate-400">
-                {i18n.t("basic_scope")}
+                {i18n.t("exam.basic_scope")}
               </Text>
               <Text className="text-[9px] font-bold text-[#1544b2]">
                 {currentScope === "standard" ? currentIndex + 1 : totalStandard}
@@ -390,7 +392,7 @@ export default function ExamSimulationScreen() {
           >
             <View className="flex-row justify-between mb-2">
               <Text className="text-[9px] font-bold uppercase text-slate-400">
-                {i18n.t("specialized_scope")}
+                {i18n.t("exam.specialized_scope")}
               </Text>
               <Text className="text-[9px] font-bold text-slate-500">
                 {currentScope === "specialized" ? currentIndex + 1 : 0}/

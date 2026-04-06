@@ -55,7 +55,7 @@ internal sealed class StartExamHandler : IRequestHandler<StartExam, StartExamRes
 
         var trigger = TriggerBuilder.Create()
             .WithIdentity($"Trigger-{examSession.Id}")
-            .StartAt(DateTimeOffset.UtcNow.AddMinutes(25))
+            .StartAt(DateTimeOffset.UtcNow.AddMinutes(1))
             .Build();
 
         await scheduler.ScheduleJob(job, trigger, cancellationToken);

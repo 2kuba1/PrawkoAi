@@ -21,8 +21,8 @@ internal sealed class AutoFinishExamHandler : IRequestHandler<AutoFinishExam, Un
         if (session is null || session.FinishedAt != null)
             return Unit.Value;
 
-        var results = await _examSessionQuestionRepository.GetExamResultsAsync(request.ExamSessionId);
-        await _examSessionRepository.CheckIfPassedAndSaveSession(session, session.StaredAt.AddMinutes(25), results.Score, results.CorrectAnswersCount);
+        var results = await _examSessionQuestionRepository.GetScoreAndCorrectAnswerCount(session.Id);
+        await _examSessionRepository.CheckIfPassedAndSaveSession(session, session.StaredAt.AddMinutes(25), (int)results.Score, results.CorrectAnswersCount);
         return Unit.Value;
     }
 }

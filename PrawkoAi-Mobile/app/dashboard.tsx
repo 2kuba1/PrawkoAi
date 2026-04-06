@@ -45,7 +45,7 @@ export default function DashboardScreen() {
               PrawkoAi
             </Text>
             <Text className="text-[10px] text-[#1544b2] font-bold uppercase tracking-wider">
-              {i18n.t("premium_account")}
+              {i18n.t("dashboard.premium_account")}
             </Text>
           </View>
         </View>
@@ -64,7 +64,7 @@ export default function DashboardScreen() {
           <View className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-[#1544b2]/5 shadow-sm">
             <View className="flex-row items-center justify-between mb-4">
               <Text className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-                {i18n.t("learning_progress")}
+                {i18n.t("dashboard.learning_progress")}
               </Text>
               <Text className="text-[#1544b2] font-bold text-xl">65%</Text>
             </View>
@@ -73,10 +73,10 @@ export default function DashboardScreen() {
             </View>
             <View className="flex-row justify-between items-center">
               <Text className="text-[11px] text-slate-400 font-medium">
-                130 z 200 {i18n.t("questions_mastered")}
+                130 z 200 {i18n.t("dashboard.questions_mastered")}
               </Text>
               <Text className="text-[11px] text-green-600 font-bold">
-                +12 {i18n.t("today")}
+                +12 {i18n.t("dashboard.today")}
               </Text>
             </View>
           </View>
@@ -87,18 +87,18 @@ export default function DashboardScreen() {
             <View className="flex-row items-center gap-2 mb-2">
               <MaterialCommunityIcons name="brain" size={16} color="white" />
               <Text className="text-[10px] font-bold tracking-widest uppercase text-white/80">
-                {i18n.t("ai_suggestion")}
+                {i18n.t("dashboard.ai_suggestion")}
               </Text>
             </View>
             <Text className="text-xl font-bold text-white mb-2">
-              {i18n.t("daily_plan")}
+              {i18n.t("dashboard.daily_plan")}
             </Text>
             <Text className="text-white/80 text-sm mb-5 leading-5">
-              {i18n.t("ai_recommendation_text")}
+              {i18n.t("dashboard.ai_recommendation_text")}
             </Text>
             <TouchableOpacity className="bg-white px-5 py-2 rounded-lg self-start active:opacity-90">
               <Text className="text-[#1544b2] font-bold text-xs uppercase">
-                {i18n.t("train_now")}
+                {i18n.t("dashboard.train_now")}
               </Text>
             </TouchableOpacity>
           </View>
@@ -106,7 +106,7 @@ export default function DashboardScreen() {
 
         <View className="p-4">
           <Text className="text-slate-800 dark:text-slate-200 font-bold mb-3 px-1">
-            {i18n.t("main_menu")}
+            {i18n.t("dashboard.main_menu")}
           </Text>
           <TouchableOpacity className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-[#1544b2]/5 shadow-sm mb-3 flex-row items-center justify-between">
             <View className="flex-row items-center gap-4">
@@ -115,10 +115,10 @@ export default function DashboardScreen() {
               </View>
               <View>
                 <Text className="font-bold text-slate-900 dark:text-white text-base">
-                  {i18n.t("start_learning")}
+                  {i18n.t("dashboard.start_learning")}
                 </Text>
                 <Text className="text-xs text-slate-500">
-                  {i18n.t("continue_course")}
+                  {i18n.t("dashboard.continue_course")}
                 </Text>
               </View>
             </View>
@@ -139,10 +139,10 @@ export default function DashboardScreen() {
               </View>
               <View>
                 <Text className="font-bold text-slate-900 dark:text-white text-base">
-                  {i18n.t("exam_simulation")}
+                  {i18n.t("dashboard.exam_simulation")}
                 </Text>
                 <Text className="text-xs text-slate-500">
-                  {i18n.t("official_database")}
+                  {i18n.t("dashboard.official_database")}
                 </Text>
               </View>
             </View>
@@ -153,18 +153,18 @@ export default function DashboardScreen() {
         <View className="px-4 py-2 flex-row gap-4">
           <View className="flex-1 bg-white dark:bg-slate-800 p-4 rounded-xl border border-[#1544b2]/5 shadow-sm">
             <Text className="text-[10px] font-bold text-slate-400 mb-2 uppercase">
-              {i18n.t("streak")}
+              {i18n.t("dashboard.streak")}
             </Text>
             <View className="flex-row items-center gap-2">
               <MaterialCommunityIcons name="fire" size={20} color="#f97316" />
               <Text className="text-lg font-bold text-slate-900 dark:text-white">
-                5 {i18n.t("days")}
+                5 {i18n.t("dashboard.days")}
               </Text>
             </View>
           </View>
           <View className="flex-1 bg-white dark:bg-slate-800 p-4 rounded-xl border border-[#1544b2]/5 shadow-sm">
             <Text className="text-[10px] font-bold text-slate-400 mb-2 uppercase">
-              {i18n.t("avg_score")}
+              {i18n.t("dashboard.avg_score")}
             </Text>
             <View className="flex-row items-center gap-2">
               <MaterialIcons name="trending-up" size={20} color="#1544b2" />
@@ -179,7 +179,9 @@ export default function DashboardScreen() {
           onPress={signOut}
           className="mt-6 mx-4 p-4 rounded-xl border border-red-100 dark:border-red-900/20 items-center"
         >
-          <Text className="text-red-600 font-bold">{i18n.t("logout")}</Text>
+          <Text className="text-red-600 font-bold">
+            {i18n.t("dashboard.logout")}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
 

@@ -185,7 +185,7 @@ export default function LoginScreen() {
           <View className="h-1 w-6 bg-[#1544b2] rounded-full mt-1" />
         </View>
         <Text className="text-slate-500 dark:text-slate-400 text-base text-center mt-4 px-4 leading-6">
-          {i18n.t("welcome")}
+          {i18n.t("login.welcome")}
         </Text>
 
         <View className="w-full gap-4 mt-4">
@@ -196,7 +196,7 @@ export default function LoginScreen() {
           >
             <FontAwesome5 name="google" size={16} color="white" />
             <Text className="text-white text-base font-bold ml-3">
-              {i18n.t("google_btn")}
+              {i18n.t("login.google_btn")}
             </Text>
           </TouchableOpacity>
 
@@ -207,14 +207,14 @@ export default function LoginScreen() {
           >
             <MaterialIcons name="person-outline" size={20} color="#64748b" />
             <Text className="text-slate-600 dark:text-slate-300 text-sm font-semibold ml-2">
-              {i18n.t("guest_btn")}
+              {i18n.t("login.guest_btn")}
             </Text>
           </TouchableOpacity>
         </View>
 
         <View className="mt-16 pt-8 border-t border-slate-200 dark:border-slate-800 w-full items-center">
           <Text className="text-[10px] text-slate-400 dark:text-slate-500 mb-6 uppercase tracking-[3px] font-bold">
-            {i18n.t("footer")}
+            {i18n.t("login.footer")}
           </Text>
 
           <View className="flex-row gap-3">
