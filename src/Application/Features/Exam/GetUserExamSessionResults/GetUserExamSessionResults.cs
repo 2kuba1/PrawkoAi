@@ -3,4 +3,4 @@ using MediatR;
 
 namespace Application.Features.Exam.GetUserExamSessionResults;
 
-public record GetUserExamSessionResults(Guid UserId, Guid ExamSessionId) : IRequest<ExamResultsDto>;
+public record GetUserExamSessionResults(Guid UserId, Guid ExamSessionId, string Locale) : IRequest<ExamResultsDto>;

@@ -72,9 +72,11 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
             .Where(q => pickedIds.Contains(q.Id))
             .Select(q => new QuestionDto(
                 q.Id,
-                (lang == "EN" ? q.ContentEn :
+                (lang == "PL" ? q.ContentPl :
+                    lang == "EN" ? q.ContentEn :
                     lang == "DE" ? q.ContentDe :
-                    lang == "UA" ? (string.IsNullOrEmpty(q.ContentUa) ? q.ContentPl : q.ContentUa) : q.ContentEn)!,
+                    lang == "UA" ? (string.IsNullOrEmpty(q.ContentUa) ? q.ContentPl : q.ContentUa) : 
+                    q.ContentEn)!,
                 q.QuestionNumber,
                 q.CategoryType,
                 q.Points,
@@ -82,9 +84,11 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
                 q.Answers.Select(a => new AnswerDto(
                     a.Id,
                     a.QuestionId,
-                    (lang == "EN" ? a.ContentEn :
+                    (lang == "PL" ? a.ContentPl :
+                        lang == "EN" ? a.ContentEn :
                         lang == "DE" ? a.ContentDe :
-                        lang == "UA" ? (string.IsNullOrEmpty(a.ContentUa) ? a.ContentPl : a.ContentUa) : a.ContentEn)!,
+                        lang == "UA" ? (string.IsNullOrEmpty(a.ContentUa) ? a.ContentPl : a.ContentUa) : 
+                        a.ContentEn)!,
                     a.CreatedAt
                 )).ToList()
             ))
@@ -94,5 +98,44 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
             Standard: resultQuestions.Where(q => q.Answers.Count == 2).OrderBy(_ => rnd.Next()).ToList(),
             Specialized: resultQuestions.Where(q => q.Answers.Count == 3).OrderBy(_ => rnd.Next()).ToList()
         );
+    }
+
+    public Task<GetQuestionAdditionalDataDto?> GetQuestionAdditionalData(Guid questionId, string locale)
+    {
+        var lang =  locale.ToUpper();
+
+        var mediaAndStaticResponse = _context.Questions.Where(q => q.Id == questionId)
+            .Select(q => new GetQuestionAdditionalDataDto
+            (
+                q.MediaUrl,
+                lang == "PL" ? q.StaticResponsePl : lang == "EN"  ? q.StaticResponseEn : lang == "DE" ? q.StaticResponseDe :
+                    lang == "UA" ? (string.IsNullOrEmpty(q.StaticResponseUa) ?  q.StaticResponsePl : q.StaticResponseUa) : q.StaticResponseEn,
+                q.CorrectAnswer!.Id
+            ))
+            .FirstOrDefaultAsync();
+        
+        return mediaAndStaticResponse;
+    }
+
+    public async Task<AiRequiredDataDto?> GetRequiredAiData(Guid questionId, string locale)
+    {
+        var  lang = locale.ToUpper();
+
+        var result = await _context.Questions.Where(q => q.Id == questionId)
+            .Select(q => new AiRequiredDataDto(
+                q.AiContext,
+                lang == "PL" ? q.StaticResponsePl :
+                lang == "EN" ? q.StaticResponseEn :
+                lang == "DE" ? q.StaticResponseDe :
+                lang == "UA" ? (string.IsNullOrEmpty(q.StaticResponseUa) ? q.StaticResponsePl : q.StaticResponseUa) :
+                q.StaticResponseEn,
+                lang == "PL" ? q.ContentPl :
+                lang == "EN" ? q.ContentEn :
+                lang == "DE" ? q.ContentDe :
+                lang == "UA" ? (string.IsNullOrEmpty(q.ContentUa) ? q.ContentPl : q.ContentUa) :
+                q.ContentEn
+            )).FirstOrDefaultAsync();
+        
+        return result;
     }
 }

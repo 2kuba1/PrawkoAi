@@ -186,13 +186,20 @@ export default function RootLayout() {
   return (
     <AuthContext.Provider value={authContextValue}>
       <SafeAreaProvider>
-        <Stack screenOptions={{ headerShown: false }}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            animation: "fade",
+            animationDuration: 200,
+          }}
+        >
           <Stack.Screen name="index" />
           <Stack.Screen name="dashboard" />
           <Stack.Screen name="exam/examHistory" />
           <Stack.Screen name="exam/examRules" />
           <Stack.Screen name="exam/examSimulation" />
           <Stack.Screen name="exam/examResult/[id]" />
+          <Stack.Screen name="question/examQuestionWithAnswer/[id]" />
         </Stack>
       </SafeAreaProvider>
     </AuthContext.Provider>

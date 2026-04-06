@@ -62,8 +62,20 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
     public async Task<ExamSessionQuestion?> GetByQuestionAndSessionIdAsync(Guid questionId, Guid examSessionId)
         => await _context.ExamSessionQuestions.FirstOrDefaultAsync(q => q.QuestionId == questionId && q.ExamSessionId == examSessionId);
 
-    public async Task<ExamResultsDto> GetExamResultsAsync(Guid examSessionId)
+    public async Task<ScoreAndCorrectAnswerCount> GetScoreAndCorrectAnswerCount(Guid sessionId)
     {
+        var correct = await _context.ExamSessionQuestions
+            .Where(q => q.ExamSessionId == sessionId && q.SelectedAnswerId != null && q.IsCorrect == true)
+            .Select(x => x.Question.Points)
+            .ToListAsync();
+        
+        return new ScoreAndCorrectAnswerCount(correct.Sum(), correct.Count);
+    }
+    
+    public async Task<ExamResultsDto> GetExamResultsAsync(Guid examSessionId, string locale)
+    {
+        var lang = locale.ToUpper();
+        
         var sessionData = await _context.ExamSessions
             .AsNoTracking()
             .Where(s => s.Id == examSessionId)
@@ -77,11 +89,20 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
                     q.AnsweredAt,
                     Answers = q.Question.Answers.Select(a => new 
                     {
-                        a.Id,
-                        a.ContentPl,
+                        Id = a.Id,
+                        Contnet = (lang == "PL" ? a.ContentPl :
+                            lang == "EN" ? a.ContentEn :
+                            lang == "DE" ? a.ContentDe :
+                            lang == "UA" ? (string.IsNullOrEmpty(a.ContentUa) ? a.ContentPl : a.ContentUa) : 
+                            a.ContentEn)!,
                     }).ToList(),
-                    QuestionContent = q.Question.ContentPl,
-                    QuestionPoints = q.Question.Points 
+                    QuestionContent = (lang == "PL" ? q.Question.ContentPl :
+                            lang == "EN" ? q.Question.ContentEn :
+                            lang == "DE" ? q.Question.ContentDe :
+                            lang == "UA" ? (string.IsNullOrEmpty(q.Question.ContentUa) ? q.Question.ContentPl : q.Question.ContentUa) : 
+                            q.Question.ContentEn)!,
+                    QuestionPoints = q.Question.Points,
+                    QuestionNumber = q.Question.QuestionNumber
                 }).ToList()
             })
             .FirstOrDefaultAsync();
@@ -112,7 +133,8 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
                 x.QuestionId, 
                 x.QuestionContent,
                 x.AnsweredAt ?? DateTime.UtcNow, 
-                x.Answers.Select(a => new ExamResultAnswerDto(a.Id, a.ContentPl))
+                x.Answers.Select(a => new ExamResultAnswerDto(a.Id, a.Contnet)),
+                x.QuestionNumber
             )).ToList(),
 
             IncorrectAnswers = incorrect.Select(x => new AnswerDto(
@@ -122,7 +144,8 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
                 x.QuestionId, 
                 x.QuestionContent,
                 x.AnsweredAt ?? DateTime.UtcNow, 
-                x.Answers.Select(a => new ExamResultAnswerDto(a.Id, a.ContentPl))
+                x.Answers.Select(a => new ExamResultAnswerDto(a.Id, a.Contnet)),
+                x.QuestionNumber
             )).ToList(),
 
             Unanswered = unanswered.Select(x => new AnswerDto(
@@ -132,7 +155,8 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
                 x.QuestionId, 
                 x.QuestionContent,
                 x.AnsweredAt ?? DateTime.UtcNow, 
-                x.Answers.Select(a => new ExamResultAnswerDto(a.Id, a.ContentPl))
+                x.Answers.Select(a => new ExamResultAnswerDto(a.Id, a.Contnet)),
+                x.QuestionNumber
             )).ToList(),
 
             Score = (int)totalScore,

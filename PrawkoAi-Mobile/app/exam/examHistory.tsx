@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContext } from "../_layout";
+import Footer from "../components/footer";
 import api from "../utils/api";
 
 interface ExamHistory {
@@ -70,7 +71,9 @@ export default function ExamHistoryScreen() {
       >
         <TouchableOpacity
           className="p-2 rounded-full"
-          onPress={() => router.back()}
+          onPress={() =>
+            router.canGoBack() ? router.back() : router.replace("/dashboard")
+          }
         >
           <MaterialCommunityIcons name="arrow-left" size={24} color="#1544b2" />
         </TouchableOpacity>
@@ -181,43 +184,7 @@ export default function ExamHistoryScreen() {
         </View>
       </ScrollView>
 
-      {/* Bottom Navigation */}
-      <View className="absolute bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 border-t border-slate-100 dark:border-slate-800 px-6 pb-10 pt-3 flex-row justify-between items-center">
-        <TouchableOpacity className="items-center">
-          <MaterialIcons name="home" size={24} color="#1544b2" />
-          <Text className="text-[10px] font-bold text-[#1544b2] mt-1">
-            Home
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity className="items-center">
-          <MaterialIcons name="leaderboard" size={24} color="#94a3b8" />
-          <Text className="text-[10px] font-bold text-slate-400 mt-1">
-            Statystyki
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity className="items-center">
-          <MaterialCommunityIcons name="controller" size={24} color="#94a3b8" />
-          <Text className="text-[10px] font-bold text-slate-400 mt-1">
-            Nauka
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity className="items-center">
-          <MaterialIcons name="school" size={24} color="#94a3b8" />
-          <Text className="text-[10px] font-bold text-slate-400 mt-1">
-            Szkoła Jazdy
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity className="items-center">
-          <MaterialIcons name="account-circle" size={24} color="#94a3b8" />
-          <Text className="text-[10px] font-bold text-slate-400 mt-1">
-            Profil
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <Footer />
     </View>
   );
 }

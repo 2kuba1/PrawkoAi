@@ -39,5 +39,8 @@ internal sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
                 x.HasIndex("QuestionsId");
                 x.HasIndex("CategoriesId");
             });
+        
+        builder.HasIndex(x => x.QuestionNumber);
+        builder.HasIndex(x => x.CategoryType);
     }
 }

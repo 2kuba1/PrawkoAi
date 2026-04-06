@@ -1,5 +1,6 @@
 import { AuthContext } from "@/app/_layout";
 import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useLocalSearchParams } from "expo-router/build/hooks";
@@ -14,7 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import api from "../../utils/api";
 
-interface PossibleAnswer {
+export interface PossibleAnswer {
   id: string;
   content: string;
 }
@@ -27,6 +28,7 @@ interface AnswerDetail {
   selectedAnswerId: string | null;
   answers: PossibleAnswer[];
   questionPoints: number;
+  questionNumber: number;
 }
 
 interface ExamResultDetail {
@@ -60,6 +62,7 @@ export default function ExamResultDetailPage() {
             params: {
               userId: user.id,
               examSessionId: id,
+              locale: await AsyncStorage.getItem("user-language"),
             },
           },
         );
@@ -216,6 +219,8 @@ export default function ExamResultDetailPage() {
               question={item.content}
               selectedAnswerId={item.selectedAnswerId}
               possibleAnswers={item.answers ?? []}
+              questionId={item.questionId}
+              questionNumber={item.questionNumber}
             />
           ))}
         </View>
@@ -231,6 +236,8 @@ function QuestionItem({
   question,
   selectedAnswerId,
   possibleAnswers,
+  questionId,
+  questionNumber,
 }: {
   index: number;
   points: number;
@@ -238,12 +245,32 @@ function QuestionItem({
   question: string;
   selectedAnswerId: string | null;
   possibleAnswers: PossibleAnswer[];
+  questionId: string;
+  questionNumber: number;
 }) {
   const isCorrect = type === "correct";
   const isUnanswered = type === "unanswered";
 
+  const router = useRouter();
+
   return (
-    <View className="bg-white dark:bg-slate-900 px-4 py-5 border-b border-slate-100 dark:border-slate-800">
+    <TouchableOpacity
+      onPress={() =>
+        router.push({
+          pathname: `/question/examQuestionWithAnswer/${questionId}` as any,
+          params: {
+            questionId: questionId,
+            questionNumber: questionNumber.toString(),
+            question: question,
+            possibleAnswers: JSON.stringify(possibleAnswers),
+            selectedAnswerId: selectedAnswerId ?? "",
+            wasCorrect: type,
+            points: points.toString(),
+          },
+        })
+      }
+      className="bg-white dark:bg-slate-900 px-4 py-5 border-b border-slate-100 dark:border-slate-800"
+    >
       <View className="flex-row gap-4">
         <View
           className={`size-10 rounded-lg items-center justify-center ${
@@ -326,6 +353,6 @@ function QuestionItem({
           )}
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }

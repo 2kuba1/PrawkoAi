@@ -10,4 +10,5 @@ public class ExamResultsDto
     public bool IsPassed { get; set; } = false;
     public DateTime? StartedAt { get; set; }
     public DateTime? FinishedAt { get; set; }
+    public float? QuestionNumber { get; set; }
 }

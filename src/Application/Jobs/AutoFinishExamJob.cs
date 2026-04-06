@@ -15,7 +15,6 @@ public class AutoFinishExamJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
-        // Pobieramy ID sesji z danych przekazanych do zadania
         var dataMap = context.MergedJobDataMap;
         var sessionId = dataMap.GetGuid("ExamSessionId");
 

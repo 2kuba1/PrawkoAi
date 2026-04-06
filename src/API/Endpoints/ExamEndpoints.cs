@@ -43,7 +43,7 @@ public static class ExamEndpoints
     private static async Task<IResult> FinishExam([FromBody] FinishExamSession finishExamSession,
         [FromServices] IMediator mediator)
     {
-        var results = await mediator.Send(new FinishExam(finishExamSession.UserId, finishExamSession.ExamSessionId));
+        var results = await mediator.Send(new FinishExam(finishExamSession.UserId, finishExamSession.ExamSessionId, finishExamSession.Locale));
         return Results.Ok(results);
     }
 
@@ -54,15 +54,16 @@ public static class ExamEndpoints
     }
 
     private static async Task<IResult> GetUserExamSessionResults([FromQuery] Guid userId,
-        [FromQuery] Guid examSessionId, [FromServices] IMediator mediator)
+        [FromQuery] Guid examSessionId, [FromQuery] string locale, [FromServices] IMediator mediator)
     {
-        var results = await mediator.Send(new GetUserExamSessionResults(userId, examSessionId)); 
+        var results = await mediator.Send(new GetUserExamSessionResults(userId, examSessionId, locale)); 
         return Results.Ok(results);
     }   
     
     private record FinishExamSession(
         Guid UserId,
-        Guid ExamSessionId);
+        Guid ExamSessionId,
+        string Locale);
 
     private record AnswerToQuestionRequest(
         Guid QuestionId,

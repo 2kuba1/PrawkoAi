@@ -11,8 +11,9 @@ public class AnswerDto
     public IEnumerable<ExamResultAnswerDto> Answers { get; set; }
     public Guid? SelectedAnswerId { get; set; }
     public float QuestionPoints { get; set; }
+    public float QuestionNumber { get; set; }
     
-    public AnswerDto(Guid id, Guid? selectedAnswerId, float questionPoints , Guid questionId, string content, DateTime createdAt, IEnumerable<ExamResultAnswerDto> answers)
+    public AnswerDto(Guid id, Guid? selectedAnswerId, float questionPoints , Guid questionId, string content, DateTime createdAt, IEnumerable<ExamResultAnswerDto> answers, float questionNumber)
     {
         Id = id;
         QuestionId = questionId;
@@ -21,6 +22,7 @@ public class AnswerDto
         Answers = answers;
         SelectedAnswerId = selectedAnswerId;
         QuestionPoints =  questionPoints;
+        QuestionNumber = questionNumber;
     }
 
     public AnswerDto(Guid id, Guid questionId, string content, DateTime createdAt)
