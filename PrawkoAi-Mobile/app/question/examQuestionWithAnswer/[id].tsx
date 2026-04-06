@@ -1,8 +1,10 @@
 import Footer from "@/app/components/footer";
 import { PossibleAnswer } from "@/app/exam/examResult/[id]";
+import api from "@/app/utils/api";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   ImageBackground,
   ScrollView,
@@ -15,71 +17,73 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface MediaAndExplanationResponse {
   mediaUrl: string;
-  explanation: string;
+  staticResponse: string;
+  correctAnswerId: string;
 }
 
 interface QuestionWithAnswerParams {
-  id: string;
+  questionId: string;
   questionNumber: number;
   question: string;
   possibleAnswers: PossibleAnswer[];
   selectedAnswerId: string;
-  wasCorrect: boolean;
+  wasCorrect: "correct" | "incorrect" | "unanswered";
   points: number;
 }
 
 export default function ExamQuestionWithAnswer() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  //   const params = useLocalSearchParams<{
-  //     id: string;
-  //     questionNumber: string;
-  //     question: string;
-  //     possibleAnswers: string; // JSON string
-  //     selectedAnswerId: string;
-  //     wasCorrect: string;
-  //     points: string;
-  //   }>();
 
-  //   const questionData: QuestionWithAnswerParams = {
-  //     id: params.id,
-  //     questionNumber: Number(params.questionNumber),
-  //     question: params.question,
-  //     selectedAnswerId: params.selectedAnswerId,
-  //     wasCorrect: params.wasCorrect === "true",
-  //     points: Number(params.points),
-  //     possibleAnswers: params.possibleAnswers
-  //       ? JSON.parse(params.possibleAnswers)
-  //       : [],
-  //   };
+  const params = useLocalSearchParams<{
+    questionId: string;
+    questionNumber: string;
+    question: string;
+    possibleAnswers: string;
+    selectedAnswerId: string;
+    wasCorrect: string;
+    points: string;
+  }>();
 
-  //   const [mediaAndExplanation, setMediaAndExplanation] =
-  //     useState<MediaAndExplanationResponse | null>(null);
+  const questionData: QuestionWithAnswerParams = {
+    questionId: params.questionId,
+    questionNumber: Number(params.questionNumber),
+    question: params.question,
+    selectedAnswerId: params.selectedAnswerId,
+    wasCorrect: params.wasCorrect as "correct" | "incorrect" | "unanswered",
+    points: Number(params.points),
+    possibleAnswers: params.possibleAnswers
+      ? JSON.parse(params.possibleAnswers)
+      : [],
+  };
 
-  //   useEffect(() => {
-  //     const fetchdMediaAndStaticResonse = async () => {
-  //       try {
-  //         const response = await api.get<MediaAndExplanationResponse>(
-  //           "/api/question/mediaAndStaticResponse",
-  //           {
-  //             params: {
-  //               questionId: questionData.id,
-  //             },
-  //           },
-  //         );
-  //         setMediaAndExplanation(response.data);
-  //       } catch (error) {
-  //         console.error("Error fetching media and explanation:", error);
-  //       }
-  //     };
-  //     fetchdMediaAndStaticResonse();
-  //   }, []);
+  const [mediaAndExplanation, setMediaAndExplanation] =
+    useState<MediaAndExplanationResponse | null>(null);
+
+  useEffect(() => {
+    const fetchdMediaAndStaticResonse = async () => {
+      try {
+        const response = await api.get<MediaAndExplanationResponse>(
+          "/api/questions/getQuestionAdditionalData",
+          {
+            params: {
+              questionId: questionData.questionId,
+              locale: await AsyncStorage.getItem("user-language"),
+            },
+          },
+        );
+        setMediaAndExplanation(response.data);
+      } catch (error) {
+        console.error("Error fetching media and explanation:", error);
+      }
+    };
+    fetchdMediaAndStaticResonse();
+  }, [questionData.questionId]);
 
   return (
     <View className="flex-1 bg-[#f6f6f8] dark:bg-[#111621]">
       <StatusBar barStyle="default" />
 
-      {/* --- HEADER --- */}
       <View
         style={{ paddingTop: insets.top }}
         className="px-4 pb-4 flex-row items-center gap-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm"
@@ -94,7 +98,7 @@ export default function ExamQuestionWithAnswer() {
         </TouchableOpacity>
         <View>
           <Text className="text-lg font-bold text-slate-900 dark:text-white">
-            Pytanie 1
+            Pytanie {questionData.questionNumber}
           </Text>
           <Text className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
             Symulacja Egzaminu
@@ -126,31 +130,64 @@ export default function ExamQuestionWithAnswer() {
           <View className="flex-row items-center gap-2 mb-4">
             <View className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 rounded-full border border-blue-100 dark:border-blue-800">
               <Text className="text-[#1544b2] dark:text-blue-400 text-[10px] font-bold uppercase">
-                Punkty: 3
+                Punkty: {questionData.points}
               </Text>
             </View>
           </View>
-
           <Text className="text-xl font-bold leading-tight text-slate-900 dark:text-white mb-8">
-            Czy w przedstawionej sytuacji masz pierwszeństwo przed pojazdem
-            nadjeżdżającym z prawej strony?
+            {questionData.question}
           </Text>
 
           <View className="gap-3 mb-8">
-            <View className="p-5 rounded-2xl border-2 border-white dark:border-slate-800 bg-white dark:bg-slate-800 shadow-sm">
-              <Text className="text-xl font-black text-center uppercase tracking-widest text-slate-700 dark:text-slate-200">
-                TAK
-              </Text>
-            </View>
+            {questionData.possibleAnswers.map((answer) => {
+              const isSelected = questionData.selectedAnswerId === answer.id;
+              const isCorrect =
+                mediaAndExplanation?.correctAnswerId === answer.id;
+              const isBinary = questionData.possibleAnswers.length === 2;
 
-            <View className="p-5 rounded-2xl border-2 border-red-500 bg-red-50 dark:bg-red-900/20 flex-row items-center justify-center">
-              <Text className="text-xl font-black text-center uppercase tracking-widest text-red-700 dark:text-red-400">
-                NIE
-              </Text>
-              <View className="absolute right-5">
-                <MaterialIcons name="cancel" size={24} color="#ef4444" />
-              </View>
-            </View>
+              let containerStyles =
+                "border-white dark:border-slate-800 bg-white dark:bg-slate-800 shadow-sm";
+              let textStyles = "text-slate-700 dark:text-slate-200";
+              let icon = null;
+
+              if (isCorrect) {
+                containerStyles =
+                  "border-green-500 bg-green-50 dark:bg-green-900/20";
+                textStyles = "text-green-700 dark:text-green-400";
+                icon = (
+                  <MaterialIcons
+                    name="check-circle"
+                    size={24}
+                    color="#22c55e"
+                  />
+                );
+              } else if (isSelected && !isCorrect) {
+                containerStyles = "border-red-500 bg-red-50 dark:bg-red-900/20";
+                textStyles = "text-red-700 dark:text-red-400";
+                icon = (
+                  <MaterialIcons name="cancel" size={24} color="#ef4444" />
+                );
+              }
+
+              return (
+                <View
+                  key={answer.id}
+                  className={`p-5 rounded-2xl border-2 flex-row items-center justify-between ${containerStyles}`}
+                >
+                  <Text
+                    className={`text-base flex-1 font-bold ${textStyles} ${
+                      isBinary
+                        ? "text-center text-xl uppercase tracking-widest"
+                        : ""
+                    }`}
+                  >
+                    {answer.content}
+                  </Text>
+
+                  {icon && <View className="ml-2">{icon}</View>}
+                </View>
+              );
+            })}
           </View>
 
           <View className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm">
@@ -165,11 +202,8 @@ export default function ExamQuestionWithAnswer() {
               </Text>
             </View>
             <Text className="text-slate-600 dark:text-slate-300 leading-6 font-medium">
-              W tej sytuacji znajdujesz się na skrzyżowaniu równorzędnym.
-              Zgodnie z zasadą "prawej ręki", masz obowiązek ustąpić
-              pierwszeństwa pojazdowi nadjeżdżającemu z Twojej prawej strony.
-              Twoja odpowiedź była błędna, ponieważ w tym przypadku nie
-              posiadasz pierwszeństwa przejazdu.
+              {mediaAndExplanation?.staticResponse ||
+                "Ładowanie wyjaśnienia..."}
             </Text>
           </View>
         </View>

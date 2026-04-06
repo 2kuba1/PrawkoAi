@@ -81,7 +81,8 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
                         a.ContentPl,
                     }).ToList(),
                     QuestionContent = q.Question.ContentPl,
-                    QuestionPoints = q.Question.Points 
+                    QuestionPoints = q.Question.Points,
+                    QuestionNumber = q.Question.QuestionNumber
                 }).ToList()
             })
             .FirstOrDefaultAsync();
@@ -112,7 +113,8 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
                 x.QuestionId, 
                 x.QuestionContent,
                 x.AnsweredAt ?? DateTime.UtcNow, 
-                x.Answers.Select(a => new ExamResultAnswerDto(a.Id, a.ContentPl))
+                x.Answers.Select(a => new ExamResultAnswerDto(a.Id, a.ContentPl)),
+                x.QuestionNumber
             )).ToList(),
 
             IncorrectAnswers = incorrect.Select(x => new AnswerDto(
@@ -122,7 +124,8 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
                 x.QuestionId, 
                 x.QuestionContent,
                 x.AnsweredAt ?? DateTime.UtcNow, 
-                x.Answers.Select(a => new ExamResultAnswerDto(a.Id, a.ContentPl))
+                x.Answers.Select(a => new ExamResultAnswerDto(a.Id, a.ContentPl)),
+                x.QuestionNumber
             )).ToList(),
 
             Unanswered = unanswered.Select(x => new AnswerDto(
@@ -132,7 +135,8 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
                 x.QuestionId, 
                 x.QuestionContent,
                 x.AnsweredAt ?? DateTime.UtcNow, 
-                x.Answers.Select(a => new ExamResultAnswerDto(a.Id, a.ContentPl))
+                x.Answers.Select(a => new ExamResultAnswerDto(a.Id, a.ContentPl)),
+                x.QuestionNumber
             )).ToList(),
 
             Score = (int)totalScore,

@@ -1,4 +1,5 @@
 ﻿using Application.Models;
+using Application.Models.DTOs;
 using Domain;
 using Domain.Entities;
 
@@ -9,4 +10,5 @@ public interface IQuestionRepository : IGenericRepository<Question>
     Task<Question?> GetRandomQuestionByCategory(Guid categoryId);
     Task<bool> CheckIfQuestionExists(Guid questionId);
     Task<ExamQuestions> GetExamSimulationQuestions(string category, string? locale);
+    Task<GetQuestionAdditionalDataDto?> GetQuestionAdditionalData(Guid questionId, string locale);
 }

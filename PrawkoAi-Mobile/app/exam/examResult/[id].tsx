@@ -27,6 +27,7 @@ interface AnswerDetail {
   selectedAnswerId: string | null;
   answers: PossibleAnswer[];
   questionPoints: number;
+  questionNumber: number;
 }
 
 interface ExamResultDetail {
@@ -217,6 +218,7 @@ export default function ExamResultDetailPage() {
               selectedAnswerId={item.selectedAnswerId}
               possibleAnswers={item.answers ?? []}
               questionId={item.questionId}
+              questionNumber={item.questionNumber}
             />
           ))}
         </View>
@@ -233,6 +235,7 @@ function QuestionItem({
   selectedAnswerId,
   possibleAnswers,
   questionId,
+  questionNumber,
 }: {
   index: number;
   points: number;
@@ -241,6 +244,7 @@ function QuestionItem({
   selectedAnswerId: string | null;
   possibleAnswers: PossibleAnswer[];
   questionId: string;
+  questionNumber: number;
 }) {
   const isCorrect = type === "correct";
   const isUnanswered = type === "unanswered";
@@ -250,7 +254,18 @@ function QuestionItem({
   return (
     <TouchableOpacity
       onPress={() =>
-        router.push(`/question/examQuestionWithAnswer/${questionId}`)
+        router.push({
+          pathname: `/question/examQuestionWithAnswer/${questionId}`,
+          params: {
+            questionId: questionId,
+            questionNumber: questionNumber.toString(),
+            question: question,
+            possibleAnswers: JSON.stringify(possibleAnswers),
+            selectedAnswerId: selectedAnswerId ?? "",
+            wasCorrect: type,
+            points: points.toString(),
+          },
+        })
       }
       className="bg-white dark:bg-slate-900 px-4 py-5 border-b border-slate-100 dark:border-slate-800"
     >

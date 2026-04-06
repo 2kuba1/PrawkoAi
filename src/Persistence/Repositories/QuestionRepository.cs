@@ -99,4 +99,21 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
             Specialized: resultQuestions.Where(q => q.Answers.Count == 3).OrderBy(_ => rnd.Next()).ToList()
         );
     }
+
+    public Task<GetQuestionAdditionalDataDto?> GetQuestionAdditionalData(Guid questionId, string locale)
+    {
+        var lang =  locale.ToUpper();
+
+        var mediaAndStaticResponse = _context.Questions.Where(q => q.Id == questionId)
+            .Select(q => new GetQuestionAdditionalDataDto
+            (
+                q.MediaUrl,
+                lang == "PL" ? q.StaticResponsePl : lang == "EN"  ? q.StaticResponseEn : lang == "DE" ? q.StaticResponseDe :
+                    lang == "UA" ? (string.IsNullOrEmpty(q.StaticResponseUa) ?  q.StaticResponsePl : q.StaticResponseUa) : q.StaticResponseEn,
+                q.CorrectAnswer!.Id
+            ))
+            .FirstOrDefaultAsync();
+        
+        return mediaAndStaticResponse;
+    }
 }
