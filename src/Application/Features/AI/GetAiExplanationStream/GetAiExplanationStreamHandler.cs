@@ -54,7 +54,8 @@ public class GetAiExplanationStreamHandler : IStreamRequestHandler<GetAiExplanat
                          Odpowiedz w 1-3 zdaniach.
                       # STYL:
                       - Nie używaj Markdown (pogrubień, list)
-                      - Nie odpowiadaj na pytania nie związane z prawem jazdy
+                      - Nie odpowiadaj na pytania użytkownika nie związane z prawem jazdy i egzaminami
+                      - Nie odpowiadaj na pytania z bezsensownymi ciągami znaków                      
 
                       # ZAPYTANIE UŻYTKOWNIKA:
                          {request.UserQuery}
@@ -95,7 +96,7 @@ public class GetAiExplanationStreamHandler : IStreamRequestHandler<GetAiExplanat
             string? textPart = null;
             try
             {
-                var chunk = JsonSerializer.Deserialize<GeminiStreamResponse>(json, new JsonSerializerOptions
+                var chunk = JsonSerializer.Deserialize<GeminiResponse>(json, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });

@@ -143,7 +143,7 @@ export default function ExamQuestionWithAnswer() {
         },
       );
 
-      if (!response.ok) throw new Error("Błąd sieci");
+      if (!response.ok) throw new Error("Connection error, try again later");
 
       const rawText = await response.text();
 
@@ -207,7 +207,7 @@ export default function ExamQuestionWithAnswer() {
         contentContainerStyle={{ paddingBottom: 160 }}
       >
         <View className="p-4">
-          <View className="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-xl mb-6">
+          <View className="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-xl border border-[#1544b2]/10">
             <ImageBackground
               source={{
                 uri:
@@ -215,10 +215,14 @@ export default function ExamQuestionWithAnswer() {
                   "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=1000",
               }}
               className="flex-1 items-center justify-center"
-            />
+            >
+              <TouchableOpacity className="w-14 h-14 rounded-full bg-white/20 items-center justify-center border border-white/40 backdrop-blur-md">
+                <MaterialIcons name="play-arrow" size={36} color="white" />
+              </TouchableOpacity>
+            </ImageBackground>
           </View>
 
-          <Text className="text-xl font-bold leading-tight text-slate-900 dark:text-white mb-6">
+          <Text className="text-xl font-bold leading-tight text-slate-900 dark:text-white mb-6 mt-6">
             {questionData.question}
           </Text>
 
@@ -355,25 +359,33 @@ export default function ExamQuestionWithAnswer() {
                 )}
             </ScrollView>
 
-            <View className="flex-row gap-2 items-center bg-white dark:bg-slate-800 p-2 rounded-3xl shadow-lg border border-slate-100 dark:border-slate-800">
-              <TextInput
-                className="flex-1 p-4 dark:text-white font-medium"
-                placeholder="Zapytaj o ten przepis..."
-                value={aiQuery}
-                onChangeText={setAiQuery}
-                multiline
-              />
-              <TouchableOpacity
-                onPress={handleAskAi}
-                disabled={isAiLoading || !aiQuery.trim()}
-                className={`w-12 h-12 rounded-2xl items-center justify-center ${
-                  aiQuery.trim()
-                    ? "bg-[#1544b2]"
-                    : "bg-slate-200 dark:bg-slate-700"
-                }`}
-              >
-                <MaterialIcons name="send" size={22} color="white" />
-              </TouchableOpacity>
+            <View className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg border border-slate-100 dark:border-slate-800">
+              <View className="flex-row gap-2 items-center p-2">
+                <TextInput
+                  className="flex-1 p-4 dark:text-white font-medium"
+                  placeholder="Zapytaj o ten przepis..."
+                  value={aiQuery}
+                  onChangeText={setAiQuery}
+                  multiline
+                  maxLength={500}
+                />
+                <TouchableOpacity
+                  onPress={handleAskAi}
+                  disabled={isAiLoading || !aiQuery.trim()}
+                  className={`w-12 h-12 rounded-2xl items-center justify-center ${
+                    aiQuery.trim()
+                      ? "bg-[#1544b2]"
+                      : "bg-slate-200 dark:bg-slate-700"
+                  }`}
+                >
+                  <MaterialIcons name="send" size={22} color="white" />
+                </TouchableOpacity>
+              </View>
+              <View className="px-4 pb-2 items-end">
+                <Text className="text-[10px] text-slate-400">
+                  {aiQuery.length} / 500
+                </Text>
+              </View>
             </View>
           </View>
         </KeyboardAvoidingView>

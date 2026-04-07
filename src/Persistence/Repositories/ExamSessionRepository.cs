@@ -41,4 +41,11 @@ public class ExamSessionRepository : GenericRepository<ExamSession>, IExamSessio
                 x.CorrectAnswersCount))
             .ToListAsync();
     }
+
+    public async Task<List<int?>> GetLastExamsScores(Guid userId, int examsCount) 
+        =>await _context.ExamSessions.Where(e => e.UserId == userId)
+            .OrderByDescending(e => e.CreatedAt)
+            .Select(e => e.Score)
+            .Take(examsCount)
+            .ToListAsync();
 }

@@ -1,6 +1,6 @@
 ﻿namespace Application.Models;
 
-public record GeminiStreamResponse(List<Candidate> Candidates);
+public record GeminiResponse(List<Candidate> Candidates);
     
 public record Candidate(Content Content);
 

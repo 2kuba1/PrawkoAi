@@ -1,4 +1,5 @@
-﻿using Application.Features.AI.GetAiExplanationStream;
+﻿using Application.Features.AI.AnalyzeUserProgress;
+using Application.Features.AI.GetAiExplanationStream;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,6 +11,9 @@ public static class AiEndpoints
     {
         app.MapPost("/api/ai/aiExplanation", AiQuestionExplanation)
             .RequireAuthorization();
+
+        app.MapGet("/api/ai/analyzeUserProgress", AnalyzeUserProgress)
+            .RequireAuthorization();;
     }
 
     private static async Task AiQuestionExplanation([FromBody] AiRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken)
@@ -30,6 +34,12 @@ public static class AiEndpoints
             await context.Response.WriteAsync($"data: {chunk}\n\n", cancellationToken);
             await context.Response.Body.FlushAsync(cancellationToken);
         }
+    }
+
+    private static async Task<IResult> AnalyzeUserProgress([FromQuery] Guid userId, [FromServices] IMediator mediator)
+    {
+        var response = await mediator.Send(new AnalyzeUserProgress(userId));
+        return Results.Ok(response);
     }
 
     private record AiRequest(Guid QuestionId, string UserQuery, string Locale);
