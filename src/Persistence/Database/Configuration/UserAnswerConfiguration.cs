@@ -32,5 +32,8 @@ internal sealed class UserAnswerConfiguration : IEntityTypeConfiguration<UserAns
 
         builder.HasIndex(x => x.UserId);
         builder.HasIndex(x => x.QuestionId);
+        
+        builder.HasIndex(x => new { x.UserId, x.CreatedAt })
+            .IsDescending(false, true);
     }
 }

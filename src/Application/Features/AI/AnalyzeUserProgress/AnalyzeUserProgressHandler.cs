@@ -82,22 +82,30 @@ internal sealed class AnalyzeUserProgressHandler : IRequestHandler<AnalyzeUserPr
             contents = new[] { new { parts = new[] { new { text = prompt } } } },
             generationConfig = new { 
                 temperature = 0.5, 
-                maxOutputTokens = 400
+                maxOutputTokens = 400,
+                topP = 0.8
             }
         };
 
         using var client = _httpClientFactory.CreateClient();
-        var response = await client.PostAsJsonAsync(url, payload, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            return "Nie udało się wygenerować analizy. Spróbuj po kolejnym egzaminie.";
-        }
-
-        var result = await response.Content.ReadFromJsonAsync<GeminiResponse>(cancellationToken: cancellationToken);
         
-        var aiText = result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
+        client.Timeout = TimeSpan.FromSeconds(12);
+        
+        try 
+        {
+            var response = await client.PostAsJsonAsync(url, payload, cancellationToken);
 
-        return aiText ?? "Analiza jest chwilowo niedostępna.";
+            if (!response.IsSuccessStatusCode)
+                return "Analiza jest chwilowo niedostępna. Spróbuj później.";
+
+            var result = await response.Content.ReadFromJsonAsync<GeminiResponse>(cancellationToken: cancellationToken);
+            var aiText = result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
+
+            return aiText?.Trim() ?? "Analiza jest chwilowo niedostępna.";
+        }
+        catch (OperationCanceledException)
+        {
+            return "Czas oczekiwania na analizę został przekroczony.";
+        }
     }
 }
