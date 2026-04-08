@@ -1,5 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ResizeMode, Video } from "expo-av";
 import { useRouter } from "expo-router";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
@@ -62,14 +63,6 @@ export default function ExamSimulationScreen() {
   const [isFinishing, setIsFinishing] = useState(false);
 
   const [timeLeft, setTimeLeft] = useState(35);
-
-  useEffect(() => {
-    const xd = async () => {
-      const lang = await AsyncStorage.getItem("user-language");
-      console.log("Saved language:", lang);
-    };
-    xd();
-  }, []);
 
   useEffect(() => {
     const fetchExamData = async () => {
@@ -136,6 +129,7 @@ export default function ExamSimulationScreen() {
         );
       });
     }
+
     return answers;
   }, [currentQuestion, currentScope]);
 
@@ -264,21 +258,48 @@ export default function ExamSimulationScreen() {
         {/* --- MEDIA SECTION --- */}
         <View className="p-4">
           <View className="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-xl border border-[#1544b2]/10">
-            <ImageBackground
-              source={{
-                uri:
-                  currentQuestion.mediaUrl ||
-                  "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=1000",
-              }}
-              className="flex-1 items-center justify-center"
-            >
-              <TouchableOpacity className="w-14 h-14 rounded-full bg-white/20 items-center justify-center border border-white/40 backdrop-blur-md">
-                <MaterialIcons name="play-arrow" size={36} color="white" />
-              </TouchableOpacity>
-            </ImageBackground>
+            {currentQuestion.mediaUrl ? (
+              currentQuestion.mediaUrl.toLowerCase().endsWith(".mp4") ? (
+                <Video
+                  source={{
+                    uri:
+                      process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL +
+                      currentQuestion.mediaUrl,
+                  }}
+                  rate={1.0}
+                  volume={1.0}
+                  isMuted={false}
+                  resizeMode={ResizeMode.COVER}
+                  shouldPlay={true}
+                  isLooping={false}
+                  useNativeControls
+                  style={{ flex: 1 }}
+                  usePoster={true}
+                  posterStyle={{ resizeMode: "cover" }}
+                />
+              ) : (
+                <ImageBackground
+                  source={{
+                    uri:
+                      process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL +
+                      currentQuestion.mediaUrl,
+                  }}
+                  className="flex-1"
+                  resizeMode="cover"
+                />
+              )
+            ) : (
+              <ImageBackground
+                source={{
+                  uri: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=1000",
+                }}
+                className="flex-1 items-center justify-center"
+              >
+                <Text className="text-white opacity-50">Brak mediów</Text>
+              </ImageBackground>
+            )}
           </View>
         </View>
-
         {/* --- QUESTION CONTENT --- */}
         <View className="px-5">
           <View className="flex-row items-center gap-2 mb-4">
