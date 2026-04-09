@@ -17,16 +17,18 @@ public class UserAnswerRepository : GenericRepository<UserAnswer>, IUserAnswerRe
     }
 
     public async Task<List<UserLastAnswersDto>> GetUserLastAnswers(Guid userId, int answerCount)
-    => await _context.UserAnswers
-        .AsNoTracking()
-        .Where(u => u.UserId == userId)
+    {
+        return await _context.UserAnswers
+            .AsNoTracking()
+            .Where(u => u.UserId == userId)
             .OrderByDescending(u => u.CreatedAt)
             .Take(answerCount)
             .Select(u => new UserLastAnswersDto(
-                    u.Question!.CategoryTag,
-                    u.AnsweredAt, 
-                    u.SelectedAnswerId == u.Question.CorrectAnswerId,
-                    u.Question.Points
-                ))
+                u.Question.CategoryTag,
+                u.AnsweredAt,
+                u.SelectedAnswerId == u.Question.CorrectAnswerId,
+                u.Question.Points
+            ))
             .ToListAsync();
+    }
 }

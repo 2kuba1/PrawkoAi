@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using System.Diagnostics;
+using System.Net.Http.Json;
 using System.Text.Json;
 using Application.Contracts.Repositories;
 using Application.Models;
@@ -24,9 +25,19 @@ internal sealed class AnalyzeUserProgressHandler : IRequestHandler<AnalyzeUserPr
     
     public async Task<string> Handle(AnalyzeUserProgress request, CancellationToken cancellationToken)
     {
+        var watch = Stopwatch.StartNew();
+        
         var answersCount = _config.GetValue<int>("Ai:AnswersCount");
         var lastAnswers = await _userAnswerRepository.GetUserLastAnswers(request.UserId, answersCount);
         var lastExamsScores = await _examSessionRepository.GetLastExamsScores(request.UserId, 5);
+
+
+        if (lastAnswers.Count < 30)
+            return "Potrzebujesz więcej przerobionych pytań aby skorzystać z tej funkcji";
+        
+        if(lastExamsScores.Count < 3)
+            return "Potrzebujesz więcej przerobionych egzaminow aby skorzystać z tej funkcji";
+
         
         var avgScore = lastExamsScores.Count != 0 ? lastExamsScores.Average() : 0;
         var trend = lastExamsScores.Count >= 2 ? lastExamsScores.First() - lastExamsScores.Last() : 0;
@@ -49,6 +60,10 @@ internal sealed class AnalyzeUserProgressHandler : IRequestHandler<AnalyzeUserPr
             PassThreshold = 68,
             ExamTrend = trend > 0 ? "Wzrostowy" : "Spadkowy",
         };
+        
+        watch.Restart();
+
+        Console.WriteLine("TIme elapsed " + watch.ElapsedMilliseconds);
 
         var prompt = $"""
                        Jesteś inteligentnym intruktorem nauki jazdy. (to jest nauka na teorię więc osoba nie ma doświadczenia za kierownicą)
@@ -89,8 +104,6 @@ internal sealed class AnalyzeUserProgressHandler : IRequestHandler<AnalyzeUserPr
 
         using var client = _httpClientFactory.CreateClient();
         
-        client.Timeout = TimeSpan.FromSeconds(12);
-        
         try 
         {
             var response = await client.PostAsJsonAsync(url, payload, cancellationToken);
@@ -100,7 +113,7 @@ internal sealed class AnalyzeUserProgressHandler : IRequestHandler<AnalyzeUserPr
 
             var result = await response.Content.ReadFromJsonAsync<GeminiResponse>(cancellationToken: cancellationToken);
             var aiText = result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
-
+            Console.WriteLine("TIme elapsed 2 " + watch.ElapsedMilliseconds);
             return aiText?.Trim() ?? "Analiza jest chwilowo niedostępna.";
         }
         catch (OperationCanceledException)

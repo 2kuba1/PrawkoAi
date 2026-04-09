@@ -30,7 +30,6 @@ internal sealed class UserAnswerConfiguration : IEntityTypeConfiguration<UserAns
         builder.Property(x => x.AnsweredAt)
             .IsRequired();
 
-        builder.HasIndex(x => x.UserId);
         builder.HasIndex(x => x.QuestionId);
         
         builder.HasIndex(x => new { x.UserId, x.CreatedAt })

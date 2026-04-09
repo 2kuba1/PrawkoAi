@@ -1,11 +1,11 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ResizeMode, Video } from "expo-av";
 import { useRouter } from "expo-router";
+import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  ImageBackground,
+  Image,
   ScrollView,
   StatusBar,
   Text,
@@ -87,6 +87,10 @@ export default function ExamSimulationScreen() {
 
   useEffect(() => {
     if (!loading && examData) {
+      console.log(
+        "Cos",
+        process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL + currentQuestion.mediaUrl,
+      );
       const initialTime = currentScope === "standard" ? 35 : 50;
       setTimeLeft(initialTime);
     }
@@ -260,43 +264,32 @@ export default function ExamSimulationScreen() {
           <View className="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-xl border border-[#1544b2]/10">
             {currentQuestion.mediaUrl ? (
               currentQuestion.mediaUrl.toLowerCase().endsWith(".mp4") ? (
-                <Video
-                  source={{
-                    uri:
-                      process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL +
-                      currentQuestion.mediaUrl,
-                  }}
-                  rate={1.0}
-                  volume={1.0}
-                  isMuted={false}
-                  resizeMode={ResizeMode.COVER}
-                  shouldPlay={true}
-                  isLooping={false}
-                  useNativeControls
-                  style={{ flex: 1 }}
-                  usePoster={true}
-                  posterStyle={{ resizeMode: "cover" }}
+                <VideoComponent
+                  url={
+                    process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL +
+                    currentQuestion.mediaUrl
+                  }
                 />
               ) : (
-                <ImageBackground
+                <Image
                   source={{
-                    uri:
+                    uri: encodeURI(
                       process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL +
-                      currentQuestion.mediaUrl,
+                        currentQuestion.mediaUrl,
+                    ),
                   }}
-                  className="flex-1"
+                  style={{ width: "100%", height: "100%" }}
                   resizeMode="cover"
                 />
               )
             ) : (
-              <ImageBackground
+              <Image
                 source={{
                   uri: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=1000",
                 }}
-                className="flex-1 items-center justify-center"
-              >
-                <Text className="text-white opacity-50">Brak mediów</Text>
-              </ImageBackground>
+                style={{ width: "100%", height: "100%" }}
+                resizeMode="cover"
+              />
             )}
           </View>
         </View>
@@ -434,3 +427,23 @@ export default function ExamSimulationScreen() {
     </View>
   );
 }
+
+const VideoComponent = ({ url }: { url: string }) => {
+  const player = useVideoPlayer(encodeURI(url), (player) => {
+    player.loop = false;
+    player.play();
+  });
+
+  return (
+    <VideoView
+      player={player}
+      style={{ width: "100%", height: "100%" }}
+      fullscreenOptions={{
+        enable: true,
+        autoExitOnRotate: true,
+      }}
+      allowsPictureInPicture
+      contentFit="cover"
+    />
+  );
+};
