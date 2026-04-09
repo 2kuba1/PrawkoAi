@@ -50,8 +50,7 @@ export interface ExamData {
 export default function ExamSimulationScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { token, user } = useContext(AuthContext);
-
+  const { user } = useContext(AuthContext);
   const [examData, setExamData] = useState<ExamData | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -62,11 +61,17 @@ export default function ExamSimulationScreen() {
   const [pendingRequests, setPendingRequests] = useState<Promise<any>[]>([]);
   const [isFinishing, setIsFinishing] = useState(false);
 
-  const [timeLeft, setTimeLeft] = useState(35);
+  const [timeLeft, setTimeLeft] = useState(20);
+  const [videoStatus, setVideoStatus] = useState<
+    "prep" | "playing" | "answering" | "idle"
+  >("prep");
+
+  const [hasRevealedMedia, setHasRevealedMedia] = useState(false);
 
   useEffect(() => {
     const fetchExamData = async () => {
       if (!user?.id) return;
+
       try {
         const response = await api.get<ExamData>("/api/exam/start", {
           params: {
@@ -82,34 +87,9 @@ export default function ExamSimulationScreen() {
         setLoading(false);
       }
     };
+
     fetchExamData();
   }, [user?.id]);
-
-  useEffect(() => {
-    if (!loading && examData) {
-      console.log(
-        "Cos",
-        process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL + currentQuestion.mediaUrl,
-      );
-      const initialTime = currentScope === "standard" ? 35 : 50;
-      setTimeLeft(initialTime);
-    }
-  }, [currentIndex, currentScope, loading]);
-
-  useEffect(() => {
-    if (loading || isFinishing || !examData) return;
-
-    if (timeLeft <= 0) {
-      handleNext();
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [timeLeft, loading, isFinishing, examData]);
 
   const questions = useMemo(() => {
     if (!examData) return [];
@@ -120,30 +100,72 @@ export default function ExamSimulationScreen() {
 
   const currentQuestion = questions[currentIndex];
 
-  const sortedAnswers = useMemo(() => {
-    if (!currentQuestion?.answers) return [];
-    const answers = [...currentQuestion.answers];
+  useEffect(() => {
+    if (!loading && currentQuestion) {
+      setHasRevealedMedia(false);
 
-    if (currentScope === "standard" && answers.length === 2) {
-      return answers.sort((a, b) => {
-        const order = ["tak", "nie"];
-        return (
-          order.indexOf(a.content.toLowerCase()) -
-          order.indexOf(b.content.toLowerCase())
-        );
-      });
+      if (currentScope === "standard") {
+        setVideoStatus("prep");
+        setTimeLeft(20);
+      } else {
+        setVideoStatus("idle");
+        setHasRevealedMedia(true);
+        setTimeLeft(50);
+      }
+    }
+  }, [currentIndex, currentScope, loading]);
+
+  useEffect(() => {
+    if (loading || isFinishing || !examData) return;
+
+    if (
+      currentScope === "standard" &&
+      videoStatus === "prep" &&
+      timeLeft <= 0
+    ) {
+      handleRevealMedia();
+      return;
     }
 
-    return answers;
-  }, [currentQuestion, currentScope]);
+    if (
+      timeLeft <= 0 &&
+      (videoStatus === "answering" || currentScope === "specialized")
+    ) {
+      handleNext();
+      return;
+    }
 
-  const totalStandard = examData?.examQuestions.standard.length || 0;
-  const totalSpecialized = examData?.examQuestions.specialized.length || 0;
-  const globalProgress =
-    currentScope === "standard"
-      ? currentIndex + 1
-      : totalStandard + currentIndex + 1;
-  const totalQuestions = totalStandard + totalSpecialized;
+    const timer = setInterval(() => {
+      if (videoStatus !== "playing") {
+        setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft, loading, isFinishing, videoStatus, currentScope]);
+
+  const handleRevealMedia = () => {
+    if (hasRevealedMedia) return;
+
+    setHasRevealedMedia(true);
+    const isVideo = currentQuestion?.mediaUrl?.toLowerCase().endsWith(".mp4");
+
+    if (isVideo) {
+      setVideoStatus("playing");
+    } else if (currentScope === "standard") {
+      setVideoStatus("answering");
+      setTimeLeft(15);
+    }
+  };
+
+  const onVideoFinished = () => {
+    if (currentScope === "standard") {
+      setVideoStatus("answering");
+      setTimeLeft(15);
+    } else {
+      setVideoStatus("idle");
+    }
+  };
 
   const handleNext = async () => {
     const nextAnswerId = selectedAnswerId;
@@ -164,6 +186,7 @@ export default function ExamSimulationScreen() {
 
   const submitAnswer = async (answerId: string | null) => {
     if (!examData?.examSession.id || !currentQuestion?.id || !user?.id) return;
+
     try {
       return await api.post("/api/exam/answer", {
         examSessionId: examData.examSession.id,
@@ -178,8 +201,8 @@ export default function ExamSimulationScreen() {
 
   const handleFinishExam = async () => {
     if (isFinishing) return;
-
     setIsFinishing(true);
+
     try {
       await Promise.all(pendingRequests);
       await api.put("/api/exam/finish", {
@@ -194,6 +217,30 @@ export default function ExamSimulationScreen() {
     }
   };
 
+  const sortedAnswers = useMemo(() => {
+    if (!currentQuestion?.answers) return [];
+    const answers = [...currentQuestion.answers];
+
+    if (currentScope === "standard" && answers.length === 2) {
+      return answers.sort((a, b) => {
+        const order = ["tak", "nie"];
+        return (
+          order.indexOf(a.content.toLowerCase()) -
+          order.indexOf(b.content.toLowerCase())
+        );
+      });
+    }
+    return answers;
+  }, [currentQuestion, currentScope]);
+
+  const totalStandard = examData?.examQuestions.standard.length || 0;
+  const totalSpecialized = examData?.examQuestions.specialized.length || 0;
+  const globalProgress =
+    currentScope === "standard"
+      ? currentIndex + 1
+      : totalStandard + currentIndex + 1;
+  const totalQuestions = totalStandard + totalSpecialized;
+
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center bg-white dark:bg-slate-950">
@@ -207,11 +254,12 @@ export default function ExamSimulationScreen() {
 
   if (!currentQuestion) return null;
 
+  const isMediaVideo = currentQuestion.mediaUrl?.toLowerCase().endsWith(".mp4");
+
   return (
     <View className="flex-1 bg-[#f6f6f8] dark:bg-[#111621]">
       <StatusBar barStyle="default" />
 
-      {/* --- HEADER --- */}
       <View
         style={{ paddingTop: insets.top }}
         className="flex-row items-center justify-between px-4 py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm"
@@ -239,7 +287,9 @@ export default function ExamSimulationScreen() {
             <Text
               className={`text-base font-bold tabular-nums ${timeLeft <= 5 ? "text-red-600" : "dark:text-white"}`}
             >
-              0:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}
+              {videoStatus === "playing"
+                ? "WIDEO"
+                : `0:${timeLeft < 10 ? `0${timeLeft}` : timeLeft}`}
             </Text>
           </View>
 
@@ -259,41 +309,58 @@ export default function ExamSimulationScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 180 }}
       >
-        {/* --- MEDIA SECTION --- */}
         <View className="p-4">
-          <View className="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-xl border border-[#1544b2]/10">
+          <View className="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-xl border border-[#1544b2]/10 items-center justify-center">
             {currentQuestion.mediaUrl ? (
-              currentQuestion.mediaUrl.toLowerCase().endsWith(".mp4") ? (
-                <VideoComponent
-                  url={
-                    process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL +
-                    currentQuestion.mediaUrl
-                  }
-                />
-              ) : (
-                <Image
-                  source={{
-                    uri: encodeURI(
-                      process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL +
-                        currentQuestion.mediaUrl,
-                    ),
-                  }}
-                  style={{ width: "100%", height: "100%" }}
-                  resizeMode="cover"
-                />
-              )
-            ) : (
-              <Image
-                source={{
-                  uri: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=1000",
-                }}
-                style={{ width: "100%", height: "100%" }}
-                resizeMode="cover"
-              />
-            )}
+              <>
+                {isMediaVideo ? (
+                  hasRevealedMedia ? (
+                    <VideoComponent
+                      url={
+                        process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL +
+                        currentQuestion.mediaUrl
+                      }
+                      onFinished={onVideoFinished}
+                      shouldPlay={videoStatus === "playing"}
+                    />
+                  ) : null
+                ) : (
+                  hasRevealedMedia && (
+                    <Image
+                      source={{
+                        uri: encodeURI(
+                          process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL +
+                            currentQuestion.mediaUrl,
+                        ),
+                      }}
+                      style={{ width: "100%", height: "100%" }}
+                      resizeMode="cover"
+                    />
+                  )
+                )}
+
+                {!hasRevealedMedia && (
+                  <TouchableOpacity
+                    onPress={handleRevealMedia}
+                    className="absolute inset-0 items-center justify-center bg-black/20"
+                  >
+                    <MaterialIcons
+                      name={isMediaVideo ? "play-circle-filled" : "image"}
+                      size={64}
+                      color="white"
+                    />
+                    <Text className="text-white font-bold mt-2">
+                      {isMediaVideo
+                        ? "Kliknij, aby obejrzeć wideo"
+                        : "Kliknij, aby zobaczyć zdjęcie"}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </>
+            ) : null}
           </View>
         </View>
-        {/* --- QUESTION CONTENT --- */}
+
         <View className="px-5">
           <View className="flex-row items-center gap-2 mb-4">
             <View className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 rounded-full border border-blue-100 dark:border-blue-800">
@@ -302,6 +369,7 @@ export default function ExamSimulationScreen() {
                 {totalQuestions}
               </Text>
             </View>
+
             <View className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full">
               <Text className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase">
                 {i18n.t("exam.points_label")}: {currentQuestion.points}
@@ -313,11 +381,11 @@ export default function ExamSimulationScreen() {
             {currentQuestion.content}
           </Text>
 
-          {/* --- ANSWERS --- */}
           <View className="gap-3">
             {sortedAnswers.map((answer: any) => {
               const isSelected = selectedAnswerId === answer.id;
               const isBinary = sortedAnswers.length === 2;
+
               return (
                 <TouchableOpacity
                   key={answer.id}
@@ -330,21 +398,10 @@ export default function ExamSimulationScreen() {
                   }`}
                 >
                   <Text
-                    className={`text-base flex-1 font-bold ${
-                      isSelected
-                        ? "text-[#1544b2] dark:text-blue-400"
-                        : "text-slate-700 dark:text-slate-200"
-                    } ${isBinary ? "text-center text-xl uppercase tracking-widest" : ""}`}
+                    className={`text-base flex-1 font-bold ${isSelected ? "text-[#1544b2] dark:text-blue-400" : "text-slate-700 dark:text-slate-200"} ${isBinary ? "text-center text-xl uppercase tracking-widest" : ""}`}
                   >
                     {answer.content}
                   </Text>
-                  {isSelected && !isBinary && (
-                    <MaterialIcons
-                      name="check-circle"
-                      size={24}
-                      color="#1544b2"
-                    />
-                  )}
                 </TouchableOpacity>
               );
             })}
@@ -352,7 +409,6 @@ export default function ExamSimulationScreen() {
         </View>
       </ScrollView>
 
-      {/* --- FOOTER PROGRESS --- */}
       <View
         style={{ paddingBottom: insets.bottom + 16 }}
         className="absolute bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 border-t border-[#1544b2]/10 gap-4 p-4"
@@ -361,7 +417,7 @@ export default function ExamSimulationScreen() {
           onPress={handleNext}
           disabled={isFinishing}
           activeOpacity={0.9}
-          className="bg-[#1544b2] h-14 rounded-xl flex-row items-center justify-center shadow-lg shadow-blue-900/30"
+          className="h-14 rounded-xl flex-row items-center justify-center bg-[#1544b2] shadow-lg shadow-blue-900/30"
         >
           <Text className="text-white font-bold text-base mr-2">
             {isFinishing
@@ -371,9 +427,8 @@ export default function ExamSimulationScreen() {
                 ? i18n.t("exam.finish_exam")
                 : i18n.t("exam.next_question")}
           </Text>
-          {isFinishing ? (
-            <ActivityIndicator color="white" size="small" />
-          ) : (
+
+          {!isFinishing && (
             <MaterialIcons name="arrow-forward" size={20} color="white" />
           )}
         </TouchableOpacity>
@@ -428,21 +483,37 @@ export default function ExamSimulationScreen() {
   );
 }
 
-const VideoComponent = ({ url }: { url: string }) => {
+const VideoComponent = ({
+  url,
+  onFinished,
+  shouldPlay,
+}: {
+  url: string;
+  onFinished: () => void;
+  shouldPlay: boolean;
+}) => {
   const player = useVideoPlayer(encodeURI(url), (player) => {
     player.loop = false;
-    player.play();
   });
+
+  useEffect(() => {
+    if (shouldPlay) {
+      player.play();
+    }
+  }, [shouldPlay]);
+
+  useEffect(() => {
+    const subscription = player.addListener("playToEnd", () => {
+      onFinished();
+    });
+    return () => subscription.remove();
+  }, [player]);
 
   return (
     <VideoView
       player={player}
       style={{ width: "100%", height: "100%" }}
-      fullscreenOptions={{
-        enable: true,
-        autoExitOnRotate: true,
-      }}
-      allowsPictureInPicture
+      fullscreenOptions={{ enable: true, autoExitOnRotate: true }}
       contentFit="cover"
     />
   );

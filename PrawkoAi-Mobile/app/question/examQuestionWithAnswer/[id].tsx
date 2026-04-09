@@ -273,7 +273,7 @@ export default function ExamQuestionWithAnswer() {
                 color="#1544b2"
               />
               <Text className="text-sm font-black text-[#1544b2] uppercase">
-                Oficjalna Wykładnia
+                Oficjalne wytłumaczenie
               </Text>
             </View>
             <Text className="text-slate-600 dark:text-slate-300 leading-6 font-medium">
