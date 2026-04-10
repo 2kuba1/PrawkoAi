@@ -5,10 +5,11 @@ import i18n from "@/app/utils/translations";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  ImageBackground,
+  Image,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -46,6 +47,8 @@ export default function ExamQuestionWithAnswer() {
   const [mediaAndExplanation, setMediaAndExplanation] =
     useState<MediaAndExplanationResponse | null>(null);
 
+  const [isPlaying, setIsPlaying] = useState(false);
+
   const params = useLocalSearchParams<{
     questionId: string;
     questionNumber: string;
@@ -67,6 +70,22 @@ export default function ExamQuestionWithAnswer() {
     points: Number(params.points),
   };
 
+  const fullMediaUrl = mediaAndExplanation?.mediaUrl
+    ? process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL + mediaAndExplanation.mediaUrl
+    : null;
+
+  const isVideo = fullMediaUrl?.toLowerCase().endsWith(".mp4");
+
+  const player = useVideoPlayer(fullMediaUrl || "", (player) => {
+    player.loop = false;
+    player.muted = false;
+  });
+
+  const handlePlayVideo = () => {
+    player.play();
+    setIsPlaying(true);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -85,7 +104,7 @@ export default function ExamQuestionWithAnswer() {
         );
         setMediaAndExplanation(response.data);
       } catch (error) {
-        console.error("Error fetching question data:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setIsLoading(false);
       }
@@ -95,7 +114,6 @@ export default function ExamQuestionWithAnswer() {
 
   const handleAskAi = async () => {
     if (!aiQuery.trim() || isAiLoading) return;
-
     const userMessage: ChatMessage = { role: "user", content: aiQuery };
     setChatHistory((prev) => [...prev, userMessage]);
     const currentQuery = aiQuery;
@@ -106,7 +124,6 @@ export default function ExamQuestionWithAnswer() {
       let displayedText = "";
       for (let i = 0; i < fullText.length; i++) {
         displayedText += fullText[i];
-
         setChatHistory((prev) => {
           const newHistory = [...prev];
           const lastIndex = newHistory.length - 1;
@@ -118,7 +135,6 @@ export default function ExamQuestionWithAnswer() {
           }
           return newHistory;
         });
-
         await new Promise((resolve) => setTimeout(resolve, 20));
       }
     };
@@ -126,7 +142,6 @@ export default function ExamQuestionWithAnswer() {
     try {
       const savedLanguage =
         (await AsyncStorage.getItem("user-language")) || "PL";
-
       const response = await fetch(
         `${process.env.EXPO_PUBLIC_API_URL}/api/ai/aiExplanation`,
         {
@@ -142,26 +157,20 @@ export default function ExamQuestionWithAnswer() {
           }),
         },
       );
-
-      if (!response.ok) throw new Error("Connection error, try again later");
-
+      if (!response.ok) throw new Error("Connection error");
       const rawText = await response.text();
-
       const cleanText = rawText
         .split("\n")
-        .filter((line) => line.startsWith("data: "))
-        .map((line) => line.replace("data: ", ""))
+        .filter((l) => l.startsWith("data: "))
+        .map((l) => l.replace("data: ", ""))
         .join("")
         .trim();
-
       setChatHistory((prev) => [...prev, { role: "model", content: "" }]);
-
       await animateText(cleanText);
     } catch (error) {
-      console.error("AI Error:", error);
       setChatHistory((prev) => [
         ...prev,
-        { role: "model", content: "Connection error, try again later" },
+        { role: "model", content: "Błąd połączenia." },
       ]);
     } finally {
       setIsAiLoading(false);
@@ -207,31 +216,60 @@ export default function ExamQuestionWithAnswer() {
         contentContainerStyle={{ paddingBottom: 160 }}
       >
         <View className="p-4">
-          <View className="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-xl border border-[#1544b2]/10">
-            <ImageBackground
-              source={{
-                uri:
-                  mediaAndExplanation?.mediaUrl ||
-                  "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=1000",
-              }}
-              className="flex-1 items-center justify-center"
-            >
-              <TouchableOpacity className="w-14 h-14 rounded-full bg-white/20 items-center justify-center border border-white/40 backdrop-blur-md">
-                <MaterialIcons name="play-arrow" size={36} color="white" />
-              </TouchableOpacity>
-            </ImageBackground>
+          <View className="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-xl border border-[#1544b2]/10 relative">
+            {fullMediaUrl ? (
+              isVideo ? (
+                <>
+                  <VideoView
+                    player={player}
+                    style={{ width: "100%", height: "100%" }}
+                    allowsPictureInPicture
+                    nativeControls={isPlaying}
+                  />
+                  {!isPlaying && (
+                    <TouchableOpacity
+                      onPress={handlePlayVideo}
+                      activeOpacity={0.9}
+                      className="absolute inset-0 items-center justify-center bg-black/20"
+                    >
+                      <View className="w-20 h-20 rounded-full bg-black/50 items-center justify-center backdrop-blur-sm">
+                        <MaterialIcons
+                          name="play-arrow"
+                          size={50}
+                          color="white"
+                        />
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                </>
+              ) : (
+                <Image
+                  source={{ uri: fullMediaUrl }}
+                  style={{ width: "100%", height: "100%" }}
+                  resizeMode="cover"
+                />
+              )
+            ) : (
+              <View className="flex-1 items-center justify-center bg-slate-800">
+                <MaterialIcons
+                  name="image-not-supported"
+                  size={48}
+                  color="white"
+                />
+              </View>
+            )}
           </View>
 
           <Text className="text-xl font-bold leading-tight text-slate-900 dark:text-white mb-6 mt-6">
             {questionData.question}
           </Text>
 
+          {/* Odpowiedzi */}
           <View className="gap-3 mb-8">
             {questionData.possibleAnswers.map((answer: any) => {
               const isSelected = questionData.selectedAnswerId === answer.id;
               const isCorrect =
                 mediaAndExplanation?.correctAnswerId === answer.id;
-
               let borderStyle =
                 "border-white dark:border-slate-800 bg-white dark:bg-slate-800";
               if (isCorrect)
@@ -265,6 +303,7 @@ export default function ExamQuestionWithAnswer() {
             })}
           </View>
 
+          {/* Wytłumaczenie */}
           <View className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm">
             <View className="flex-row items-center gap-2 mb-3">
               <MaterialCommunityIcons
@@ -283,6 +322,7 @@ export default function ExamQuestionWithAnswer() {
         </View>
       </ScrollView>
 
+      {/* Floating Button AI */}
       <View className="absolute bottom-32 right-6">
         <TouchableOpacity
           onPress={() => setIsAiModalVisible(true)}
@@ -292,6 +332,7 @@ export default function ExamQuestionWithAnswer() {
         </TouchableOpacity>
       </View>
 
+      {/* Modal AI */}
       <Modal
         visible={isAiModalVisible}
         animationType="slide"
@@ -313,7 +354,6 @@ export default function ExamQuestionWithAnswer() {
                 <MaterialIcons name="close" size={20} color="gray" />
               </TouchableOpacity>
             </View>
-
             <ScrollView
               ref={scrollViewRef}
               onContentSizeChange={() =>
@@ -330,19 +370,14 @@ export default function ExamQuestionWithAnswer() {
                     color="#1544b2"
                   />
                   <Text className="text-slate-400 text-center mt-4 italic px-10">
-                    Masz wątpliwości do tego pytania? Napisz do mnie, wyjaśnię
-                    Ci przepisy!
+                    Masz pytania? Chętnie pomogę!
                   </Text>
                 </View>
               )}
               {chatHistory.map((msg, index) => (
                 <View
                   key={index}
-                  className={`mb-4 max-w-[85%] p-4 rounded-3xl ${
-                    msg.role === "user"
-                      ? "bg-[#1544b2] self-end rounded-tr-none"
-                      : "bg-white dark:bg-slate-800 self-start rounded-tl-none shadow-sm"
-                  }`}
+                  className={`mb-4 max-w-[85%] p-4 rounded-3xl ${msg.role === "user" ? "bg-[#1544b2] self-end rounded-tr-none" : "bg-white dark:bg-slate-800 self-start rounded-tl-none shadow-sm"}`}
                 >
                   <Text
                     className={`text-[15px] font-medium ${msg.role === "user" ? "text-white" : "text-slate-800 dark:text-slate-200"}`}
@@ -351,40 +386,28 @@ export default function ExamQuestionWithAnswer() {
                   </Text>
                 </View>
               ))}
-              {isAiLoading &&
-                chatHistory[chatHistory.length - 1]?.role === "user" && (
-                  <View className="self-start ml-4 bg-white dark:bg-slate-800 p-3 rounded-2xl">
-                    <ActivityIndicator size="small" color="#1544b2" />
-                  </View>
-                )}
+              {isAiLoading && (
+                <View className="self-start ml-4 bg-white dark:bg-slate-800 p-3 rounded-2xl">
+                  <ActivityIndicator size="small" color="#1544b2" />
+                </View>
+              )}
             </ScrollView>
-
             <View className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg border border-slate-100 dark:border-slate-800">
               <View className="flex-row gap-2 items-center p-2">
                 <TextInput
                   className="flex-1 p-4 dark:text-white font-medium"
-                  placeholder="Zapytaj o ten przepis..."
+                  placeholder="Zapytaj..."
                   value={aiQuery}
                   onChangeText={setAiQuery}
                   multiline
-                  maxLength={500}
                 />
                 <TouchableOpacity
                   onPress={handleAskAi}
                   disabled={isAiLoading || !aiQuery.trim()}
-                  className={`w-12 h-12 rounded-2xl items-center justify-center ${
-                    aiQuery.trim()
-                      ? "bg-[#1544b2]"
-                      : "bg-slate-200 dark:bg-slate-700"
-                  }`}
+                  className={`w-12 h-12 rounded-2xl items-center justify-center ${aiQuery.trim() ? "bg-[#1544b2]" : "bg-slate-200 dark:bg-slate-700"}`}
                 >
                   <MaterialIcons name="send" size={22} color="white" />
                 </TouchableOpacity>
-              </View>
-              <View className="px-4 pb-2 items-end">
-                <Text className="text-[10px] text-slate-400">
-                  {aiQuery.length} / 500
-                </Text>
               </View>
             </View>
           </View>
