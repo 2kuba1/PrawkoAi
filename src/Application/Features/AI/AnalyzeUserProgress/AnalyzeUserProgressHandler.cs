@@ -3,8 +3,10 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Application.Contracts.Repositories;
 using Application.Models;
+using Domain.Enums;
 using MediatR;
 using Microsoft.Extensions.Configuration;
+using MathNet.Numerics.Distributions;
 
 namespace Application.Features.AI.AnalyzeUserProgress;
 
@@ -25,11 +27,9 @@ internal sealed class AnalyzeUserProgressHandler : IRequestHandler<AnalyzeUserPr
     
     public async Task<string> Handle(AnalyzeUserProgress request, CancellationToken cancellationToken)
     {
-        var watch = Stopwatch.StartNew();
-        
         var answersCount = _config.GetValue<int>("Ai:AnswersCount");
         var lastAnswers = await _userAnswerRepository.GetUserLastAnswers(request.UserId, answersCount);
-        var lastExamsScores = await _examSessionRepository.GetLastExamsScores(request.UserId, 5);
+        var lastExamsScores = await _examSessionRepository.GetLastExamsScores(request.UserId, 10);
 
 
         if (lastAnswers.Count < 30)
@@ -58,19 +58,29 @@ internal sealed class AnalyzeUserProgressHandler : IRequestHandler<AnalyzeUserPr
             AverageScore = avgScore,
             MaxScore = 74,
             PassThreshold = 68,
-            ExamTrend = trend > 0 ? "Wzrostowy" : "Spadkowy",
+            ExamTrend = trend > 0 ? ExamTrend.Upward : ExamTrend.Downward
         };
         
-        watch.Restart();
+        var safeAvg = avgScore ?? 0;
+        
+        var sumOfSquares = lastExamsScores.Select(s => Math.Pow(safeAvg, 2)).Sum();
+        var standardDeviation = Math.Sqrt(sumOfSquares / lastExamsScores.Count);
 
-        Console.WriteLine("TIme elapsed " + watch.ElapsedMilliseconds);
+        var dist = new Normal(safeAvg, standardDeviation);
 
+        var probOfFailure = dist.CumulativeDistribution(68);
+
+        var passProbability = Math.Round((1 - probOfFailure) * 100);
+
+        var finalExamTrend = examStats.ExamTrend == ExamTrend.Upward ? "Wzorsotwy" : "Spadkowy";
+        
         var prompt = $"""
                        Jesteś inteligentnym intruktorem nauki jazdy. (to jest nauka na teorię więc osoba nie ma doświadczenia za kierownicą)
                        Dane kursanta:
                        - Średni wynik z egzaminów: {examStats.AverageScore}/74 (Próg zaliczenia: 68).
-                       - Trend wyników: {examStats.ExamTrend}.
+                       - Trend wyników: {finalExamTrend}.
                        - Statystyki kategorii: {JsonSerializer.Serialize(answersStats)}.
+                       - Prawdopodobieństwo zdania egzaminu: {passProbability}
                        
                        Twoje zadanie:
                        1. Szansa na zdanie (%) - podaj tylko liczbę i krótkie uzasadnienie.
@@ -113,7 +123,6 @@ internal sealed class AnalyzeUserProgressHandler : IRequestHandler<AnalyzeUserPr
 
             var result = await response.Content.ReadFromJsonAsync<GeminiResponse>(cancellationToken: cancellationToken);
             var aiText = result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
-            Console.WriteLine("TIme elapsed 2 " + watch.ElapsedMilliseconds);
             return aiText?.Trim() ?? "Analiza jest chwilowo niedostępna.";
         }
         catch (OperationCanceledException)

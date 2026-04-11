@@ -25,7 +25,7 @@ const Footer = () => {
       label: i18n.t("navigation.nav_stats"),
       icon: "leaderboard",
       family: "MaterialIcons",
-      path: "/stats",
+      path: "/user/stats",
     },
     {
       id: "learn",
