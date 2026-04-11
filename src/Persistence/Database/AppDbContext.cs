@@ -20,6 +20,7 @@ public class AppDbContext : DbContext
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<ExamSession> ExamSessions { get; set; }
     public DbSet<ExamSessionQuestion> ExamSessionQuestions { get; set; }
+    public DbSet<UserAiProgress> UserAiProgresses { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

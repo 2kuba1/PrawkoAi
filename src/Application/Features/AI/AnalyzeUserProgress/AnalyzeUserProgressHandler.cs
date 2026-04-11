@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Application.Contracts.Repositories;
 using Application.Models;
+using Domain.Entities;
 using Domain.Enums;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -15,13 +16,15 @@ internal sealed class AnalyzeUserProgressHandler : IRequestHandler<AnalyzeUserPr
     private readonly IUserAnswerRepository _userAnswerRepository;
     private readonly IExamSessionRepository _examSessionRepository;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IUserAiProgressRepository _aiProgressRepository;
     private readonly IConfiguration _config;
 
-    public AnalyzeUserProgressHandler(IUserAnswerRepository userAnswerRepository, IExamSessionRepository examSessionRepository, IHttpClientFactory httpClientFactory,IConfiguration config)
+    public AnalyzeUserProgressHandler(IUserAnswerRepository userAnswerRepository, IExamSessionRepository examSessionRepository, IHttpClientFactory httpClientFactory, IUserAiProgressRepository aiProgressRepository, IConfiguration config)
     {
         _userAnswerRepository = userAnswerRepository;
         _examSessionRepository = examSessionRepository;
         _httpClientFactory = httpClientFactory;
+        _aiProgressRepository = aiProgressRepository;
         _config = config;
     }
     
@@ -114,20 +117,24 @@ internal sealed class AnalyzeUserProgressHandler : IRequestHandler<AnalyzeUserPr
 
         using var client = _httpClientFactory.CreateClient();
         
-        try 
-        {
-            var response = await client.PostAsJsonAsync(url, payload, cancellationToken);
+        var response = await client.PostAsJsonAsync(url, payload, cancellationToken);
 
-            if (!response.IsSuccessStatusCode)
-                return "Analiza jest chwilowo niedostępna. Spróbuj później.";
+        if (!response.IsSuccessStatusCode)
+            return "Analiza jest chwilowo niedostępna. Spróbuj później.";
 
-            var result = await response.Content.ReadFromJsonAsync<GeminiResponse>(cancellationToken: cancellationToken);
-            var aiText = result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
-            return aiText?.Trim() ?? "Analiza jest chwilowo niedostępna.";
-        }
-        catch (OperationCanceledException)
+        var result = await response.Content.ReadFromJsonAsync<GeminiResponse>(cancellationToken: cancellationToken);
+        var aiText = result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
+        var aiTextTrim = aiText?.Trim();
+
+        if (aiTextTrim == null)
+            return "Analiza jest chwilowo niedostępna.";
+
+        await _aiProgressRepository.CreateAsync(new UserAiProgress()
         {
-            return "Czas oczekiwania na analizę został przekroczony.";
-        }
+            UserId = request.UserId,
+            Content = aiTextTrim
+        });
+            
+        return aiTextTrim;
     }
 }

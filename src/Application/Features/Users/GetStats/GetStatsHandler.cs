@@ -11,12 +11,14 @@ internal sealed class GetStatsHandler : IRequestHandler<GetStats, UserStatsDto>
 {
     private readonly IUserAnswerRepository _userAnswerRepository;
     private readonly IExamSessionRepository _examSessionRepository;
+    private readonly IUserAiProgressRepository _aiProgressRepository;
     private readonly IConfiguration _config;
 
-    public GetStatsHandler(IUserAnswerRepository userAnswerRepository, IExamSessionRepository examSessionRepository, IConfiguration config)
+    public GetStatsHandler(IUserAnswerRepository userAnswerRepository, IExamSessionRepository examSessionRepository, IUserAiProgressRepository aiProgressRepository,IConfiguration config)
     {
         _userAnswerRepository = userAnswerRepository;
         _examSessionRepository = examSessionRepository;
+        _aiProgressRepository = aiProgressRepository;
         _config = config;
     }
     
@@ -58,12 +60,15 @@ internal sealed class GetStatsHandler : IRequestHandler<GetStats, UserStatsDto>
         var probOfFailure = dist.CumulativeDistribution(68);
         var passProbability = Math.Round((1 - probOfFailure) * 100);
 
+        var userAiProgressContent = await _aiProgressRepository.GetAiProgress(request.UserId);
+        
         return new UserStatsDto(
             answersStats,
             examStats.AverageScore,
             examStats.ExamTrend,
             passProbability,
-            totalAccuracy
+            totalAccuracy,
+            userAiProgressContent
         );
     }
 }

@@ -21,6 +21,7 @@ public class ExamSessionRepository : GenericRepository<ExamSession>, IExamSessio
         examSession.IsPassed = isPassed;
         examSession.Score = score;
         examSession.FinishedAt = finishedAt;
+        examSession.CorrectAnswersCount = correctAnswerCount;
         _context.ExamSessions.Update(examSession);
         await _context.SaveChangesAsync();
         return isPassed;

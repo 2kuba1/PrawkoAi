@@ -25,6 +25,7 @@ public static class PersistenceService
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IExamSessionQuestionRepository, ExamSessionQuestionRepository>();
         services.AddScoped<IExamSessionRepository, ExamSessionRepository>();
+        services.AddScoped<IUserAiProgressRepository, UserAiProgressRepository>();
 
         services.AddScoped<IAuthService, AuthService>();
         

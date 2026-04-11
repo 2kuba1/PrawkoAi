@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -12,11 +12,11 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AuthContext } from "../_layout";
 import Footer from "../components/footer";
 import api from "../utils/api";
 
 const { width } = Dimensions.get("window");
-const USER_ID = "cdff9236-8577-45a9-a61e-505935a48dc9";
 
 export interface CategoryStat {
   accuracy: number;
@@ -33,6 +33,7 @@ export interface StatisticsResponse {
   examTrend: number;
   passProbability: number;
   totalAccuracy: number;
+  aiProgressAnalysis: string | null;
 }
 
 const categoryMap: Record<string, { name: string; icon: string }> = {
@@ -84,6 +85,8 @@ export default function Stats() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
+  const { user } = useContext(AuthContext);
+
   const [loading, setLoading] = useState(true);
   const [aiLoading, setAiLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -93,8 +96,11 @@ export default function Stats() {
   const fetchData = async () => {
     try {
       const response = await api.get<StatisticsResponse>("/api/user/stats", {
-        params: { userId: USER_ID },
+        params: { userId: user?.id },
       });
+      if (response.data.aiProgressAnalysis) {
+        setAiAnalysis(response.data.aiProgressAnalysis);
+      }
       setStats(response.data);
     } catch (error) {
       console.error("Błąd pobierania statystyk:", error);
@@ -108,7 +114,7 @@ export default function Stats() {
     setAiLoading(true);
     try {
       const response = await api.get<string>("/api/ai/analyzeUserProgress", {
-        params: { userId: USER_ID },
+        params: { userId: user?.id },
       });
       setAiAnalysis(response.data);
     } catch (error) {

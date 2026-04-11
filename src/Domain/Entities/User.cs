@@ -11,4 +11,5 @@ public class User : BaseEntity
     public List<UserAnswer> UserAnswers { get; set; } = new();
     public Role Role { get; set; }
     public List<ExamSession> ExamSessions { get; set; }
+    public List<UserAiProgress> UserAiProgresses { get; set; }
 }
