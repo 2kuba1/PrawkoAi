@@ -31,7 +31,7 @@ public class AuthService : IAuthService
 
         var tokenDescriptor = new SecurityTokenDescriptor()
         {
-            Expires = DateTime.UtcNow.AddMinutes(_configuration.GetValue<int>("Jwt:ExpirationInMinutes")),
+            Expires = DateTime.UtcNow.AddMinutes(_configuration.GetValue<int>("Jwt:JwtExpirationInMinutes")),
             SigningCredentials = credentials,
             Issuer = _configuration["Jwt:Issuer"],
             Audience = _configuration["Jwt:Audience"],

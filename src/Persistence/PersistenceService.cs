@@ -14,8 +14,6 @@ public static class PersistenceService
 {
     public static IServiceCollection AddPersistenceServices(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
-
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserAnswerRepository, UserAnswerRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
@@ -30,8 +28,9 @@ public static class PersistenceService
         services.AddScoped<IAuthService, AuthService>();
         
         services.AddDbContext<AppDbContext>(options =>
-            options.UseMySql(connectionString, 
-                ServerVersion.AutoDetect(connectionString)));
+        {
+            options.UseNpgsql(configuration.GetConnectionString("DatabaseConnectionString"));
+        });
         
         return services;
     }

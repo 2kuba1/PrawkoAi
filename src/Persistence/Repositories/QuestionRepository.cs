@@ -44,28 +44,17 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
 
     public async Task<ExamQuestions> GetExamSimulationQuestions(string category, string? locale)
     {
-        var allIds = await _context.Questions
-            .Where(q => q.Categories.Any(c => c.Name == category))
-            .Select(q => new { q.Id, q.Points, AnsCount = q.Answers.Count })
-            .ToListAsync();
-
-        var rnd = new Random();
-        var standardIds = allIds.Where(x => x.AnsCount == 2).ToList();
-        var specializedIds = allIds.Where(x => x.AnsCount == 3).ToList();
+        var lang = locale?.ToUpper() ?? "PL";
 
         var pickedIds = new List<Guid>();
-        void Pick(List<Guid> target, IEnumerable<Guid> source, int count) =>
-            target.AddRange(source.OrderBy(_ => rnd.Next()).Take(count));
 
-        Pick(pickedIds, standardIds.Where(x => x.Points == 3).Select(x => x.Id), 10);
-        Pick(pickedIds, standardIds.Where(x => x.Points == 2).Select(x => x.Id), 6);
-        Pick(pickedIds, standardIds.Where(x => x.Points == 1).Select(x => x.Id), 4);
+        pickedIds.AddRange(await GetRandomIds(2, 3, 10));
+        pickedIds.AddRange(await GetRandomIds(2, 2, 6));
+        pickedIds.AddRange(await GetRandomIds(2, 1, 4));
 
-        Pick(pickedIds, specializedIds.Where(x => x.Points == 3).Select(x => x.Id), 6);
-        Pick(pickedIds, specializedIds.Where(x => x.Points == 2).Select(x => x.Id), 4);
-        Pick(pickedIds, specializedIds.Where(x => x.Points == 1).Select(x => x.Id), 2);
-
-        var lang = locale?.ToUpper() ?? "PL";
+        pickedIds.AddRange(await GetRandomIds(3, 3, 6));
+        pickedIds.AddRange(await GetRandomIds(3, 2, 4));
+        pickedIds.AddRange(await GetRandomIds(3, 1, 2));
 
         var resultQuestions = await _context.Questions
             .AsNoTracking()
@@ -75,7 +64,7 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
                 (lang == "PL" ? q.ContentPl :
                     lang == "EN" ? q.ContentEn :
                     lang == "DE" ? q.ContentDe :
-                    lang == "UA" ? (string.IsNullOrEmpty(q.ContentUa) ? q.ContentPl : q.ContentUa) : 
+                    lang == "UA" ? (string.IsNullOrEmpty(q.ContentUa) ? q.ContentPl : q.ContentUa) :
                     q.ContentEn)!,
                 q.QuestionNumber,
                 q.CategoryType,
@@ -87,7 +76,7 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
                     (lang == "PL" ? a.ContentPl :
                         lang == "EN" ? a.ContentEn :
                         lang == "DE" ? a.ContentDe :
-                        lang == "UA" ? (string.IsNullOrEmpty(a.ContentUa) ? a.ContentPl : a.ContentUa) : 
+                        lang == "UA" ? (string.IsNullOrEmpty(a.ContentUa) ? a.ContentPl : a.ContentUa) :
                         a.ContentEn)!,
                     a.CreatedAt
                 )).ToList()
@@ -95,31 +84,46 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
             .ToListAsync();
 
         return new ExamQuestions(
-            Standard: resultQuestions.Where(q => q.Answers.Count == 2).OrderBy(_ => rnd.Next()).ToList(),
-            Specialized: resultQuestions.Where(q => q.Answers.Count == 3).OrderBy(_ => rnd.Next()).ToList()
+            Standard: resultQuestions.Where(q => q.Answers.Count == 2).ToList(),
+            Specialized: resultQuestions.Where(q => q.Answers.Count == 3).ToList()
         );
+
+        async Task<List<Guid>> GetRandomIds(int ansCount, int points, int take)
+        {
+            return await _context.Questions
+                .Where(q => q.Categories.Any(c => c.Name == category)
+                            && q.Answers.Count == ansCount
+                            && q.Points == points)
+                .OrderBy(q => Guid.NewGuid())
+                .Select(q => q.Id)
+                .Take(take)
+                .ToListAsync();
+        }
     }
 
     public Task<GetQuestionAdditionalDataDto?> GetQuestionAdditionalData(Guid questionId, string locale)
     {
-        var lang =  locale.ToUpper();
+        var lang = locale.ToUpper();
 
         var mediaAndStaticResponse = _context.Questions.Where(q => q.Id == questionId)
             .Select(q => new GetQuestionAdditionalDataDto
             (
                 q.MediaUrl,
-                lang == "PL" ? q.StaticResponsePl : lang == "EN"  ? q.StaticResponseEn : lang == "DE" ? q.StaticResponseDe :
-                    lang == "UA" ? (string.IsNullOrEmpty(q.StaticResponseUa) ?  q.StaticResponsePl : q.StaticResponseUa) : q.StaticResponseEn,
+                lang == "PL" ? q.StaticResponsePl :
+                lang == "EN" ? q.StaticResponseEn :
+                lang == "DE" ? q.StaticResponseDe :
+                lang == "UA" ? (string.IsNullOrEmpty(q.StaticResponseUa) ? q.StaticResponsePl : q.StaticResponseUa) :
+                q.StaticResponseEn,
                 q.CorrectAnswer!.Id
             ))
             .FirstOrDefaultAsync();
-        
+
         return mediaAndStaticResponse;
     }
 
     public async Task<AiRequiredDataDto?> GetRequiredAiData(Guid questionId, string locale)
     {
-        var  lang = locale.ToUpper();
+        var lang = locale.ToUpper();
 
         var result = await _context.Questions.Where(q => q.Id == questionId)
             .Select(q => new AiRequiredDataDto(
@@ -135,7 +139,7 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
                 lang == "UA" ? (string.IsNullOrEmpty(q.ContentUa) ? q.ContentPl : q.ContentUa) :
                 q.ContentEn
             )).FirstOrDefaultAsync();
-        
+
         return result;
     }
 }

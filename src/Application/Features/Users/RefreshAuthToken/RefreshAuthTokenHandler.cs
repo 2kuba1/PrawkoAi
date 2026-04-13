@@ -3,6 +3,7 @@ using Application.Contracts.Services;
 using Application.Models;
 using Domain.Exceptions;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.Users.RefreshAuthToken;
 
@@ -10,11 +11,13 @@ internal sealed class RefreshAuthTokenHandler : IRequestHandler<RefreshAuthToken
 {
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IAuthService _authService;
+    private readonly IConfiguration _configuration;
 
-    public RefreshAuthTokenHandler(IRefreshTokenRepository refreshTokenRepository, IAuthService authService)
+    public RefreshAuthTokenHandler(IRefreshTokenRepository refreshTokenRepository, IAuthService authService, IConfiguration configuration)
     {
         _refreshTokenRepository = refreshTokenRepository;
         _authService = authService;
+        _configuration = configuration;
     }
     
     public async Task<TokenResponse> Handle(RefreshAuthToken request, CancellationToken cancellationToken)
@@ -27,7 +30,7 @@ internal sealed class RefreshAuthTokenHandler : IRequestHandler<RefreshAuthToken
         var accessToken = _authService.CreateToken(refreshToken.User);
 
         refreshToken.Token = _authService.GenerateRefreshToken();
-        refreshToken.ExpiresOnUtc = DateTime.UtcNow.AddDays(30);
+        refreshToken.ExpiresOnUtc = DateTime.UtcNow.AddDays(_configuration.GetValue<int>("Jwt:RefreshTokenExpirationTimeInDays"));
 
         await _refreshTokenRepository.UpdateAsync(refreshToken);
         
