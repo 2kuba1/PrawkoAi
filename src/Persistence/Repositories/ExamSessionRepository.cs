@@ -15,7 +15,7 @@ public class ExamSessionRepository : GenericRepository<ExamSession>, IExamSessio
         _context = context;
     }
 
-    public async Task<bool> CheckIfPassedAndSaveSession(ExamSession examSession, DateTime finishedAt,int score, int correctAnswerCount)
+    public bool CheckIfPassedAndSaveSession(ExamSession examSession, DateTime finishedAt,int score, int correctAnswerCount)
     {
         bool isPassed = score >= 68;
         examSession.IsPassed = isPassed;
@@ -23,7 +23,6 @@ public class ExamSessionRepository : GenericRepository<ExamSession>, IExamSessio
         examSession.FinishedAt = finishedAt;
         examSession.CorrectAnswersCount = correctAnswerCount;
         _context.ExamSessions.Update(examSession);
-        await _context.SaveChangesAsync();
         return isPassed;
     }
 

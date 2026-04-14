@@ -58,8 +58,11 @@ export default function ExamSimulationScreen() {
     "standard",
   );
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
-  const [pendingRequests, setPendingRequests] = useState<Promise<any>[]>([]);
   const [isFinishing, setIsFinishing] = useState(false);
+
+  const [userAnswers, setUserAnswers] = useState<
+    Record<string, { selectedAnswerId: string | null; answeredAt: string }>
+  >({});
 
   const [timeLeft, setTimeLeft] = useState(20);
   const [videoStatus, setVideoStatus] = useState<
@@ -168,11 +171,18 @@ export default function ExamSimulationScreen() {
   };
 
   const handleNext = async () => {
-    const nextAnswerId = selectedAnswerId;
-    setSelectedAnswerId(null);
+    if (!currentQuestion) return;
 
-    const request = submitAnswer(nextAnswerId);
-    setPendingRequests((prev) => [...prev, request]);
+    const updatedAnswers = {
+      ...userAnswers,
+      [currentQuestion.id]: {
+        selectedAnswerId: selectedAnswerId,
+        answeredAt: new Date().toISOString(),
+      },
+    };
+
+    setUserAnswers(updatedAnswers);
+    setSelectedAnswerId(null);
 
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(currentIndex + 1);
@@ -180,43 +190,51 @@ export default function ExamSimulationScreen() {
       setCurrentScope("specialized");
       setCurrentIndex(0);
     } else {
-      await handleFinishExam();
+      await handleFinishExam(updatedAnswers);
     }
   };
 
-  const submitAnswer = async (answerId: string | null) => {
-    if (!examData?.examSession.id || !currentQuestion?.id || !user?.id) return;
-
-    try {
-      return await api.post("/api/exam/answer", {
-        examSessionId: examData.examSession.id,
-        questionId: currentQuestion.id,
-        selectedAnswerId: answerId,
-        userId: user.id,
-      });
-    } catch (e) {
-      console.error("Błąd wysyłania odpowiedzi:", e);
-    }
-  };
-
-  const handleFinishExam = async () => {
-    if (isFinishing) return;
+  const handleFinishExam = async (
+    finalAnswers?: Record<
+      string,
+      { selectedAnswerId: string | null; answeredAt: string }
+    >,
+  ) => {
+    if (isFinishing || !examData || !user?.id) return;
     setIsFinishing(true);
 
     try {
-      await Promise.all(pendingRequests);
+      const language = (await AsyncStorage.getItem("user-language")) ?? "EN";
+
+      const answersMap = finalAnswers || {
+        ...userAnswers,
+        [currentQuestion.id]: {
+          selectedAnswerId: selectedAnswerId,
+          answeredAt: new Date().toISOString(),
+        },
+      };
+
+      const formattedAnswers = Object.entries(answersMap).map(
+        ([qId, data]) => ({
+          questionId: qId,
+          selectedAnswerId: data.selectedAnswerId,
+          answeredAt: data.answeredAt,
+        }),
+      );
+
       await api.put("/api/exam/finish", {
-        examSessionId: examData?.examSession.id,
-        userId: user?.id,
-        locale: await AsyncStorage.getItem("user-language"),
+        userId: user.id,
+        examSessionId: examData.examSession.id,
+        locale: language,
+        answers: formattedAnswers,
       });
-      router.replace(`/exam/examResult/${examData?.examSession.id}`);
+
+      router.replace(`/exam/examResult/${examData.examSession.id}`);
     } catch (e) {
       console.error("Błąd podczas finalizacji:", e);
       setIsFinishing(false);
     }
   };
-
   const sortedAnswers = useMemo(() => {
     if (!currentQuestion?.answers) return [];
     const answers = [...currentQuestion.answers];
@@ -294,7 +312,7 @@ export default function ExamSimulationScreen() {
           </View>
 
           <TouchableOpacity
-            onPress={handleFinishExam}
+            onPress={() => handleFinishExam()}
             className="bg-red-500 px-4 py-3 rounded-lg"
           >
             <Text className="text-white text-xs font-bold">

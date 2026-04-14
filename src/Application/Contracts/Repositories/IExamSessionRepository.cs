@@ -5,7 +5,7 @@ namespace Application.Contracts.Repositories;
 
 public interface IExamSessionRepository : IGenericRepository<ExamSession>
 {
-    Task<bool> CheckIfPassedAndSaveSession(ExamSession examSession, DateTime finishedAt, int score, int correctAnswerCount);
+    bool CheckIfPassedAndSaveSession(ExamSession examSession, DateTime finishedAt, int score, int correctAnswerCount);
     Task<List<ExamSessionHistory>> GetUserExamsSessionHistory(Guid userId);
     Task<List<int?>> GetLastExamsScores(Guid userId, int examsCount);
 }

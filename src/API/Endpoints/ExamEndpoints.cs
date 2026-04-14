@@ -3,6 +3,7 @@ using Application.Features.Exam.FinishExam;
 using Application.Features.Exam.GetUserExamSessionResults;
 using Application.Features.Exam.GetUserExamsSessionHistory;
 using Application.Features.Exam.StartExam;
+using Application.Models.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,7 +44,7 @@ public static class ExamEndpoints
     private static async Task<IResult> FinishExam([FromBody] FinishExamSession finishExamSession,
         [FromServices] IMediator mediator)
     {
-        var results = await mediator.Send(new FinishExam(finishExamSession.UserId, finishExamSession.ExamSessionId, finishExamSession.Locale));
+        var results = await mediator.Send(new FinishExam(finishExamSession.UserId, finishExamSession.ExamSessionId, finishExamSession.Locale, finishExamSession.Answers));
         return Results.Ok(results);
     }
 
@@ -63,11 +64,13 @@ public static class ExamEndpoints
     private record FinishExamSession(
         Guid UserId,
         Guid ExamSessionId,
-        string Locale);
+        string Locale,
+        List<UserAnswerSubmissionDto> Answers);
 
     private record AnswerToQuestionRequest(
         Guid QuestionId,
         Guid? SelectedAnswerId,
         Guid UserId,
         Guid ExamSessionId);
+    
 }

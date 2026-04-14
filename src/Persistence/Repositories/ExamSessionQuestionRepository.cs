@@ -162,4 +162,27 @@ public class ExamSessionQuestionRepository : GenericRepository<ExamSessionQuesti
             Score = (int)totalScore,
         };
     }
+    
+    public async Task BulkUpdateAnswersAsync(Guid sessionId, List<UserAnswerSubmissionDto> answers)
+    {
+        var sessionData = await _context.ExamSessionQuestions
+            .Where(x => x.ExamSessionId == sessionId)
+            .Join(_context.Questions, 
+                esq => esq.QuestionId, 
+                q => q.Id, 
+                (esq, q) => new { esq, q.CorrectAnswerId })
+            .ToListAsync();
+
+        foreach (var item in sessionData)
+        {
+            var submission = answers.FirstOrDefault(a => a.QuestionId == item.esq.QuestionId);
+
+            if (submission == null) continue;
+            
+            item.esq.IsCorrect = submission.SelectedAnswerId == item.CorrectAnswerId;
+
+            item.esq.SelectedAnswerId = submission.SelectedAnswerId;
+            item.esq.AnsweredAt = submission.AnsweredAt;
+        }
+    }
 }

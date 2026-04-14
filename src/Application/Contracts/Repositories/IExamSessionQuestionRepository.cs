@@ -11,4 +11,5 @@ public interface IExamSessionQuestionRepository : IGenericRepository<ExamSession
     Task<ExamSessionQuestion?> GetByQuestionAndSessionIdAsync(Guid questionId, Guid examSessionId);
     Task<ExamResultsDto> GetExamResultsAsync(Guid examSessionId, string locale);
     Task<ScoreAndCorrectAnswerCount> GetScoreAndCorrectAnswerCount(Guid sessionId);
+    Task BulkUpdateAnswersAsync(Guid examSessionId, List<UserAnswerSubmissionDto> answers);
 }

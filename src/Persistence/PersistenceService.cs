@@ -26,7 +26,8 @@ public static class PersistenceService
         services.AddScoped<IUserAiProgressRepository, UserAiProgressRepository>();
 
         services.AddScoped<IAuthService, AuthService>();
-        
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+            
         services.AddDbContext<AppDbContext>(options =>
         {
             options.UseNpgsql(configuration.GetConnectionString("DatabaseConnectionString"));
