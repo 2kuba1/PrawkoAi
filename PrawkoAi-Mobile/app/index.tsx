@@ -16,7 +16,14 @@ export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const { signIn: completeSignIn } = useContext(AuthContext);
 
-  const deviceLanguage = getLocales()[0].languageCode;
+  const getNormalizedDeviceLanguage = () => {
+    const locale = getLocales()[0];
+    if (!locale) return "EN";
+    const code = locale.languageCode || locale.languageTag.split("-")[0];
+    return code.toUpperCase();
+  };
+
+  const deviceLanguage = getNormalizedDeviceLanguage();
 
   const languages = [
     { code: "PL", flag: "🇵🇱", label: "Polski" },
