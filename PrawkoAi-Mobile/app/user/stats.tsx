@@ -4,6 +4,7 @@ import React, { useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
+  Platform,
   RefreshControl,
   ScrollView,
   StatusBar,
@@ -15,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContext } from "../_layout";
 import Footer from "../components/footer";
 import api from "../utils/api";
+import categoryMap from "../utils/categoryMap";
 
 const { width } = Dimensions.get("window");
 
@@ -36,55 +38,9 @@ export interface StatisticsResponse {
   aiProgressAnalysis: string | null;
 }
 
-const categoryMap: Record<string, { name: string; icon: string }> = {
-  SafetyFirstAidAndDocuments: {
-    name: "Bezpieczeństwo i Dokumenty",
-    icon: "medical-services",
-  },
-  OvertakingAndPassing: {
-    name: "Wyprzedzanie i Mijanie",
-    icon: "compare-arrows",
-  },
-  SocialBehaviourAndSecuring: {
-    name: "Zachowanie i Zabezpieczenie",
-    icon: "groups",
-  },
-  SpeedAndBrakingDistances: { name: "Prędkość i Hamowanie", icon: "speed" },
-  EmergencyAndFitnessToDrive: {
-    name: "Sytuacje Awaryjne i Zdrowie",
-    icon: "psychology",
-  },
-  ManoeuvresAndPositioning: {
-    name: "Manewry i Pozycjonowanie",
-    icon: "directions-car",
-  },
-  MandatoryAndWarningSigns: {
-    name: "Znaki Nakazu i Ostrzegawcze",
-    icon: "warning",
-  },
-  SignalizedIntersectionsAndPedestrians: {
-    name: "Sygnalizacja i Pieszy",
-    icon: "traffic",
-  },
-  UncontrolledAndPriorityIntersections: {
-    name: "Skrzyżowania i Pierwszeństwo",
-    icon: "alt-route",
-  },
-  RailCrossingsAndPublicTransport: {
-    name: "Przejazdy Kolejowe i Komunikacja",
-    icon: "train",
-  },
-  VehicleLightsAndSignals: { name: "Światła i Sygnały", icon: "lightbulb" },
-  InformationAndRoadMarkings: {
-    name: "Informacja i Znaki Poziome",
-    icon: "map",
-  },
-};
-
 export default function Stats() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-
   const { user } = useContext(AuthContext);
 
   const [loading, setLoading] = useState(true);
@@ -92,6 +48,13 @@ export default function Stats() {
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState<StatisticsResponse | null>(null);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
+
+  const paddingTop =
+    Platform.OS === "android"
+      ? insets.top > 0
+        ? insets.top
+        : StatusBar.currentHeight || 24
+      : insets.top;
 
   const fetchData = async () => {
     try {
@@ -152,31 +115,54 @@ export default function Stats() {
 
   return (
     <View className="flex-1 bg-[#f6f6f8] dark:bg-[#111621]">
-      <StatusBar barStyle="dark-content" />
+      <StatusBar
+        barStyle="dark-content"
+        translucent
+        backgroundColor="transparent"
+      />
 
       <View
-        style={{ paddingTop: insets.top }}
-        className="flex-row items-center p-4 bg-white/80 dark:bg-slate-900/80 border-b border-blue-900/10"
+        style={{ paddingTop }}
+        className="bg-white/95 dark:bg-slate-900/95 border-b border-blue-900/10 shadow-sm z-50"
       >
-        <TouchableOpacity
-          className="p-2 rounded-full"
-          onPress={() =>
-            router.canGoBack() ? router.back() : router.replace("/dashboard")
-          }
+        <View
+          style={{
+            height: 56,
+            flexDirection: "row",
+            alignItems: "center",
+            paddingHorizontal: 12,
+          }}
         >
-          <MaterialCommunityIcons name="arrow-left" size={24} color="#1544b2" />
-        </TouchableOpacity>
-        <Text className="text-xl font-bold ml-2 flex-1 text-slate-900 dark:text-white">
-          Twoje Statystyki
-        </Text>
+          <TouchableOpacity
+            className="p-2 rounded-full"
+            onPress={() =>
+              router.canGoBack() ? router.back() : router.replace("/dashboard")
+            }
+          >
+            <MaterialCommunityIcons
+              name="arrow-left"
+              size={24}
+              color="#1544b2"
+            />
+          </TouchableOpacity>
+          <Text className="text-xl font-bold ml-2 flex-1 text-slate-900 dark:text-white">
+            Twoje Statystyki
+          </Text>
+        </View>
       </View>
 
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+        contentContainerStyle={{
+          paddingBottom: Platform.OS === "ios" ? 120 : 40,
+        }}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#1544b2"
+          />
         }
       >
         <View className="m-4 p-6 rounded-3xl bg-[#1544b2] shadow-xl overflow-hidden relative">
@@ -223,7 +209,7 @@ export default function Stats() {
                 Status trendu:
               </Text>
               <Text className="text-white text-xs italic font-medium">
-                {(stats?.examTrend ?? 0) == 0
+                {(stats?.examTrend ?? 0) === 0
                   ? "Twój wynik poprawia się!"
                   : "Musisz poświęcić więcej czasu na naukę."}
               </Text>
@@ -240,11 +226,11 @@ export default function Stats() {
           />
           <MetricCard
             title="Trend"
-            value={(stats?.examTrend ?? 0) == 0 ? "Wzrostowy" : "Spadkowy"}
+            value={(stats?.examTrend ?? 0) === 0 ? "Wzrostowy" : "Spadkowy"}
             icon={
-              (stats?.examTrend ?? 0) == 0 ? "trending-up" : "trending-down"
+              (stats?.examTrend ?? 0) === 0 ? "trending-up" : "trending-down"
             }
-            color={(stats?.examTrend ?? 0) == 0 ? "#22c55e" : "#ef4444"}
+            color={(stats?.examTrend ?? 0) === 0 ? "#22c55e" : "#ef4444"}
           />
           <MetricCard
             title="Dokładność"
@@ -383,7 +369,7 @@ function MetricCard({
         {icon && <MaterialCommunityIcons name={icon} size={20} color={color} />}
       </View>
       {progress !== undefined && (
-        <View className="mt-2 h-1 bg-slate-100 rounded-full overflow-hidden">
+        <View className="mt-2 h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
           <View
             style={{ width: `${progress * 100}%`, backgroundColor: color }}
             className="h-full"

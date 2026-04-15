@@ -2,15 +2,35 @@ import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { usePathname, useRouter } from "expo-router";
 import { MotiView } from "moti";
 import React from "react";
-import { Pressable, Text, View } from "react-native";
+import { Platform, Pressable, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import i18n from "../utils/translations";
 
 const Footer = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const insets = useSafeAreaInsets();
 
   const ACTIVE_COLOR = "#1544b2";
   const INACTIVE_COLOR = "#94a3b8";
+
+  const footerPlatformStyles = Platform.select({
+    ios: {
+      position: "absolute" as const,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      paddingBottom: insets.bottom > 0 ? insets.bottom : 20,
+    },
+    android: {
+      position: "relative" as const,
+      paddingBottom: 16,
+    },
+    default: {
+      position: "relative" as const,
+      paddingBottom: 20,
+    },
+  });
 
   const navItems = [
     {
@@ -32,7 +52,7 @@ const Footer = () => {
       label: i18n.t("navigation.nav_learn"),
       icon: "controller",
       family: "MaterialCommunityIcons",
-      path: "/learn",
+      path: "/learning/studyTopics",
     },
     {
       id: "school",
@@ -51,7 +71,10 @@ const Footer = () => {
   ];
 
   return (
-    <View className="absolute bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 border-t border-slate-100 dark:border-slate-800 px-4 pb-8 pt-2 flex-row justify-around items-center shadow-lg">
+    <View
+      style={[footerPlatformStyles, { paddingTop: 12 }]}
+      className="bg-white/95 dark:bg-slate-900/95 border-t border-slate-100 dark:border-slate-800 px-4 flex-row justify-around items-center shadow-[0_-4px_10px_rgba(0,0,0,0.05)]"
+    >
       {navItems.map((item) => {
         const active = pathname === item.path;
         const IconComponent =
@@ -67,7 +90,7 @@ const Footer = () => {
                 router.replace(item.path as any);
               }
             }}
-            className="items-center justify-center py-2 flex-1"
+            className="items-center justify-center flex-1 py-1"
           >
             <MotiView
               animate={{
@@ -81,7 +104,7 @@ const Footer = () => {
             >
               <IconComponent
                 name={item.icon as any}
-                size={26}
+                size={24}
                 color={active ? ACTIVE_COLOR : INACTIVE_COLOR}
               />
             </MotiView>
@@ -92,7 +115,6 @@ const Footer = () => {
                 fontWeight: "700",
                 marginTop: 4,
                 color: active ? ACTIVE_COLOR : INACTIVE_COLOR,
-                opacity: active ? 1 : 0.7,
               }}
             >
               {item.label}

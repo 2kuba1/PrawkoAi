@@ -2,6 +2,7 @@ import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
 import {
+  Platform,
   ScrollView,
   StatusBar,
   Text,
@@ -26,9 +27,16 @@ interface ExamHistory {
 export default function ExamHistoryScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { token, user } = useContext(AuthContext);
-
+  const { user } = useContext(AuthContext);
   const [exams, setExams] = useState<ExamHistory[] | null>();
+
+  const paddingTop =
+    Platform.OS === "android"
+      ? insets.top > 0
+        ? insets.top
+        : StatusBar.currentHeight || 24
+      : insets.top;
+
   const averageScore =
     exams && exams.length > 0
       ? Math.round(
@@ -43,9 +51,7 @@ export default function ExamHistoryScreen() {
         const response = await api.get<ExamHistory[]>("/api/exam/userHistory", {
           params: { userId: user.id },
         });
-
         const data = response.data;
-
         setExams(
           data.sort(
             (a, b) =>
@@ -57,40 +63,62 @@ export default function ExamHistoryScreen() {
         console.error("Error fetching exam history:", error);
       }
     };
-
     getExams();
   }, [user?.id]);
+
   return (
     <View className="flex-1 bg-[#f6f6f8] dark:bg-[#111621]">
-      <StatusBar barStyle="dark-content" />
+      <StatusBar
+        barStyle="dark-content"
+        translucent
+        backgroundColor="transparent"
+      />
 
-      {/* Header */}
       <View
-        style={{ paddingTop: insets.top }}
-        className="flex-row items-center p-4 bg-[#f6f6f8]/80 dark:bg-[#111621]/80 border-b border-blue-900/10"
+        className="bg-white/95 dark:bg-[#1a1f2e] border-b border-blue-900/10 shadow-sm z-50"
+        style={{ paddingTop }}
       >
-        <TouchableOpacity
-          className="p-2 rounded-full"
-          onPress={() =>
-            router.canGoBack() ? router.back() : router.replace("/dashboard")
-          }
+        <View
+          style={{
+            height: 56,
+            flexDirection: "row",
+            alignItems: "center",
+            paddingHorizontal: 12,
+          }}
         >
-          <MaterialCommunityIcons name="arrow-left" size={24} color="#1544b2" />
-        </TouchableOpacity>
-        <Text className="text-xl font-bold ml-2 flex-1 text-slate-900 dark:text-white">
-          Historia Egzaminów
-        </Text>
-        <TouchableOpacity className="p-2">
-          <MaterialCommunityIcons
-            name="filter-variant"
-            size={24}
-            color="#1544b2"
-          />
-        </TouchableOpacity>
+          <TouchableOpacity
+            className="p-2"
+            onPress={() =>
+              router.canGoBack() ? router.back() : router.replace("/dashboard")
+            }
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <MaterialCommunityIcons
+              name="arrow-left"
+              size={24}
+              color="#1544b2"
+            />
+          </TouchableOpacity>
+          <Text className="text-xl font-bold ml-2 flex-1 text-black">
+            Historia Egzaminów
+          </Text>
+          <TouchableOpacity className="p-2">
+            <MaterialCommunityIcons
+              name="filter-variant"
+              size={24}
+              color="#1544b2"
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Stats Overview */}
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: Platform.OS === "ios" ? 100 : 24,
+        }}
+      >
         <View className="p-4 flex-row gap-4">
           <View className="flex-1 bg-white dark:bg-slate-800 p-4 rounded-xl border border-blue-900/10 shadow-sm">
             <Text className="text-sm text-slate-500 dark:text-slate-400 font-medium">
@@ -127,7 +155,7 @@ export default function ExamHistoryScreen() {
         </View>
 
         {/* Exam List */}
-        <View className="px-4 space-y-3 pb-24">
+        <View className="px-4 space-y-3">
           {exams?.map((exam) => (
             <TouchableOpacity
               key={exam.examSessionId}
@@ -162,7 +190,7 @@ export default function ExamHistoryScreen() {
                       })}
                     </Text>
                     <Text className="text-sm text-slate-500">
-                      Wynik:
+                      Wynik:{" "}
                       <Text className="font-semibold text-slate-700 dark:text-slate-300">
                         {exam.score} pkt
                       </Text>

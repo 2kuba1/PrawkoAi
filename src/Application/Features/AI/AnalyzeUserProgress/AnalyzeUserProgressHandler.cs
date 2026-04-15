@@ -30,7 +30,7 @@ internal sealed class AnalyzeUserProgressHandler : IRequestHandler<AnalyzeUserPr
     
     public async Task<string> Handle(AnalyzeUserProgress request, CancellationToken cancellationToken)
     {
-        var answersCount = _config.GetValue<int>("Ai:AnswersCount");
+        var answersCount = _config.GetValue<int>("AI:AnswersCount");
         var lastAnswers = await _userAnswerRepository.GetUserLastAnswers(request.UserId, answersCount);
         var lastExamsScores = await _examSessionRepository.GetLastExamsScores(request.UserId, 10);
 

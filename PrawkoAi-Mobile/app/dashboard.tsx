@@ -1,17 +1,14 @@
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-
 import { useRouter } from "expo-router";
-
 import React, { useContext } from "react";
-
 import {
+  Platform,
   ScrollView,
   StatusBar,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContext } from "./_layout";
 import Footer from "./components/footer";
@@ -19,10 +16,15 @@ import i18n from "./utils/translations";
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
-
   const { signOut } = useContext(AuthContext);
-
   const router = useRouter();
+
+  const paddingTop =
+    Platform.OS === "android"
+      ? insets.top > 0
+        ? insets.top
+        : StatusBar.currentHeight || 24
+      : insets.top;
 
   const startExam = () => {
     router.push("/exam/examRules");
@@ -30,11 +32,15 @@ export default function DashboardScreen() {
 
   return (
     <View className="flex-1 bg-[#f6f6f8] dark:bg-[#111621]">
-      <StatusBar barStyle="default" />
+      <StatusBar
+        barStyle="dark-content"
+        translucent
+        backgroundColor="transparent"
+      />
 
       <View
-        style={{ paddingTop: insets.top }}
-        className="px-4 pb-4 flex-row items-center justify-between bg-[#f6f6f8]/80 dark:bg-[#111621]/80 border-b border-[#1544b2]/10"
+        style={{ paddingTop }}
+        className="px-4 pb-4 flex-row items-center justify-between bg-white/95 dark:bg-[#1a1f2e] border-b border-[#1544b2]/10 shadow-sm z-50"
       >
         <View className="flex-row items-center gap-3">
           <View className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 items-center justify-center border border-[#1544b2]/10 shadow-sm">
@@ -44,13 +50,13 @@ export default function DashboardScreen() {
             <Text className="text-lg font-bold text-slate-900 dark:text-white leading-none">
               PrawkoAi
             </Text>
-            <Text className="text-[10px] text-[#1544b2] font-bold uppercase tracking-wider">
+            <Text className="text-[10px] text-[#1544b2] font-bold uppercase tracking-wider mt-1">
               {i18n.t("dashboard.premium_account")}
             </Text>
           </View>
         </View>
 
-        <TouchableOpacity className="p-2 rounded-full">
+        <TouchableOpacity className="p-2 rounded-full active:bg-blue-50 dark:active:bg-slate-700">
           <MaterialIcons name="notifications-none" size={26} color="#1544b2" />
         </TouchableOpacity>
       </View>
@@ -58,7 +64,9 @@ export default function DashboardScreen() {
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 140 }}
+        contentContainerStyle={{
+          paddingBottom: Platform.OS === "ios" ? 110 : 30,
+        }}
       >
         <View className="p-4">
           <View className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-[#1544b2]/5 shadow-sm">
@@ -108,7 +116,11 @@ export default function DashboardScreen() {
           <Text className="text-slate-800 dark:text-slate-200 font-bold mb-3 px-1">
             {i18n.t("dashboard.main_menu")}
           </Text>
-          <TouchableOpacity className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-[#1544b2]/5 shadow-sm mb-3 flex-row items-center justify-between">
+
+          <TouchableOpacity
+            className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-[#1544b2]/5 shadow-sm mb-3 flex-row items-center justify-between"
+            onPress={() => router.push("/learning/studyTopics")}
+          >
             <View className="flex-row items-center gap-4">
               <View className="w-12 h-12 rounded-lg bg-blue-50 dark:bg-blue-900/20 items-center justify-center">
                 <MaterialIcons name="local-library" size={26} color="#1544b2" />
@@ -130,7 +142,7 @@ export default function DashboardScreen() {
             className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-[#1544b2]/5 shadow-sm mb-3 flex-row items-center justify-between"
           >
             <View className="flex-row items-center gap-4">
-              <View className="w-12 h-12 rounded-lg bg-green-50 dark:bg-green-900/20 items-center justify-center">
+              <View className="w-12 h-12 rounded-lg bg-orange-50 dark:bg-orange-900/20 items-center justify-center">
                 <MaterialIcons
                   name="assignment-turned-in"
                   size={26}
@@ -177,7 +189,7 @@ export default function DashboardScreen() {
 
         <TouchableOpacity
           onPress={signOut}
-          className="mt-6 mx-4 p-4 rounded-xl border border-red-100 dark:border-red-900/20 items-center"
+          className="mt-6 mx-4 p-4 rounded-xl border border-red-100 dark:border-red-900/20 items-center active:bg-red-50 dark:active:bg-red-900/10"
         >
           <Text className="text-red-600 font-bold">
             {i18n.t("dashboard.logout")}
