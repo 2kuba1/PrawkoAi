@@ -93,5 +93,6 @@ app.MapAnswerEndpoints();
 app.MapExamEndpoints();
 app.MapAiEndpoints();
 app.MapUserEndpoints();
+app.MapLearnEndpoints();
 
 app.Run();

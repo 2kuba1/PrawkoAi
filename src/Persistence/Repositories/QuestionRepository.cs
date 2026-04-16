@@ -142,4 +142,40 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
 
         return result;
     }
+
+    public async Task<List<GetStudyTopicsResponeDto>> GetUserLearningProgressAndTopicsCount(Guid userId, string category)
+    {
+        var categoriesTags = await _context.Questions
+            .AsNoTracking()
+            .Where(q => q.Categories.Any(c => c.Name == category))
+            .Select(q => q.CategoryTag)
+            .Distinct()
+            .ToListAsync();
+
+        var allQuestionsCounts = await _context.Questions
+            .AsNoTracking()
+            .Where(q => q.Categories.Any(c => c.Name == category))
+            .GroupBy(q => q.CategoryTag)
+            .Select(g => new { Tag = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.Tag!, x => x.Count);
+
+        var userProgressCounts = await _context.UserAnswers
+            .AsNoTracking()
+            .Where(u => u.UserId == userId && u.Question!.Categories.Any(c => c.Name == category))
+            .Select(u => new { u.QuestionId, u.Question!.CategoryTag })
+            .Distinct() 
+            .GroupBy(x => x.CategoryTag)
+            .Select(g => new { Tag = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.Tag!, x => x.Count);
+
+        var studyTopicsResponse = categoriesTags
+            .Where(tag => tag != null)
+            .Select(tag => new GetStudyTopicsResponeDto(
+                tag!,
+                allQuestionsCounts.GetValueOrDefault(tag!, 0),
+                userProgressCounts.GetValueOrDefault(tag!, 0)
+            )).ToList();
+
+        return studyTopicsResponse;
+    }
 }

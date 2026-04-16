@@ -12,4 +12,5 @@ public interface IQuestionRepository : IGenericRepository<Question>
     Task<ExamQuestions> GetExamSimulationQuestions(string category, string? locale);
     Task<GetQuestionAdditionalDataDto?> GetQuestionAdditionalData(Guid questionId, string locale);
     Task<AiRequiredDataDto?> GetRequiredAiData(Guid questionId, string locale);
+    Task<List<GetStudyTopicsResponeDto>> GetUserLearningProgressAndTopicsCount(Guid userId, string category);
 }

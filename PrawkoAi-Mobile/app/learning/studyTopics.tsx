@@ -1,8 +1,10 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Platform,
+  RefreshControl,
   ScrollView,
   StatusBar,
   Text,
@@ -11,13 +13,16 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AuthContext } from "../_layout";
 import Footer from "../components/footer";
+import api from "../utils/api";
 import categoryMap from "../utils/categoryMap";
 
-const userProgress = [
-  { id: "MandatoryAndWarningSigns", completed: 7, total: 45 },
-  { id: "UncontrolledAndPriorityIntersections", completed: 15, total: 45 },
-];
+export interface StudyTopics {
+  categoryTag: string;
+  questionsCount: number;
+  completedQuestions: number;
+}
 
 const sections = [
   {
@@ -56,6 +61,8 @@ export default function StudyTopicsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
+  const { user, token } = useContext(AuthContext);
+
   const paddingTop =
     Platform.OS === "android"
       ? insets.top > 0
@@ -63,8 +70,53 @@ export default function StudyTopicsScreen() {
         : StatusBar.currentHeight || 24
       : insets.top;
 
+  const [userProgress, setUserProgress] = React.useState<StudyTopics[] | null>(
+    null,
+  );
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
   const getProgress = (id: string) =>
-    userProgress.find((p) => p.id === id) || { completed: 0, total: 45 };
+    userProgress?.find((p) => p.categoryTag === id) || {
+      CategoryTag: id,
+      questionsCount: 0,
+      completedQuestions: 0,
+    };
+
+  const fetchProgress = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get("/api/learn/getStudyTopics", {
+        params: {
+          userId: user?.id,
+          category: "B",
+        },
+      });
+      setUserProgress(response.data);
+    } catch (e) {
+      console.error("Błąd podczas pobierania postępu użytkownika:", e);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchProgress();
+  };
+
+  useEffect(() => {
+    fetchProgress();
+  }, []);
+
+  if (loading && !refreshing) {
+    return (
+      <View className="flex-1 justify-center items-center bg-[#f6f6f8] dark:bg-[#111621]">
+        <ActivityIndicator size="large" color="#1544b2" />
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-[#f6f6f8] dark:bg-[#111621]">
@@ -87,7 +139,9 @@ export default function StudyTopicsScreen() {
           }}
         >
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={() =>
+              router.canGoBack() ? router.back() : router.replace("/dashboard")
+            }
             className="p-2"
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
@@ -107,6 +161,13 @@ export default function StudyTopicsScreen() {
           paddingBottom: Platform.OS === "ios" ? 100 : 20,
         }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#1544b2"
+          />
+        }
       >
         <View className="mb-6 flex-row items-center bg-white dark:bg-slate-800 rounded-2xl px-4 shadow-sm h-14">
           <MaterialIcons name="search" size={20} color="#475569" />
@@ -189,12 +250,12 @@ export default function StudyTopicsScreen() {
                             <View
                               className="h-full bg-[#1544b2]"
                               style={{
-                                width: `${(prog.completed / prog.total) * 100}%`,
+                                width: `${(prog?.completedQuestions / prog?.questionsCount) * 100}%`,
                               }}
                             />
                           </View>
                           <Text className="text-[10px] font-bold text-slate-400">
-                            {prog.completed}/{prog.total}
+                            {prog.completedQuestions}/{prog.questionsCount}
                           </Text>
                         </View>
                       </View>
@@ -254,7 +315,6 @@ export default function StudyTopicsScreen() {
                           color={style.text}
                         />
                       </View>
-                      {/* Flex name container bez sztywnej wysokości */}
                       <View style={{ minHeight: 42, justifyContent: "center" }}>
                         <Text className="font-bold text-slate-800 dark:text-white text-[11px] leading-4">
                           {cat.name}
@@ -265,7 +325,7 @@ export default function StudyTopicsScreen() {
                           Status
                         </Text>
                         <Text className="text-[10px] font-bold text-slate-400">
-                          {prog.completed}/{prog.total}
+                          {prog.completedQuestions}/{prog.questionsCount}
                         </Text>
                       </View>
                     </TouchableOpacity>
@@ -293,7 +353,7 @@ export default function StudyTopicsScreen() {
                         {cat.name}
                       </Text>
                       <Text className="text-[10px] font-bold text-slate-400 mr-2">
-                        {prog.completed}/{prog.total}
+                        {prog.completedQuestions}/{prog.questionsCount}
                       </Text>
                       <MaterialIcons
                         name="chevron-right"
@@ -309,7 +369,6 @@ export default function StudyTopicsScreen() {
         ))}
       </ScrollView>
 
-      {/* Footer siedzi grzecznie pod ScrollView */}
       <Footer />
     </View>
   );
