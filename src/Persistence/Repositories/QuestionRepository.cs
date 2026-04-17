@@ -178,4 +178,57 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
 
         return studyTopicsResponse;
     }
+
+    public async Task<List<SetQuestionDto>> GetQuestionSet(string categoryTag, string categoryType, int setNumber, string locale)
+    {
+        if (setNumber < 1) setNumber = 1;
+
+        var totalQuestionsInCategoryTypeWithCategoryTag = await _context.Questions
+            .AsNoTracking()
+            .CountAsync(q => q.Categories.Any(c => c.Name == categoryType) && q.CategoryTag == categoryTag);
+
+        if (totalQuestionsInCategoryTypeWithCategoryTag == 0) return [];
+
+        var totalSets = (int)Math.Max(1, Math.Round((double)totalQuestionsInCategoryTypeWithCategoryTag / 20));
+        
+        if (setNumber > totalSets) setNumber = totalSets;
+        
+        var baseSize = totalQuestionsInCategoryTypeWithCategoryTag / totalSets;
+        var extraQuestions = totalQuestionsInCategoryTypeWithCategoryTag % totalSets;
+
+        var skipAmount = setNumber <= extraQuestions 
+            ? (setNumber - 1) * (baseSize + 1) 
+            : (extraQuestions * (baseSize + 1)) + ((setNumber - extraQuestions - 1) * baseSize);
+
+        var takeAmount = setNumber <= extraQuestions ? baseSize + 1 : baseSize;
+        
+        return await _context.Questions
+            .AsNoTracking()
+            .Where(q => q.CategoryTag == categoryTag && q.Categories.Any(c => c.Name == categoryType))
+            .OrderBy(q => q.QuestionNumber)
+            .Skip(skipAmount)
+            .Take(takeAmount)
+            .Select(q => new SetQuestionDto(
+                q.Id,
+                q.QuestionNumber,
+                locale == "EN" ? q.ContentEn ?? q.ContentPl : 
+                locale == "DE" ? q.ContentDe ?? q.ContentPl : 
+                locale == "UA" ? q.ContentUa ?? q.ContentPl : q.ContentPl,
+            
+                locale == "EN" ? q.StaticResponseEn ?? "" : 
+                locale == "DE" ? q.StaticResponseDe ?? "" : 
+                locale == "UA" ? q.StaticResponseUa ?? "" : q.StaticResponsePl ?? "",
+            
+                q.Points,
+                q.MediaUrl,
+                q.CorrectAnswerId,
+                q.Answers.Select(a => new SetAnswerDto(
+                    a.Id,
+                    locale == "EN" ? a.ContentEn ?? a.ContentPl : 
+                    locale == "DE" ? a.ContentDe ?? a.ContentPl : 
+                    locale == "UA" ? a.ContentUa ?? a.ContentPl : a.ContentPl,
+                    q.Id)).ToList()
+            ))
+            .ToListAsync();
+    }
 }

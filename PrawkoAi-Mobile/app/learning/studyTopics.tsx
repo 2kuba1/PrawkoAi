@@ -63,6 +63,8 @@ export default function StudyTopicsScreen() {
 
   const { user, token } = useContext(AuthContext);
 
+  console.log("Token", token?.accessToken);
+
   const paddingTop =
     Platform.OS === "android"
       ? insets.top > 0
