@@ -1,6 +1,5 @@
 ﻿using Application.Contracts.Repositories;
 using Application.Models.DTOs;
-using Domain;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Database;
@@ -16,13 +15,12 @@ public class UserAnswerRepository : GenericRepository<UserAnswer>, IUserAnswerRe
         _context = context;
     }
 
-    public async Task<List<UserLastAnswersDto>> GetUserLastAnswers(Guid userId, int answerCount)
+    public async Task<List<UserLastAnswersDto>> GetUserLastAnswers(Guid userId)
     {
         return await _context.UserAnswers
             .AsNoTracking()
             .Where(u => u.UserId == userId)
             .OrderByDescending(u => u.CreatedAt)
-            .Take(answerCount)
             .Select(u => new UserLastAnswersDto(
                 u.Question.CategoryTag,
                 u.AnsweredAt,

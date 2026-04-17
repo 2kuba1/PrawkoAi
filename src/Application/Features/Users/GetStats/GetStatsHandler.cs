@@ -24,9 +24,8 @@ internal sealed class GetStatsHandler : IRequestHandler<GetStats, UserStatsDto>
 
     public async Task<UserStatsDto> Handle(GetStats request, CancellationToken cancellationToken)
     {
-        var answersCount = _config.GetValue<int>("Ai:AnswersCount");
-        var lastAnswers = await _userAnswerRepository.GetUserLastAnswers(request.UserId, answersCount);
-        var lastExamsScoresNullable = await _examSessionRepository.GetLastExamsScores(request.UserId, 10);
+        var lastAnswers = await _userAnswerRepository.GetUserLastAnswers(request.UserId);
+        var lastExamsScoresNullable = await _examSessionRepository.GetLastExamsScores(request.UserId);
         
         var lastExamsScores = lastExamsScoresNullable.Where(x => x.HasValue).Select(x => (double)x!.Value).ToList();
 

@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "userInterfaceStyle": "light",
+      "userInterfaceStyle": "dark",
       "bundleIdentifier": "pl.prawkoai",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false

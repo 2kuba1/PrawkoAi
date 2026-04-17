@@ -147,7 +147,7 @@ export default function StudyTopicsScreen() {
           >
             <MaterialIcons name="arrow-back" size={24} color="#1544b2" />
           </TouchableOpacity>
-          <Text className="text-xl font-bold ml-2 text-black">
+          <Text className="text-xl font-bold ml-2 flex-1 text-slate-900 dark:text-white">
             Tematy Nauki
           </Text>
         </View>
@@ -230,6 +230,7 @@ export default function StudyTopicsScreen() {
                     <TouchableOpacity
                       key={id}
                       className="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-blue-500/10 flex-row mb-4"
+                      onPress={() => router.push("/learning/studyTopic")}
                     >
                       <View className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 items-center justify-center mr-4">
                         <MaterialIcons

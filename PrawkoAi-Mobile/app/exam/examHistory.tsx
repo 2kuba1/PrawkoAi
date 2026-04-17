@@ -99,7 +99,7 @@ export default function ExamHistoryScreen() {
               color="#1544b2"
             />
           </TouchableOpacity>
-          <Text className="text-xl font-bold ml-2 flex-1 text-black">
+          <Text className="text-xl font-bold ml-2 flex-1 text-slate-900 dark:text-white">
             Historia Egzaminów
           </Text>
           <TouchableOpacity className="p-2">

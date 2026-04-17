@@ -31,8 +31,8 @@ internal sealed class AnalyzeUserProgressHandler : IRequestHandler<AnalyzeUserPr
     public async Task<string> Handle(AnalyzeUserProgress request, CancellationToken cancellationToken)
     {
         var answersCount = _config.GetValue<int>("AI:AnswersCount");
-        var lastAnswers = await _userAnswerRepository.GetUserLastAnswers(request.UserId, answersCount);
-        var lastExamsScores = await _examSessionRepository.GetLastExamsScores(request.UserId, 10);
+        var lastAnswers = await _userAnswerRepository.GetUserLastAnswers(request.UserId);
+        var lastExamsScores = await _examSessionRepository.GetLastExamsScores(request.UserId);
 
 
         if (lastAnswers.Count < 30)

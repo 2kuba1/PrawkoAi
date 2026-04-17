@@ -202,6 +202,7 @@ export default function RootLayout() {
           <Stack.Screen name="question/examQuestionWithAnswer/[id]" />
           <Stack.Screen name="user/stats" />
           <Stack.Screen name="learning/studyTopics" />
+          <Stack.Screen name="learning/studyTopic" />
         </Stack>
       </SafeAreaProvider>
     </AuthContext.Provider>

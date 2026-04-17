@@ -42,12 +42,11 @@ public class ExamSessionRepository : GenericRepository<ExamSession>, IExamSessio
             .ToListAsync();
     }
 
-    public async Task<List<int?>> GetLastExamsScores(Guid userId, int examsCount) 
+    public async Task<List<int?>> GetLastExamsScores(Guid userId) 
         =>await _context.ExamSessions
             .AsNoTracking()
             .Where(e => e.UserId == userId)
             .OrderByDescending(e => e.CreatedAt)
-            .Take(examsCount)
             .Select(e => e.Score)
             .ToListAsync();
 }

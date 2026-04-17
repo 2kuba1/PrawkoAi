@@ -235,13 +235,13 @@ export default function Stats() {
           <MetricCard
             title="Dokładność"
             value={`${stats?.totalAccuracy ?? 0}%`}
-            subtext="Skuteczność (ostatnie 500 pytań)"
+            subtext="Skuteczność"
             color="#3b82f6"
           />
           <MetricCard
             title="Średni wynik"
             value={`${Math.round(stats?.averageExamScore!) ?? 0} pkt`}
-            subtext="Egzaminy (ostatnie 10 egzaminów)"
+            subtext="Egzaminy"
             subColor="#1544b2"
             color="#3b82f6"
           />

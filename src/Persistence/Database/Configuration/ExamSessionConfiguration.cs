@@ -13,5 +13,7 @@ public class ExamSessionConfiguration : IEntityTypeConfiguration<ExamSession>
 
         builder.Property(x => x.StaredAt)
             .IsRequired();
+
+        builder.HasIndex(x => x.UserId);
     }
 }

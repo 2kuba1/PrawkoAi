@@ -7,5 +7,5 @@ public interface IExamSessionRepository : IGenericRepository<ExamSession>
 {
     bool CheckIfPassedAndSaveSession(ExamSession examSession, DateTime finishedAt, int score, int correctAnswerCount);
     Task<List<ExamSessionHistory>> GetUserExamsSessionHistory(Guid userId);
-    Task<List<int?>> GetLastExamsScores(Guid userId, int examsCount);
+    Task<List<int?>> GetLastExamsScores(Guid userId);
 }
