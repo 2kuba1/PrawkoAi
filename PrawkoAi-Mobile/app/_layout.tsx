@@ -56,7 +56,7 @@ async function scheduleInactivityNotification() {
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-      seconds: 30,
+      seconds: 3600,
     },
   });
 }
@@ -202,7 +202,8 @@ export default function RootLayout() {
           <Stack.Screen name="question/examQuestionWithAnswer/[id]" />
           <Stack.Screen name="user/stats" />
           <Stack.Screen name="learning/studyTopics" />
-          <Stack.Screen name="learning/studyTopic" />
+          <Stack.Screen name="learning/studyTopic/[category]" />
+          <Stack.Screen name="learning/setSolving/[category]" />
         </Stack>
       </SafeAreaProvider>
     </AuthContext.Provider>

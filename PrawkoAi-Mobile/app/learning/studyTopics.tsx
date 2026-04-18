@@ -63,8 +63,6 @@ export default function StudyTopicsScreen() {
 
   const { user, token } = useContext(AuthContext);
 
-  console.log("Token", token?.accessToken);
-
   const paddingTop =
     Platform.OS === "android"
       ? insets.top > 0
@@ -232,7 +230,16 @@ export default function StudyTopicsScreen() {
                     <TouchableOpacity
                       key={id}
                       className="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-blue-500/10 flex-row mb-4"
-                      onPress={() => router.push("/learning/studyTopic")}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/learning/studyTopic/[id]" as any,
+                          params: {
+                            categoryId: id,
+                            categoryName: cat.name,
+                            questionsCount: prog.questionsCount.toString(),
+                          },
+                        })
+                      }
                     >
                       <View className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 items-center justify-center mr-4">
                         <MaterialIcons

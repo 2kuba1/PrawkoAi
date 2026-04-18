@@ -123,7 +123,7 @@ export default function Stats() {
 
       <View
         style={{ paddingTop }}
-        className="bg-white/95 dark:bg-slate-900/95 border-b border-blue-900/10 shadow-sm z-50"
+        className="bg-white/95 dark:bg-[#1a1f2e] border-b border-blue-900/10 shadow-sm z-50"
       >
         <View
           style={{
@@ -247,13 +247,13 @@ export default function Stats() {
           />
         </View>
 
-        <View className="m-4 p-5 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800">
+        <View className="m-4 p-5 bg-white/95 dark:bg-[#1a1f2e] rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800">
           <Text className="font-bold text-slate-900 dark:text-white mb-4 flex-row items-center">
             <MaterialIcons name="warning" size={18} color="#ef4444" /> Struktura
             Punktowa Błędów
           </Text>
 
-          <View className="h-4 w-full rounded-full bg-slate-100 dark:bg-slate-800 flex-row overflow-hidden mb-4">
+          <View className="h-4 w-full rounded-full bg-white/95 dark:bg-[#1a1f2e] flex-row overflow-hidden mb-4">
             <View
               style={{ width: `${(sumSmall / totalErrors) * 100}%` }}
               className="bg-blue-300"
@@ -296,7 +296,7 @@ export default function Stats() {
               return (
                 <TouchableOpacity
                   key={idx}
-                  className="bg-white dark:bg-slate-900 p-4 rounded-2xl mb-2 flex-row items-center justify-between shadow-sm"
+                  className="bg-white/95 dark:bg-[#1a1f2e] p-4 rounded-2xl mb-2 flex-row items-center justify-between shadow-sm"
                 >
                   <View className="flex-row items-center flex-1">
                     <View
@@ -325,7 +325,7 @@ export default function Stats() {
                       </Text>
                     </View>
                   </View>
-                  <View className="w-16 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <View className="w-16 h-1.5 bg-white/95 dark:bg-[#111621] rounded-full overflow-hidden">
                     <View
                       style={{
                         width: `${cat.accuracy}%`,
@@ -351,13 +351,13 @@ function MetricCard({
   progress,
   icon,
   subtext,
-  color = "#0f172a",
+  color = "#1544b2",
   subColor = "#94a3b8",
 }: any) {
   return (
     <View
       style={{ width: (width - 48) / 2 }}
-      className="bg-white dark:bg-slate-900 m-2 p-4 rounded-2xl shadow-sm border border-slate-50 dark:border-slate-800"
+      className="bg-white/95 dark:bg-[#1a1f2e] m-2 p-4 rounded-2xl shadow-sm border border-slate-50 dark:border-slate-800"
     >
       <Text className="text-[10px] uppercase font-bold text-slate-400 mb-1">
         {title}
@@ -369,7 +369,7 @@ function MetricCard({
         {icon && <MaterialCommunityIcons name={icon} size={20} color={color} />}
       </View>
       {progress !== undefined && (
-        <View className="mt-2 h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+        <View className="mt-2 h-1 bg-white/95 dark:bg-[#1a1f2e] rounded-full overflow-hidden">
           <View
             style={{ width: `${progress * 100}%`, backgroundColor: color }}
             className="h-full"
