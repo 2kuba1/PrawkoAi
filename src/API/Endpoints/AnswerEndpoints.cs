@@ -1,4 +1,5 @@
 ﻿using Application.Features.Answers.LogUserAnswersInSet;
+using Application.Models.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,9 +12,20 @@ public static class AnswerEndpoints
         app.MapPost("/api/answer/answerSet", LogUserAnswersInSet);
     }
 
-    private static async Task<IResult> LogUserAnswersInSet([FromBody] List<AnswersInSet> questionSet, [FromServices] IMediator mediator)
+    private static async Task<IResult> LogUserAnswersInSet([FromBody] AnswersInSet questionSet, [FromServices] IMediator mediator)
     {
-        await mediator.Send(new LogUserAnswersInSet());
+        var mappedAnswers = questionSet.Answers.Select(a => new UserSetAnswerDto
+        (
+            a.QuestionId,
+            a.SelectedAnswerId,
+            a.AnsweredAt
+        )).ToList();
+
+        await mediator.Send(new LogUserAnswersInSet(
+            questionSet.UserId,
+            mappedAnswers
+        ));
+
         return Results.NoContent();
     }
 
