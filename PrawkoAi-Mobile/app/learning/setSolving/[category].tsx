@@ -75,7 +75,9 @@ export default function ExamSolvingScreen() {
     } else {
       const percentage = (correctCount / questions.length) * 100;
       const isPassed = percentage >= 80;
-
+      console.log(
+        `Wynik: ${percentage}%. ${isPassed ? "Zdane!" : "Niezdane."}`,
+      );
       try {
         const storageKey = `progress_${params.categoryTag}`;
         const existingData = await AsyncStorage.getItem(storageKey);

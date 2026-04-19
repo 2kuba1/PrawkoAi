@@ -29,4 +29,53 @@ public class UserAnswerRepository : GenericRepository<UserAnswer>, IUserAnswerRe
             ))
             .ToListAsync();
     }
+
+    public async Task CreateSetAnswers(Guid userId, List<UserSetAnswerDto> userSetAnswers)
+    {
+        if (userSetAnswers == null || userSetAnswers.Count == 0)
+            return;
+
+        var questionIds = userSetAnswers.Select(a => a.QuestionId).Distinct().ToList();
+        var answerIds = userSetAnswers
+            .Select(a => a.SelectedAnswerId)
+            .Where(id => id != Guid.Empty) 
+            .Distinct()
+            .ToList();
+
+        var existingQuestionIds = await _context.Questions
+            .Where(q => questionIds.Contains(q.Id))
+            .Select(q => q.Id)
+            .ToListAsync();
+
+        var existingAnswerIds = await _context.Answers
+            .Where(a => answerIds.Contains(a.Id))
+            .Select(a => a.Id)
+            .ToListAsync();
+
+        var newAnswers = new List<UserAnswer>();
+
+        foreach (var dto in userSetAnswers)
+        {
+            if (!existingQuestionIds.Contains(dto.QuestionId))
+            {
+                throw new Exception($"Question with ID {dto.QuestionId} does not exist.");
+            }
+
+            if (dto.SelectedAnswerId != Guid.Empty && !existingAnswerIds.Contains(dto.SelectedAnswerId))
+            {
+                throw new Exception($"Answer with ID {dto.SelectedAnswerId} does not exist.");
+            }
+
+            newAnswers.Add(new UserAnswer
+            {
+                UserId = userId,
+                QuestionId = dto.QuestionId,
+                AnsweredAt = dto.AnsweredAt,
+                SelectedAnswerId = dto.SelectedAnswerId == Guid.Empty ? null : dto.SelectedAnswerId,
+            });
+        }
+
+        await _context.UserAnswers.AddRangeAsync(newAnswers);
+        await _context.SaveChangesAsync();
+    }
 }

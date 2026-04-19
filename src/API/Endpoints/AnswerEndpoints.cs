@@ -1,4 +1,4 @@
-﻿using Application.Features.Answers.AnswerToQuestion;
+﻿using Application.Features.Answers.LogUserAnswersInSet;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,20 +8,22 @@ public static class AnswerEndpoints
 {
     public static void MapAnswerEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/answers/answerToQuestion", AnswerToQuestion)
-            .RequireAuthorization();
+        app.MapPost("/api/answer/answerSet", LogUserAnswersInSet);
     }
 
-    private static async Task<IResult> AnswerToQuestion([FromBody] AnswerToQuestionRequest request, [FromServices] IMediator mediator)
+    private static async Task<IResult> LogUserAnswersInSet([FromBody] List<AnswersInSet> questionSet, [FromServices] IMediator mediator)
     {
-        await mediator.Send(new AnswerToQuestion(request.QuestionId, request.UserId, request.SelectedAnswerId));
-        
-        return Results.Ok();
+        await mediator.Send(new LogUserAnswersInSet());
+        return Results.NoContent();
     }
-    
-    private record AnswerToQuestionRequest(
-        Guid QuestionId, 
-        Guid SelectedAnswerId, 
-        Guid UserId
-    );
+
+    private record AnswersInSet(
+        Guid UserId,
+        List<UserSetAnswer> Answers
+        );
+
+    private record UserSetAnswer(
+        Guid SelectedAnswerId,
+        Guid QuestionId,
+        DateTime AnsweredAt);
 }
