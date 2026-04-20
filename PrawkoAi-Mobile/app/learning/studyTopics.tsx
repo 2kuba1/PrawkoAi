@@ -315,6 +315,16 @@ export default function StudyTopicsScreen() {
                     <TouchableOpacity
                       key={id}
                       className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-blue-500/10 mb-1 flex-1 min-w-[45%]"
+                      onPress={() =>
+                        router.push({
+                          pathname: "/learning/studyTopic/[id]" as any,
+                          params: {
+                            categoryId: id,
+                            categoryName: cat.name,
+                            questionsCount: prog.questionsCount.toString(),
+                          },
+                        })
+                      }
                     >
                       <View
                         className={`w-10 h-10 rounded-lg ${style.bg} items-center justify-center mb-3`}
@@ -353,6 +363,16 @@ export default function StudyTopicsScreen() {
                     <TouchableOpacity
                       key={id}
                       className={`p-4 flex-row items-center border-b border-slate-50 dark:border-slate-700 ${idx === section.ids.length - 1 ? "border-b-0" : ""}`}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/learning/studyTopic/[id]" as any,
+                          params: {
+                            categoryId: id,
+                            categoryName: cat.name,
+                            questionsCount: prog.questionsCount.toString(),
+                          },
+                        })
+                      }
                     >
                       <MaterialIcons
                         name={cat.icon as any}
