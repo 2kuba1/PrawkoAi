@@ -16,11 +16,11 @@ public static class AnswerEndpoints
     {
         var mappedAnswers = questionSet.Answers.Select(a => new UserSetAnswerDto
         (
-            a.QuestionId,
             a.SelectedAnswerId,
+            a.QuestionId,
             a.AnsweredAt
         )).ToList();
-
+        
         await mediator.Send(new LogUserAnswersInSet(
             questionSet.UserId,
             mappedAnswers
@@ -35,7 +35,7 @@ public static class AnswerEndpoints
         );
 
     private record UserSetAnswer(
-        Guid SelectedAnswerId,
+        Guid? SelectedAnswerId,
         Guid QuestionId,
         DateTime AnsweredAt);
 }

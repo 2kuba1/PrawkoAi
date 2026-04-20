@@ -1,9 +1,10 @@
+import { AuthContext } from "@/app/_layout";
 import api from "@/app/utils/api";
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -14,6 +15,12 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+interface UserSetAnswer {
+  questionId: string;
+  selectedAnswerId: string;
+  answeredAt: string;
+}
 
 export default function ExamSolvingScreen() {
   const insets = useSafeAreaInsets();
@@ -31,6 +38,10 @@ export default function ExamSolvingScreen() {
   const [isChecked, setIsChecked] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const [userAnswers, setUserAnswers] = useState<UserSetAnswer[]>([]);
+
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     let isMounted = true;
@@ -60,6 +71,16 @@ export default function ExamSolvingScreen() {
   const handleCheck = () => {
     if (!selectedId || isChecked) return;
 
+    const questionId = currentQuestion.id || currentQuestion.questionId;
+
+    const newAnswer: UserSetAnswer = {
+      questionId: questionId,
+      selectedAnswerId: selectedId,
+      answeredAt: new Date().toISOString(),
+    };
+
+    setUserAnswers((prev) => [...prev, newAnswer]);
+
     if (selectedId === currentQuestion.correctAnswerId) {
       setCorrectCount((prev) => prev + 1);
     }
@@ -73,24 +94,33 @@ export default function ExamSolvingScreen() {
       setSelectedId(null);
       setCurrentIndex((prev) => prev + 1);
     } else {
-      const percentage = (correctCount / questions.length) * 100;
-      const isPassed = percentage >= 80;
-      console.log(
-        `Wynik: ${percentage}%. ${isPassed ? "Zdane!" : "Niezdane."}`,
-      );
       try {
+        const payload = {
+          userId: user?.id,
+          answers: userAnswers,
+        };
+
+        console.log("Wysyłanie danych:", JSON.stringify(payload, null, 2));
+
+        await api.post("/api/answer/answerSet", payload);
+
         const storageKey = `progress_${params.categoryTag}`;
         const existingData = await AsyncStorage.getItem(storageKey);
         const progress = existingData ? JSON.parse(existingData) : {};
 
+        const percentage = (correctCount / questions.length) * 100;
         progress[params.setNumber] = {
           score: percentage,
           completed: true,
         };
 
         await AsyncStorage.setItem(storageKey, JSON.stringify(progress));
-      } catch (e) {
-        console.error("Błąd zapisu progresu:", e);
+        router.back();
+      } catch (e: any) {
+        console.error(
+          "Błąd podczas wysyłania zestawu:",
+          e.response?.data || e.message,
+        );
       }
     }
   };

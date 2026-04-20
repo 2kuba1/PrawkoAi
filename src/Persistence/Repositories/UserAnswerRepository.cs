@@ -1,6 +1,7 @@
 ﻿using Application.Contracts.Repositories;
 using Application.Models.DTOs;
 using Domain.Entities;
+using Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Database;
 
@@ -58,12 +59,15 @@ public class UserAnswerRepository : GenericRepository<UserAnswer>, IUserAnswerRe
         {
             if (!existingQuestionIds.Contains(dto.QuestionId))
             {
-                throw new Exception($"Question with ID {dto.QuestionId} does not exist.");
+                throw new NotFoundException($"Question with ID {dto.QuestionId} does not exist.");
             }
 
-            if (dto.SelectedAnswerId != Guid.Empty && !existingAnswerIds.Contains(dto.SelectedAnswerId))
+            if (dto.SelectedAnswerId != null)
             {
-                throw new Exception($"Answer with ID {dto.SelectedAnswerId} does not exist.");
+                if (!existingAnswerIds.Contains((Guid)dto.SelectedAnswerId))
+                {
+                    throw new NotFoundException($"Answer with ID {dto.SelectedAnswerId} does not exist.");
+                }
             }
 
             newAnswers.Add(new UserAnswer
@@ -71,7 +75,7 @@ public class UserAnswerRepository : GenericRepository<UserAnswer>, IUserAnswerRe
                 UserId = userId,
                 QuestionId = dto.QuestionId,
                 AnsweredAt = dto.AnsweredAt,
-                SelectedAnswerId = dto.SelectedAnswerId == Guid.Empty ? null : dto.SelectedAnswerId,
+                SelectedAnswerId = dto.SelectedAnswerId
             });
         }
 
