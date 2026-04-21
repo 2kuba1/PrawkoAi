@@ -190,17 +190,25 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
         if (totalQuestionsInCategoryTypeWithCategoryTag == 0) return [];
 
         var totalSets = (int)Math.Max(1, Math.Round((double)totalQuestionsInCategoryTypeWithCategoryTag / 20));
-        
+
         if (setNumber > totalSets) setNumber = totalSets;
         
         var baseSize = totalQuestionsInCategoryTypeWithCategoryTag / totalSets;
         var extraQuestions = totalQuestionsInCategoryTypeWithCategoryTag % totalSets;
 
-        var skipAmount = setNumber <= extraQuestions 
-            ? (setNumber - 1) * (baseSize + 1) 
-            : (extraQuestions * (baseSize + 1)) + ((setNumber - extraQuestions - 1) * baseSize);
+        int skipAmount;
+        int takeAmount;
 
-        var takeAmount = setNumber <= extraQuestions ? baseSize + 1 : baseSize;
+        if (setNumber <= extraQuestions)
+        {
+            takeAmount = baseSize + 1;
+            skipAmount = (setNumber - 1) * (baseSize + 1);
+        }
+        else
+        {
+            takeAmount = baseSize;
+            skipAmount = (extraQuestions * (baseSize + 1)) + ((setNumber - extraQuestions - 1) * baseSize);
+        }
         
         return await _context.Questions
             .AsNoTracking()
