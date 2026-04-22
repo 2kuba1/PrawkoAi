@@ -204,6 +204,7 @@ export default function RootLayout() {
           <Stack.Screen name="learning/studyTopics" />
           <Stack.Screen name="learning/studyTopic/[category]" />
           <Stack.Screen name="learning/setSolving/[category]" />
+          <Stack.Screen name="learning/setResult/setResult" />
         </Stack>
       </SafeAreaProvider>
     </AuthContext.Provider>

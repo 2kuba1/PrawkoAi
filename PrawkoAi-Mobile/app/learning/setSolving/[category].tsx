@@ -20,6 +20,7 @@ interface UserSetAnswer {
   questionId: string;
   selectedAnswerId: string;
   answeredAt: string;
+  orderIndex: number;
 }
 
 export default function ExamSolvingScreen() {
@@ -38,7 +39,6 @@ export default function ExamSolvingScreen() {
   const [isChecked, setIsChecked] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-
   const [userAnswers, setUserAnswers] = useState<UserSetAnswer[]>([]);
 
   const { user } = useContext(AuthContext);
@@ -77,6 +77,7 @@ export default function ExamSolvingScreen() {
       questionId: questionId,
       selectedAnswerId: selectedId,
       answeredAt: new Date().toISOString(),
+      orderIndex: currentIndex,
     };
 
     setUserAnswers((prev) => [...prev, newAnswer]);
@@ -95,35 +96,84 @@ export default function ExamSolvingScreen() {
       setCurrentIndex((prev) => prev + 1);
     } else {
       try {
-        const payload = {
-          userId: user?.id,
-          answers: userAnswers,
+        const resultsData = {
+          correctAnswersCount: correctCount,
+          score: correctCount,
+          maxScore: questions.length,
+          startedAt: new Date().toISOString(),
+          finishedAt: new Date().toISOString(),
+          isPassed: correctCount / questions.length >= 0.8,
+          correctAnswers: questions
+            .filter(
+              (q, idx) =>
+                userAnswers.find(
+                  (ua) => ua.questionId === (q.id || q.questionId),
+                )?.selectedAnswerId === q.correctAnswerId,
+            )
+            .map((q, idx) =>
+              formatToDetail(q, userAnswers, questions.indexOf(q)),
+            ),
+          incorrectAnswers: questions
+            .filter((q) => {
+              const ua = userAnswers.find(
+                (ua) => ua.questionId === (q.id || q.questionId),
+              );
+              return ua && ua.selectedAnswerId !== q.correctAnswerId;
+            })
+            .map((q) => formatToDetail(q, userAnswers, questions.indexOf(q))),
+          unanswered: questions
+            .filter(
+              (q) =>
+                !userAnswers.find(
+                  (ua) => ua.questionId === (q.id || q.questionId),
+                ),
+            )
+            .map((q) => formatToDetail(q, userAnswers, questions.indexOf(q))),
         };
 
-        console.log("Wysyłanie danych:", JSON.stringify(payload, null, 2));
+        await AsyncStorage.setItem(
+          "last_set_result",
+          JSON.stringify(resultsData),
+        );
 
+        const payload = { userId: user?.id, answers: userAnswers };
         await api.post("/api/answer/answerSet", payload);
 
         const storageKey = `progress_${params.categoryTag}`;
         const existingData = await AsyncStorage.getItem(storageKey);
         const progress = existingData ? JSON.parse(existingData) : {};
-
-        const percentage = (correctCount / questions.length) * 100;
         progress[params.setNumber] = {
-          score: percentage,
+          score: (correctCount / questions.length) * 100,
           completed: true,
         };
-
         await AsyncStorage.setItem(storageKey, JSON.stringify(progress));
-        router.back();
+
+        router.push({
+          pathname: "/learning/setResult/setResult" as any,
+          params: { source: "local" },
+        });
       } catch (e: any) {
-        console.error(
-          "Błąd podczas wysyłania zestawu:",
-          e.response?.data || e.message,
-        );
+        console.error("Błąd zapisu wyników:", e);
       }
     }
   };
+
+  const formatToDetail = (q: any, answers: UserSetAnswer[], index: number) => ({
+    questionId: q.id || q.questionId,
+    content: q.questionContent,
+    createdAt:
+      answers.find((a) => a.questionId === (q.id || q.questionId))
+        ?.answeredAt || new Date().toISOString(),
+    selectedAnswerId:
+      answers.find((a) => a.questionId === (q.id || q.questionId))
+        ?.selectedAnswerId || null,
+    questionPoints: 1,
+    questionNumber: index + 1,
+    answers: q.answers.map((a: any) => ({
+      id: a.answerId,
+      content: a.answerContent,
+    })),
+  });
 
   const fullMediaUrl = currentQuestion?.mediaUrl
     ? process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL + currentQuestion?.mediaUrl
