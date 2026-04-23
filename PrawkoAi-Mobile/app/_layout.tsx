@@ -111,21 +111,6 @@ export default function RootLayout() {
     }
   }, [token, isLoading, segments]);
 
-  useEffect(() => {
-    const subscription = AppState.addEventListener(
-      "change",
-      (state: AppStateStatus) => {
-        if (state === "background") {
-          scheduleInactivityNotification();
-        }
-      },
-    );
-
-    return () => {
-      subscription.remove();
-    };
-  }, []);
-
   const authContextValue = {
     token,
     isLoading,
@@ -197,14 +182,38 @@ export default function RootLayout() {
           <Stack.Screen name="dashboard" />
           <Stack.Screen name="exam/examHistory" />
           <Stack.Screen name="exam/examRules" />
-          <Stack.Screen name="exam/examSimulation" />
-          <Stack.Screen name="exam/examResult/[id]" />
+          <Stack.Screen
+            name="exam/examSimulation"
+            options={{
+              gestureEnabled: false,
+              headerLeft: () => null,
+            }}
+          />
+          <Stack.Screen
+            name="exam/examResult/[id]"
+            options={{
+              gestureEnabled: false,
+              headerLeft: () => null,
+            }}
+          />
           <Stack.Screen name="question/examQuestionWithAnswer/[id]" />
           <Stack.Screen name="user/stats" />
           <Stack.Screen name="learning/studyTopics" />
           <Stack.Screen name="learning/studyTopic/[category]" />
-          <Stack.Screen name="learning/setSolving/[category]" />
-          <Stack.Screen name="learning/setResult/setResult" />
+          <Stack.Screen
+            name="learning/setSolving/[category]"
+            options={{
+              gestureEnabled: false,
+              headerLeft: () => null,
+            }}
+          />
+          <Stack.Screen
+            name="learning/setResult/setResult"
+            options={{
+              gestureEnabled: false,
+              headerLeft: () => null,
+            }}
+          />
         </Stack>
       </SafeAreaProvider>
     </AuthContext.Provider>

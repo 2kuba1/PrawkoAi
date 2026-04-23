@@ -25,6 +25,8 @@ interface AnswerDetail {
   selectedAnswerId: string | null;
   answers: PossibleAnswer[];
   questionPoints: number;
+  questionNumber: number;
+  index: number;
 }
 
 interface SetResultDetail {
@@ -51,7 +53,7 @@ export default function SetResultDetailPage() {
 
       try {
         const localData = await AsyncStorage.getItem("last_set_result");
-
+        console.log("Pobrane lokalne dane zestawu:", localData);
         if (localData) {
           setSetResult(JSON.parse(localData));
         } else {
@@ -263,6 +265,8 @@ export default function SetResultDetailPage() {
               question={item.content}
               selectedAnswerId={item.selectedAnswerId}
               possibleAnswers={item.answers ?? []}
+              questionId={item.questionId}
+              questionNumber={item.questionNumber}
             />
           ))}
         </View>
@@ -273,10 +277,13 @@ export default function SetResultDetailPage() {
 
 function QuestionItem({
   index,
+  points,
   type,
   question,
   selectedAnswerId,
   possibleAnswers,
+  questionId,
+  questionNumber,
 }: {
   index: number;
   points: number;
@@ -284,12 +291,32 @@ function QuestionItem({
   question: string;
   selectedAnswerId: string | null;
   possibleAnswers: PossibleAnswer[];
+  questionId: string;
+  questionNumber: number;
 }) {
   const isCorrect = type === "correct";
   const isUnanswered = type === "unanswered";
 
+  const router = useRouter();
+
   return (
-    <View className="bg-white dark:bg-slate-900 px-4 py-5 border-b border-slate-100 dark:border-slate-800">
+    <TouchableOpacity
+      onPress={() =>
+        router.push({
+          pathname: `/question/examQuestionWithAnswer/${questionId}` as any,
+          params: {
+            questionId: questionId,
+            questionNumber: questionNumber.toString(),
+            question: question,
+            possibleAnswers: JSON.stringify(possibleAnswers),
+            selectedAnswerId: selectedAnswerId ?? "",
+            wasCorrect: type,
+            points: points.toString(),
+          },
+        })
+      }
+      className="bg-white dark:bg-slate-900 px-4 py-5 border-b border-slate-100 dark:border-slate-800"
+    >
       <View className="flex-row gap-4">
         <View
           className={`size-10 rounded-lg items-center justify-center ${
@@ -309,8 +336,9 @@ function QuestionItem({
 
         <View className="flex-1">
           <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-1">
-            Pytanie {index} • Zestaw treningowy
+            Pytanie {index} • {points} pkt
           </Text>
+
           <Text className="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-relaxed mb-4">
             {question}
           </Text>
@@ -318,6 +346,7 @@ function QuestionItem({
           <View className="gap-2">
             {possibleAnswers.map((answer) => {
               const isUserChoice = answer.id === selectedAnswerId;
+
               let containerClass =
                 "bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800";
               let textClass = "text-slate-700 dark:text-slate-300";
@@ -370,6 +399,6 @@ function QuestionItem({
           )}
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }

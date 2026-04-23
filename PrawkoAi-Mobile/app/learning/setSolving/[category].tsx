@@ -52,6 +52,7 @@ export default function ExamSolvingScreen() {
           params: { ...params, locale: lang.toUpperCase() },
         });
         if (isMounted) {
+          console.log("Pobrane pytania:", JSON.stringify(response.data));
           setQuestions(response.data || []);
           setLoading(false);
         }
@@ -167,8 +168,9 @@ export default function ExamSolvingScreen() {
     selectedAnswerId:
       answers.find((a) => a.questionId === (q.id || q.questionId))
         ?.selectedAnswerId || null,
-    questionPoints: 1,
-    questionNumber: index + 1,
+    questionPoints: q.points || 1,
+    questionNumber: q.questionNumber,
+    index: index + 1,
     answers: q.answers.map((a: any) => ({
       id: a.answerId,
       content: a.answerContent,
@@ -179,7 +181,7 @@ export default function ExamSolvingScreen() {
     ? process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL + currentQuestion?.mediaUrl
     : null;
 
-  const isVideo = fullMediaUrl?.toLowerCase().endsWith(".mp4");
+  const isVideo = fullMediaUrl?.endsWith(".mp4");
 
   const player = useVideoPlayer(fullMediaUrl || "", (player) => {
     player.loop = false;
