@@ -336,6 +336,7 @@ export default function ExamSimulationScreen() {
                     <VideoComponent
                       url={
                         process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL +
+                        "/" +
                         currentQuestion.mediaUrl
                       }
                       onFinished={onVideoFinished}
@@ -348,6 +349,7 @@ export default function ExamSimulationScreen() {
                       source={{
                         uri: encodeURI(
                           process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL +
+                            "/" +
                             currentQuestion.mediaUrl,
                         ),
                       }}

@@ -369,7 +369,7 @@ function MetricCard({
         {icon && <MaterialCommunityIcons name={icon} size={20} color={color} />}
       </View>
       {progress !== undefined && (
-        <View className="mt-2 h-1 bg-white/95 dark:bg-[#1a1f2e] rounded-full overflow-hidden">
+        <View className="mt-2 h-1 bg-white/95 dark:bg-[#111621] rounded-full overflow-hidden">
           <View
             style={{ width: `${progress * 100}%`, backgroundColor: color }}
             className="h-full"

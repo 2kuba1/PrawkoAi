@@ -177,16 +177,33 @@ export default function ExamSolvingScreen() {
     })),
   });
 
-  const fullMediaUrl = currentQuestion?.mediaUrl
-    ? process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL + currentQuestion?.mediaUrl
-    : null;
+  const fullMediaUrl = React.useMemo(() => {
+    if (!currentQuestion?.mediaUrl) return "";
+    return `${process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL}/${currentQuestion.mediaUrl}`;
+  }, [currentQuestion]);
 
-  const isVideo = fullMediaUrl?.endsWith(".mp4");
+  const isVideo = fullMediaUrl?.toLowerCase().endsWith(".mp4");
 
-  const player = useVideoPlayer(fullMediaUrl || "", (player) => {
-    player.loop = false;
-    player.muted = false;
+  const player = useVideoPlayer(fullMediaUrl ?? "", (p) => {
+    p.loop = false;
   });
+
+  useEffect(() => {
+    if (isVideo && fullMediaUrl) {
+      console.log("Przełączam na wideo:", fullMediaUrl);
+
+      const loadVideo = async () => {
+        try {
+          await player.replaceAsync(fullMediaUrl);
+        } catch (e) {
+          console.error("Błąd ładowania wideo:", e);
+        }
+      };
+
+      loadVideo();
+      setIsPlaying(false);
+    }
+  }, [fullMediaUrl, isVideo]);
 
   const handlePlayVideo = () => {
     player.play();
