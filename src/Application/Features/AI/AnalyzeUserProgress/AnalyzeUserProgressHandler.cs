@@ -1,13 +1,13 @@
-﻿using System.Diagnostics;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
 using Application.Contracts.Repositories;
 using Application.Models;
+using Application.Models.DTOs;
+using Application.Shared;
 using Domain.Entities;
 using Domain.Enums;
 using MediatR;
 using Microsoft.Extensions.Configuration;
-using MathNet.Numerics.Distributions;
 
 namespace Application.Features.AI.AnalyzeUserProgress;
 
@@ -30,9 +30,10 @@ internal sealed class AnalyzeUserProgressHandler : IRequestHandler<AnalyzeUserPr
     
     public async Task<string> Handle(AnalyzeUserProgress request, CancellationToken cancellationToken)
     {
-        var answersCount = _config.GetValue<int>("AI:AnswersCount");
         var lastAnswers = await _userAnswerRepository.GetUserLastAnswers(request.UserId);
-        var lastExamsScores = await _examSessionRepository.GetLastExamsScores(request.UserId);
+        var lastExamsScoresNullable = await _examSessionRepository.GetLastExamsScores(request.UserId);
+        
+        var lastExamsScores = lastExamsScoresNullable.Where(x => x.HasValue).Select(x => (double)x!.Value).ToList();
 
 
         if (lastAnswers.Count < 30)
@@ -42,40 +43,35 @@ internal sealed class AnalyzeUserProgressHandler : IRequestHandler<AnalyzeUserPr
             return "Potrzebujesz więcej przerobionych egzaminow aby skorzystać z tej funkcji";
 
         
-        var avgScore = lastExamsScores.Count != 0 ? lastExamsScores.Average() : 0;
-        var trend = lastExamsScores.Count >= 2 ? lastExamsScores.First() - lastExamsScores.Last() : 0;
+        var avgScore = lastExamsScores.Count != 0 ? lastExamsScores.Average() : 0.0;
+        var trendValue = lastExamsScores.Count >= 2 ? lastExamsScores.First() - lastExamsScores.Last() : 0;
         
         var answersStats = lastAnswers
             .GroupBy(x => x.CategoryTag)
-            .Select(g => new {
-                Category = g.Key,
-                Accuracy = Math.Round((double)g.Count(x => x.WasCorrectlyAnswered) / g.Count() * 100, 1),
-                TotalAttempts = g.Count(),
-                SmallErrors = g.Count(x => x is { WasCorrectlyAnswered: false, Points: 1 }),
-                MediumErrors = g.Count(x => x is { WasCorrectlyAnswered: false, Points: 2 }),
-                CriticalErrors = g.Count(x => x is { WasCorrectlyAnswered: false, Points: 3 })
-            })
+            .Select(g => new AnswersStatsDto(
+                g.Key,
+                Math.Round((double)g.Count(x => x.WasCorrectlyAnswered) / g.Count() * 100, 1),
+                g.Count(),
+                g.Count(x => x is { WasCorrectlyAnswered: false, Points: 1 }),
+                g.Count(x => x is { WasCorrectlyAnswered: false, Points: 2 }),
+                g.Count(x => x is { WasCorrectlyAnswered: false, Points: 3 })
+            ))
             .ToList();
         
         var examStats =new {
             AverageScore = avgScore,
             MaxScore = 74,
             PassThreshold = 68,
-            ExamTrend = trend > 0 ? ExamTrend.Upward : ExamTrend.Downward
+            ExamTrend = trendValue > 0 ? ExamTrend.Upward : ExamTrend.Downward
         };
-        
-        var safeAvg = avgScore ?? 0;
-        
-        var sumOfSquares = lastExamsScores.Select(s => Math.Pow(safeAvg, 2)).Sum();
-        var standardDeviation = Math.Sqrt(sumOfSquares / lastExamsScores.Count);
-
-        var dist = new Normal(safeAvg, standardDeviation);
-
-        var probOfFailure = dist.CumulativeDistribution(68);
-
-        var passProbability = Math.Round((1 - probOfFailure) * 100);
 
         var finalExamTrend = examStats.ExamTrend == ExamTrend.Upward ? "Wzorsotwy" : "Spadkowy";
+        
+        var totalAccuracy = lastAnswers.Count != 0
+            ? (Math.Round((double)lastAnswers.Count(x => x.WasCorrectlyAnswered) / lastAnswers.Count * 100))
+            : 0;
+
+        var passProbability = Utils.CalculatePassProbability(lastExamsScores, answersStats);
         
         var prompt = $"""
                        Jesteś inteligentnym intruktorem nauki jazdy. (to jest nauka na teorię więc osoba nie ma doświadczenia za kierownicą)
@@ -84,6 +80,7 @@ internal sealed class AnalyzeUserProgressHandler : IRequestHandler<AnalyzeUserPr
                        - Trend wyników: {finalExamTrend}.
                        - Statystyki kategorii: {JsonSerializer.Serialize(answersStats)}.
                        - Prawdopodobieństwo zdania egzaminu: {passProbability}
+                       - Poprawność odpowiadaniea {totalAccuracy}
                        
                        Twoje zadanie:
                        1. Szansa na zdanie (%) - podaj tylko liczbę i krótkie uzasadnienie.

@@ -1,5 +1,6 @@
 ﻿using Application.Contracts.Repositories;
 using Application.Models.DTOs;
+using Application.Shared;
 using Domain.Enums;
 using MathNet.Numerics.Distributions;
 using MediatR;
@@ -50,34 +51,7 @@ internal sealed class GetStatsHandler : IRequestHandler<GetStats, UserStatsDto>
             ? (Math.Round((double)lastAnswers.Count(x => x.WasCorrectlyAnswered) / lastAnswers.Count * 100))
             : 0;
 
-        double passProbability = 0;
-
-        switch (lastExamsScores.Count)
-        {
-            case >= 2:
-            {
-                var sumOfSquares = lastExamsScores.Select(s => Math.Pow(s - avgScore, 2)).Sum();
-                var standardDeviation = Math.Sqrt(sumOfSquares / lastExamsScores.Count);
-
-                if (standardDeviation > 0)
-                {
-                    var dist = new Normal(avgScore, standardDeviation);
-                    var probOfFailure = dist.CumulativeDistribution(68);
-                    passProbability = Math.Round((1 - probOfFailure) * 100);
-                }
-                else
-                {
-                    passProbability = avgScore >= 68 ? 100 : 0;
-                }
-
-                break;
-            }
-            case 1:
-                passProbability = lastExamsScores[0] >= 68 ? 100 : 0;
-                break;
-        }
-
-        passProbability = Math.Clamp(passProbability, 0, 100);
+        var passProbability = Utils.CalculatePassProbability(lastExamsScores, answersStats);
 
         var userAiProgressContent = await _aiProgressRepository.GetAiProgress(request.UserId);
 
