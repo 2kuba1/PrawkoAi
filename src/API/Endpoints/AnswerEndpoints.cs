@@ -9,7 +9,8 @@ public static class AnswerEndpoints
 {
     public static void MapAnswerEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/answer/answerSet", LogUserAnswersInSet);
+        var answerGroup = app.MapGroup("/api/answer");
+        answerGroup.MapPost("/answerSet", LogUserAnswersInSet);
     }
 
     private static async Task<IResult> LogUserAnswersInSet([FromBody] AnswersInSet questionSet, [FromServices] IMediator mediator)

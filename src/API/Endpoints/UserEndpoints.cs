@@ -8,7 +8,9 @@ public static class UserEndpoints
 {
     public static void MapUserEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/user/stats", GetUserStats)
+         var userGroup = app.MapGroup("/api/user");
+        
+         userGroup.MapGet("/stats", GetUserStats)
             .RequireAuthorization();
     }
 

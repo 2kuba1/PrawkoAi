@@ -9,10 +9,12 @@ public static class AiEndpoints
 {
     public static void MapAiEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/ai/aiExplanation", AiQuestionExplanation)
+        var aiGroup = app.MapGroup("/api/ai");
+        
+        aiGroup.MapPost("/aiExplanation", AiQuestionExplanation)
             .RequireAuthorization();
 
-        app.MapGet("/api/ai/analyzeUserProgress", AnalyzeUserProgress)
+        aiGroup.MapGet("/analyzeUserProgress", AnalyzeUserProgress)
             .RequireAuthorization();;
     }
 

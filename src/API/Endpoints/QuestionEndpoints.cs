@@ -9,8 +9,10 @@ public static class QuestionEndpoints
 {
     public static void MapQuestionsEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/questions/getRandomQuestionByCategory", GetRandomQuestionByCategory);
-        app.MapGet("/api/questions/getQuestionAdditionalData", GetQuestionAdditionalData);
+        var questionGroup = app.MapGroup("/api/questions");
+        
+        questionGroup.MapGet("/getRandomQuestionByCategory", GetRandomQuestionByCategory);
+        questionGroup.MapGet("/getQuestionAdditionalData", GetQuestionAdditionalData);
     }
 
     private static async Task<IResult> GetRandomQuestionByCategory([FromQuery] string category, IMediator mediator)

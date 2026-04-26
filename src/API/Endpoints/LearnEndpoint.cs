@@ -9,10 +9,12 @@ public static class LearnEndpoint
 {
     public static void MapLearnEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/learn/getStudyTopics", GetStudyTopics)
+        var learnGroup = app.MapGroup("/api/learn");
+        
+        learnGroup.MapGet("/getStudyTopics", GetStudyTopics)
             .RequireAuthorization();
         
-        app.MapGet("/api/learn/getQuestionsForSet", GetQuestionsForSet)
+        learnGroup.MapGet("/getQuestionsForSet", GetQuestionsForSet)
             .RequireAuthorization();
     }
 

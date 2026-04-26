@@ -15,13 +15,16 @@ public static class AuthEndpoints
 {
     public static void MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/account/login/google", GoogleLogin);
-        app.MapGet("/api/account/login/google/callback", GoogleLoginCallback).WithName("GoogleLoginCallback");
-        app.MapGet("/api/account/login/guest", GuestLogin);
-        app.MapGet("/api/account/refresh-token", RefreshToken);
-        app.MapDelete("/api/account/logout", Logout)
+        var accountGroup = app.MapGroup("/api/account");
+        var loginGroup = accountGroup.MapGroup("/login");
+        
+        loginGroup.MapGet("/google", GoogleLogin);
+        loginGroup.MapGet("/google/callback", GoogleLoginCallback).WithName("GoogleLoginCallback");
+        loginGroup.MapGet("/guest", GuestLogin);
+        loginGroup.MapPost("/google-native", GoogleLoginNative);
+        accountGroup.MapGet("/refresh-token", RefreshToken);
+        accountGroup.MapDelete("/logout", Logout)
             .RequireAuthorization();
-        app.MapPost("/api/account/login/google-native", GoogleLoginNative);
     }
 
     private static async Task<IResult> GoogleLoginNative([FromBody] GoogleLoginRequest request, [FromServices] IMediator mediator, [FromServices] IConfiguration configuration)

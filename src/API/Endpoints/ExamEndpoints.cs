@@ -13,19 +13,21 @@ public static class ExamEndpoints
 {
     public static void MapExamEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/exam/start", StartExam)
+        var examGroup = app.MapGroup("/api/exam");
+        
+        examGroup.MapGet("/start", StartExam)
             .RequireAuthorization();
         
-        app.MapPost("/api/exam/answer", AnswerToExamQuestion)
+        examGroup.MapPost("/answer", AnswerToExamQuestion)
             .RequireAuthorization();
 
-        app.MapPut("/api/exam/finish", FinishExam)
+        examGroup.MapPut("/finish", FinishExam)
             .RequireAuthorization();
 
-        app.MapGet("/api/exam/userHistory", GetUserExamSessionsHistory)
+        examGroup.MapGet("/userHistory", GetUserExamSessionsHistory)
             .RequireAuthorization();
 
-        app.MapGet("/api/exam/examResults", GetUserExamSessionResults)
+        examGroup.MapGet("/examResults", GetUserExamSessionResults)
             .RequireAuthorization();
     }
 
