@@ -1,6 +1,7 @@
-﻿using Application.Models.DTOs;
+﻿using Application.Models;
+using Application.Models.DTOs;
 using MediatR;
 
 namespace Application.Features.Exam.GetUserExamsSessionHistory;
 
-public record GetUserExamsSessionHistory(Guid UserId) : IRequest<List<ExamSessionHistory>>;
+public record GetUserExamsSessionHistory(Guid UserId, int PageNumber) : IRequest<PagedList<ExamSessionHistory>>;

@@ -48,9 +48,9 @@ public static class ExamEndpoints
         return Results.Ok(results);
     }
 
-    private static async Task<IResult> GetUserExamSessionsHistory([FromQuery] Guid userId,[FromServices] IMediator mediator)
+    private static async Task<IResult> GetUserExamSessionsHistory([FromQuery] Guid userId, [FromQuery] int pageNumber,[FromServices] IMediator mediator)
     {
-        var results = await mediator.Send(new GetUserExamsSessionHistory(userId));
+        var results = await mediator.Send(new GetUserExamsSessionHistory(userId, pageNumber));
         return Results.Ok(results);
     }
 
