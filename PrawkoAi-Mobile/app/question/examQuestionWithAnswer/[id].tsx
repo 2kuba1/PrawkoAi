@@ -34,7 +34,7 @@ interface ChatMessage {
   content: string;
 }
 
-export default function ExamQuestionWithAnswer() {
+export default function ExamQuestionWithAnswerScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const scrollViewRef = useRef<ScrollView>(null);

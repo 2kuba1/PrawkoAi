@@ -39,7 +39,7 @@ export interface StatisticsResponse {
   aiProgressAnalysis: string | null;
 }
 
-export default function Stats() {
+export default function StatsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 

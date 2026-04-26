@@ -42,7 +42,7 @@ interface SetResultDetail {
   unanswered: AnswerDetail[];
 }
 
-export default function SetResultDetailPage() {
+export default function SetResultDetailPageScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [setResult, setSetResult] = useState<SetResultDetail | null>(null);

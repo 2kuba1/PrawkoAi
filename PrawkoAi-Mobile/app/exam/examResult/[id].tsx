@@ -43,7 +43,7 @@ interface ExamResultDetail {
   isPassed: boolean;
 }
 
-export default function ExamResultDetailPage() {
+export default function ExamResultDetailPageScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
