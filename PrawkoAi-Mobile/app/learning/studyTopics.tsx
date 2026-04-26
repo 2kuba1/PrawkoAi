@@ -15,6 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContext } from "../_layout";
 import Footer from "../components/footer";
+import { useError } from "../context/errorContext";
 import api from "../utils/api";
 import categoryMap from "../utils/categoryMap";
 
@@ -61,7 +62,8 @@ export default function StudyTopicsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const { user, token } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+  const { showError } = useError();
 
   const paddingTop =
     Platform.OS === "android"
@@ -94,6 +96,7 @@ export default function StudyTopicsScreen() {
       });
       setUserProgress(response.data);
     } catch (e) {
+      showError("Wystąpił błąd podczas pobierania postępu użytkownika");
       console.error("Błąd podczas pobierania postępu użytkownika:", e);
     } finally {
       setLoading(false);

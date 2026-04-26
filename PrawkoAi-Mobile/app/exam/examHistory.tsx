@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContext } from "../_layout";
 import Footer from "../components/footer";
+import { useError } from "../context/errorContext";
 import api from "../utils/api";
 
 interface ExamHistory {
@@ -28,6 +29,8 @@ export default function ExamHistoryScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { user } = useContext(AuthContext);
+  const { showError } = useError();
+
   const [exams, setExams] = useState<ExamHistory[] | null>();
 
   const paddingTop =
@@ -60,6 +63,7 @@ export default function ExamHistoryScreen() {
           ),
         );
       } catch (error) {
+        showError("Wystąpił błąd podczas pobierania historii egzaminów");
         console.error("Error fetching exam history:", error);
       }
     };

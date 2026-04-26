@@ -9,6 +9,7 @@ import {
   ReanimatedLogLevel,
 } from "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { ErrorProvider } from "./context/errorContext";
 import "./globals.css";
 import api from "./utils/api";
 
@@ -170,52 +171,54 @@ export default function RootLayout() {
 
   return (
     <AuthContext.Provider value={authContextValue}>
-      <SafeAreaProvider>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            animation: "fade",
-            animationDuration: 200,
-          }}
-        >
-          <Stack.Screen name="index" />
-          <Stack.Screen name="dashboard" />
-          <Stack.Screen name="exam/examHistory" />
-          <Stack.Screen name="exam/examRules" />
-          <Stack.Screen
-            name="exam/examSimulation"
-            options={{
-              gestureEnabled: false,
-              headerLeft: () => null,
+      <ErrorProvider>
+        <SafeAreaProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              animation: "fade",
+              animationDuration: 200,
             }}
-          />
-          <Stack.Screen
-            name="exam/examResult/[id]"
-            options={{
-              gestureEnabled: false,
-              headerLeft: () => null,
-            }}
-          />
-          <Stack.Screen name="question/examQuestionWithAnswer/[id]" />
-          <Stack.Screen name="user/stats" />
-          <Stack.Screen name="learning/studyTopics" />
-          <Stack.Screen name="learning/studyTopic/[category]" />
-          <Stack.Screen
-            name="learning/setSolving/[category]"
-            options={{
-              gestureEnabled: false,
-              headerLeft: () => null,
-            }}
-          />
-          <Stack.Screen
-            name="learning/setResult/setResult"
-            options={{
-              gestureEnabled: false,
-              headerLeft: () => null,
-            }}
-          />
-        </Stack>
-      </SafeAreaProvider>
+          >
+            <Stack.Screen name="index" />
+            <Stack.Screen name="dashboard" />
+            <Stack.Screen name="exam/examHistory" />
+            <Stack.Screen name="exam/examRules" />
+            <Stack.Screen
+              name="exam/examSimulation"
+              options={{
+                gestureEnabled: false,
+                headerLeft: () => null,
+              }}
+            />
+            <Stack.Screen
+              name="exam/examResult/[id]"
+              options={{
+                gestureEnabled: false,
+                headerLeft: () => null,
+              }}
+            />
+            <Stack.Screen name="question/examQuestionWithAnswer/[id]" />
+            <Stack.Screen name="user/stats" />
+            <Stack.Screen name="learning/studyTopics" />
+            <Stack.Screen name="learning/studyTopic/[category]" />
+            <Stack.Screen
+              name="learning/setSolving/[category]"
+              options={{
+                gestureEnabled: false,
+                headerLeft: () => null,
+              }}
+            />
+            <Stack.Screen
+              name="learning/setResult/setResult"
+              options={{
+                gestureEnabled: false,
+                headerLeft: () => null,
+              }}
+            />
+          </Stack>
+        </SafeAreaProvider>
+      </ErrorProvider>
     </AuthContext.Provider>
   );
 }

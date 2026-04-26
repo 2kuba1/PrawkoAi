@@ -1,10 +1,11 @@
 import { AuthContext } from "@/app/_layout";
+import { useError } from "@/app/context/errorContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useLocalSearchParams } from "expo-router/build/hooks";
-import React, { useContext, useEffect, useMemo } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -47,10 +48,10 @@ export default function ExamResultDetailPage() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user, token } = useContext(AuthContext);
-  const [examResult, setExamResult] = React.useState<ExamResultDetail | null>(
-    null,
-  );
-  const [loading, setLoading] = React.useState(true);
+  const [examResult, setExamResult] = useState<ExamResultDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const { showError } = useError();
 
   useEffect(() => {
     const fetchExamResult = async () => {
@@ -68,6 +69,7 @@ export default function ExamResultDetailPage() {
         );
         setExamResult(response.data);
       } catch (error) {
+        showError("Wystąpił błąd podczas pobierania wyników egzaminu");
         console.error("Błąd pobierania wyników egzaminu:", error);
       } finally {
         setLoading(false);

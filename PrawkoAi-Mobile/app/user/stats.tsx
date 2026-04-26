@@ -15,6 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContext } from "../_layout";
 import Footer from "../components/footer";
+import { useError } from "../context/errorContext";
 import api from "../utils/api";
 import categoryMap from "../utils/categoryMap";
 
@@ -41,7 +42,9 @@ export interface StatisticsResponse {
 export default function Stats() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+
   const { user } = useContext(AuthContext);
+  const { showError } = useError();
 
   const [loading, setLoading] = useState(true);
   const [aiLoading, setAiLoading] = useState(false);
@@ -67,6 +70,7 @@ export default function Stats() {
       setStats(response.data);
     } catch (error) {
       console.error("Błąd pobierania statystyk:", error);
+      showError("Wystąpił błąd podczas pobierania statystyk");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -82,6 +86,7 @@ export default function Stats() {
       setAiAnalysis(response.data);
     } catch (error) {
       console.error("Błąd pobierania analizy AI:", error);
+      showError("Wystąpił błąd podczas pobierania analizy AI");
     } finally {
       setAiLoading(false);
     }

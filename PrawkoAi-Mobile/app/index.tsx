@@ -8,6 +8,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { StatusBar, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContext, TokenResponse } from "./_layout";
+import { useError } from "./context/errorContext";
 import i18n from "./utils/translations";
 
 WebBrowser.maybeCompleteAuthSession();
@@ -15,6 +16,7 @@ WebBrowser.maybeCompleteAuthSession();
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const { signIn: completeSignIn } = useContext(AuthContext);
+  const { showError } = useError();
 
   const getNormalizedDeviceLanguage = () => {
     const locale = getLocales()[0];
@@ -83,6 +85,9 @@ export default function LoginScreen() {
         }
       }
     } catch (error) {
+      showError(
+        "Nie można zalogować się przez Google. Proszę spróbować ponownie.",
+      );
       console.error("Błąd sesji przeglądarki:", error);
     }
   };

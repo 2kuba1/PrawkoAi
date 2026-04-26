@@ -1,5 +1,6 @@
 import { AuthContext } from "@/app/_layout";
 import Footer from "@/app/components/footer";
+import { useError } from "@/app/context/errorContext";
 import api from "@/app/utils/api";
 import i18n from "@/app/utils/translations";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
@@ -37,7 +38,9 @@ export default function ExamQuestionWithAnswer() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const scrollViewRef = useRef<ScrollView>(null);
+
   const { token } = useContext(AuthContext);
+  const { showError } = useError();
 
   const [isLoading, setIsLoading] = useState(true);
   const [isAiModalVisible, setIsAiModalVisible] = useState(false);
@@ -104,6 +107,9 @@ export default function ExamQuestionWithAnswer() {
         );
         setMediaAndExplanation(response.data);
       } catch (error) {
+        showError(
+          "Wystąpił błąd podczas pobierania danych pytania. Proszę spróbować ponownie.",
+        );
         console.error("Error fetching data:", error);
       } finally {
         setIsLoading(false);

@@ -1,4 +1,5 @@
 import { AuthContext } from "@/app/_layout";
+import { useError } from "@/app/context/errorContext";
 import api from "@/app/utils/api";
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -32,6 +33,8 @@ export default function ExamSolvingScreen() {
     setNumber: string;
   }>();
 
+  const { showError } = useError();
+
   const [questions, setQuestions] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -52,11 +55,13 @@ export default function ExamSolvingScreen() {
           params: { ...params, locale: lang.toUpperCase() },
         });
         if (isMounted) {
-          console.log("Pobrane pytania:", JSON.stringify(response.data));
           setQuestions(response.data || []);
           setLoading(false);
         }
       } catch (e) {
+        showError(
+          "Wystąpił błąd podczas pobierania pytań. Proszę spróbować ponownie.",
+        );
         console.error("Błąd API:", e);
         if (isMounted) setLoading(false);
       }
@@ -154,6 +159,7 @@ export default function ExamSolvingScreen() {
           params: { source: "local" },
         });
       } catch (e: any) {
+        showError("Wystąpił błąd podczas zapisu wyników.");
         console.error("Błąd zapisu wyników:", e);
       }
     }
@@ -190,12 +196,11 @@ export default function ExamSolvingScreen() {
 
   useEffect(() => {
     if (isVideo && fullMediaUrl) {
-      console.log("Przełączam na wideo:", fullMediaUrl);
-
       const loadVideo = async () => {
         try {
           await player.replaceAsync(fullMediaUrl);
         } catch (e) {
+          showError("Wystąpił błąd podczas ładowania wideo.");
           console.error("Błąd ładowania wideo:", e);
         }
       };

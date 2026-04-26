@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContext } from "../_layout";
+import { useError } from "../context/errorContext";
 import api from "../utils/api";
 import i18n from "../utils/translations";
 
@@ -60,6 +61,8 @@ export default function ExamSimulationScreen() {
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
   const [isFinishing, setIsFinishing] = useState(false);
 
+  const { showError } = useError();
+
   const [userAnswers, setUserAnswers] = useState<
     Record<string, { selectedAnswerId: string | null; answeredAt: string }>
   >({});
@@ -85,6 +88,9 @@ export default function ExamSimulationScreen() {
         });
         setExamData(response.data);
       } catch (e) {
+        showError(
+          "Wystąpił błąd podczas generowania egzaminu. Proszę spróbować ponownie.",
+        );
         console.error("Błąd pobierania danych:", e);
       } finally {
         setLoading(false);
@@ -231,6 +237,9 @@ export default function ExamSimulationScreen() {
 
       router.replace(`/exam/examResult/${examData.examSession.id}`);
     } catch (e) {
+      showError(
+        "Wystąpił błąd podczas finalizacji egzaminu. Proszę spróbować ponownie.",
+      );
       console.error("Błąd podczas finalizacji:", e);
       setIsFinishing(false);
     }

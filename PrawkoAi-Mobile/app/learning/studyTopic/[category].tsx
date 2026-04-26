@@ -1,3 +1,4 @@
+import { useError } from "@/app/context/errorContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
@@ -29,6 +30,8 @@ export default function ScalableExamPathScreen() {
     questionsCount: string;
   }>();
 
+  const { showError } = useError();
+
   const [completedSets, setCompletedSets] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
 
@@ -42,6 +45,9 @@ export default function ScalableExamPathScreen() {
             setCompletedSets(JSON.parse(data));
           }
         } catch (e) {
+          showError(
+            "Wystąpił błąd podczas odczytu postępu. Postęp może być niedostępny.",
+          );
           console.error("Błąd odczytu postępu:", e);
         } finally {
           setLoading(false);

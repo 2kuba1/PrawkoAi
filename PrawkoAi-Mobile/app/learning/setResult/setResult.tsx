@@ -1,3 +1,4 @@
+import { useError } from "@/app/context/errorContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
@@ -47,19 +48,22 @@ export default function SetResultDetailPage() {
   const [setResult, setSetResult] = useState<SetResultDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const { showError } = useError();
+
   useEffect(() => {
     const loadLocalResult = async () => {
       setLoading(true);
 
       try {
         const localData = await AsyncStorage.getItem("last_set_result");
-        console.log("Pobrane lokalne dane zestawu:", localData);
         if (localData) {
           setSetResult(JSON.parse(localData));
         } else {
+          showError("Nie znaleziono lokalnych wyników zestawu.");
           console.warn("Nie znaleziono lokalnych wyników zestawu.");
         }
       } catch (error) {
+        showError("Wystąpił błąd podczas pobierania lokalnych wyników.");
         console.error("Błąd pobierania lokalnych wyników:", error);
       } finally {
         setLoading(false);
@@ -79,6 +83,7 @@ export default function SetResultDetailPage() {
           setSetResult(JSON.parse(localData));
         }
       } catch (error) {
+        showError("Wystąpił błąd podczas pobierania lokalnych wyników.");
         console.error("Błąd pobierania lokalnych wyników:", error);
       } finally {
         setLoading(false);
@@ -88,9 +93,10 @@ export default function SetResultDetailPage() {
     loadLocalResult();
 
     return () => {
-      AsyncStorage.removeItem("last_set_result").catch((err) =>
-        console.error("Błąd usuwania wyników ze storage:", err),
-      );
+      AsyncStorage.removeItem("last_set_result").catch((err) => {
+        showError("Wystąpił błąd podczas usuwania wyników ze storage.");
+        console.error("Błąd usuwania wyników ze storage:", err);
+      });
     };
   }, []);
 
