@@ -62,7 +62,7 @@ public static class AuthEndpoints
     {
         var props = new AuthenticationProperties
         {
-            RedirectUri = "/api/account/login/google/callback", 
+            RedirectUri = "/api/v1/account/login/google/callback", 
             Items =
             {
                 ["returnUrl"] = returnUrl,
@@ -81,12 +81,8 @@ public static class AuthEndpoints
 
         if (!result.Succeeded)
             return Results.Unauthorized();
-
-        var authenticateResult = await httpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
-        var returnUrl = authenticateResult.Properties?.Items["returnUrl"];
         
         var deviceId = result.Properties?.Items["device_id"];
-        var deviceName = result.Properties?.Items["device_name"];
         var expoRedirectUrl = result.Properties?.Items["returnUrl"];
         
         var tokens = await mediator.Send(new GoogleLogin(result.Principal, deviceId), CancellationToken.None);

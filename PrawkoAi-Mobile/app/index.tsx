@@ -63,7 +63,7 @@ export default function LoginScreen() {
     const deviceId = Device.osInternalBuildId ?? "dev_id";
     const deviceName = Device.deviceName ?? "Mobile";
 
-    const apiUrl = `${process.env.EXPO_PUBLIC_API_URL}/api/account/login/google`;
+    const apiUrl = `${process.env.EXPO_PUBLIC_API_URL}/api/v1/account/login/google`;
     const authUrl = `${apiUrl}?returnUrl=${encodeURIComponent(redirectUri)}&deviceId=${encodeURIComponent(deviceId)}&deviceName=${encodeURIComponent(deviceName)}`;
 
     try {
@@ -95,7 +95,7 @@ export default function LoginScreen() {
   const handleGuestSignIn = async () => {
     const deviceId = Device.osInternalBuildId ?? "dev_id";
 
-    const apiUrl = `${process.env.EXPO_PUBLIC_API_URL}/api/account/login/guest`;
+    const apiUrl = `${process.env.EXPO_PUBLIC_API_URL}/api/v1/account/login/guest`;
 
     const response = await fetch(
       `${apiUrl}?deviceId=${encodeURIComponent(deviceId)}`,
