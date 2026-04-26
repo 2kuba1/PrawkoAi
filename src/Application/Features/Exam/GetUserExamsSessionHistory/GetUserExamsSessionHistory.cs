@@ -4,4 +4,4 @@ using MediatR;
 
 namespace Application.Features.Exam.GetUserExamsSessionHistory;
 
-public record GetUserExamsSessionHistory(Guid UserId, int PageNumber) : IRequest<PagedList<ExamSessionHistory>>;
+public record GetUserExamsSessionHistory(Guid UserId, int PageNumber, int PageSize) : IRequest<PagedList<ExamSessionHistory>>;

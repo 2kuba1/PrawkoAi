@@ -48,9 +48,12 @@ public static class ExamEndpoints
         return Results.Ok(results);
     }
 
-    private static async Task<IResult> GetUserExamSessionsHistory([FromQuery] Guid userId, [FromQuery] int pageNumber,[FromServices] IMediator mediator)
+    private static async Task<IResult> GetUserExamSessionsHistory([FromQuery] Guid userId, [FromQuery] int pageNumber,[FromQuery] int pageSize,[FromServices] IMediator mediator)
     {
-        var results = await mediator.Send(new GetUserExamsSessionHistory(userId, pageNumber));
+        if(pageSize > 15)
+            return Results.BadRequest("PageSize must be less than 15");
+        
+        var results = await mediator.Send(new GetUserExamsSessionHistory(userId, pageNumber, pageSize));
         return Results.Ok(results);
     }
 

@@ -1,7 +1,10 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getLocales } from "expo-localization";
 import * as Notifications from "expo-notifications";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { jwtDecode } from "jwt-decode";
+import { useColorScheme } from "nativewind";
 import { createContext, useEffect, useState } from "react";
 import { AppState, AppStateStatus } from "react-native";
 import {
@@ -12,6 +15,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorProvider } from "./context/errorContext";
 import "./globals.css";
 import api from "./utils/api";
+import i18n from "./utils/translations";
 
 export interface AuthContextType {
   signIn: (token: TokenResponse) => Promise<void>;
@@ -69,9 +73,46 @@ export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
 
-  const decodeAndSetUser = (token: string) => {
+  const { setColorScheme } = useColorScheme();
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    const loadAppSettings = async () => {
+      try {
+        const [savedTheme, savedLang, savedCat] = await Promise.all([
+          AsyncStorage.getItem("user-theme"),
+          AsyncStorage.getItem("user-language"),
+          AsyncStorage.getItem("user-category"),
+        ]);
+
+        if (savedTheme) {
+          setColorScheme(savedTheme as "light" | "dark");
+        }
+
+        if (savedLang) {
+          i18n.locale = savedLang;
+        } else {
+          const locale = getLocales()[0];
+          const code = locale
+            ? (
+                locale.languageCode || locale.languageTag.split("-")[0]
+              ).toUpperCase()
+            : "EN";
+          i18n.locale = code;
+        }
+      } catch (e) {
+        console.error("Błąd podczas ładowania ustawień w RootLayout:", e);
+      } finally {
+        setIsReady(true);
+      }
+    };
+
+    loadAppSettings();
+  }, []);
+
+  const decodeAndSetUser = (tokenStr: string) => {
     try {
-      const decoded = jwtDecode(token) as User;
+      const decoded = jwtDecode(tokenStr) as User;
       setUser(decoded);
     } catch (e) {
       setUser(null);
@@ -99,7 +140,7 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || !isReady) return;
 
     const currentSegments = segments as string[];
     const rootSegment = currentSegments[0];
@@ -110,7 +151,7 @@ export default function RootLayout() {
     } else if (token && isLoginPage) {
       router.replace("/dashboard");
     }
-  }, [token, isLoading, segments]);
+  }, [token, isLoading, isReady, segments]);
 
   const authContextValue = {
     token,
@@ -169,6 +210,8 @@ export default function RootLayout() {
     };
   }, [token]);
 
+  if (!isReady) return null;
+
   return (
     <AuthContext.Provider value={authContextValue}>
       <ErrorProvider>
@@ -216,6 +259,7 @@ export default function RootLayout() {
                 headerLeft: () => null,
               }}
             />
+            <Stack.Screen name="user/profile" />
           </Stack>
         </SafeAreaProvider>
       </ErrorProvider>

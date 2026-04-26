@@ -26,7 +26,7 @@ internal sealed class GetUserExamsSessionHistoryHandler : IRequestHandler<GetUse
         var results = await _examSessionRepository.GetUserExamsSessionHistory(
             request.UserId, 
             request.PageNumber, 
-            15);
+            request.PageSize);
         
         return results;
     }

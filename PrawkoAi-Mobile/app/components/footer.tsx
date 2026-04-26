@@ -66,7 +66,7 @@ const Footer = () => {
       label: i18n.t("navigation.nav_profile"),
       icon: "account-circle",
       family: "MaterialIcons",
-      path: "/exam/examHistory",
+      path: "/user/profile",
     },
   ];
 

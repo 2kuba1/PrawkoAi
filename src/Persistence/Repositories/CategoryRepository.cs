@@ -17,4 +17,8 @@ public class CategoryRepository : GenericRepository<Category>, ICategoryReposito
 
     public async Task<Category?> GetCategoryByName(string categoryName)
         => await _context.Categories.FirstOrDefaultAsync(x => x.Name == categoryName);
+
+    public async Task<List<string>> GetAllCategoriesNames()
+        =>await _context.Categories.Select(x => x.Name).ToListAsync();
+    
 }

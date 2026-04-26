@@ -94,5 +94,6 @@ app.MapExamEndpoints();
 app.MapAiEndpoints();
 app.MapUserEndpoints();
 app.MapLearnEndpoints();
+app.MapCategoryEndpoints();
 
 app.Run();

@@ -1,9 +1,10 @@
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Platform,
   ScrollView,
   StatusBar,
   Text,
@@ -17,6 +18,13 @@ export default function ExamRulesScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+
+  const paddingTop =
+    Platform.OS === "android"
+      ? insets.top > 0
+        ? insets.top
+        : StatusBar.currentHeight || 24
+      : insets.top;
 
   useEffect(() => {
     const loadLanguage = async () => {
@@ -43,22 +51,40 @@ export default function ExamRulesScreen() {
 
   return (
     <View className="flex-1 bg-[#f6f6f8] dark:bg-[#111621]">
-      <Stack.Screen options={{ headerShown: false }} />
-      <StatusBar barStyle="default" />
+      <StatusBar
+        barStyle="dark-content"
+        translucent
+        backgroundColor="transparent"
+      />
 
       <View
-        style={{ paddingTop: insets.top }}
-        className="flex-row items-center p-4 bg-[#f6f6f8]/80 dark:bg-[#111621]/80 backdrop-blur-md border-b border-[#1544b2]/10"
+        style={{ paddingTop }}
+        className="bg-white/95 dark:bg-[#1a1f2e] border-b border-blue-900/10 shadow-sm z-50"
       >
-        <TouchableOpacity
-          onPress={() => router.back()}
-          className="p-2 hover:bg-[#1544b2]/10 rounded-full"
+        <View
+          style={{
+            height: 56,
+            flexDirection: "row",
+            alignItems: "center",
+            paddingHorizontal: 12,
+          }}
         >
-          <MaterialIcons name="arrow-back" size={24} color="#1544b2" />
-        </TouchableOpacity>
-        <Text className="text-xl font-bold ml-2 text-slate-900 dark:text-white">
-          {i18n.t("exam_rules.title")}
-        </Text>
+          <TouchableOpacity
+            className="p-2 rounded-full"
+            onPress={() =>
+              router.canGoBack() ? router.back() : router.replace("/dashboard")
+            }
+          >
+            <MaterialCommunityIcons
+              name="arrow-left"
+              size={24}
+              color="#1544b2"
+            />
+          </TouchableOpacity>
+          <Text className="text-xl font-bold ml-2 flex-1 text-slate-900 dark:text-white">
+            {i18n.t("exam_rules.title")}
+          </Text>
+        </View>
       </View>
 
       <ScrollView
