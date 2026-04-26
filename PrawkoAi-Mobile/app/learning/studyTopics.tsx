@@ -1,4 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
 import {
@@ -91,7 +92,7 @@ export default function StudyTopicsScreen() {
       const response = await api.get("/learn/getStudyTopics", {
         params: {
           userId: user?.id,
-          category: "B",
+          category: (await AsyncStorage.getItem("user-category")) ?? "B",
         },
       });
       setUserProgress(response.data);

@@ -187,13 +187,16 @@ export default function ScalableExamPathScreen() {
           >
             <NodeCard
               data={item}
-              onPress={() => {
+              onPress={async () => {
+                const savedCategory =
+                  await AsyncStorage.getItem("user-category");
+
                 if (item.status !== "locked") {
                   router.push({
                     pathname: "/learning/setSolving/[category]" as any,
                     params: {
                       categoryTag: params.categoryId,
-                      categoryType: "B",
+                      categoryType: savedCategory ?? "B",
                       setNumber: item.id.toString(),
                     },
                   });

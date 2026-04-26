@@ -82,7 +82,7 @@ export default function ExamSimulationScreen() {
         const response = await api.get<ExamData>("/exam/start", {
           params: {
             userId: user.id,
-            category: "B",
+            category: (await AsyncStorage.getItem("user-category")) ?? "B",
             locale: (await AsyncStorage.getItem("user-language")) ?? "EN",
           },
         });
