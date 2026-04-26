@@ -3,6 +3,7 @@ using Application.Features.Users.GoogleLoginNative;
 using Application.Features.Users.GuestLogin;
 using Application.Features.Users.RefreshAuthToken;
 using Application.Features.Users.RevokeRefreshTokens;
+using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -15,7 +16,13 @@ public static class AuthEndpoints
 {
     public static void MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
-        var accountGroup = app.MapGroup("/api/account");
+        var versionSet = app.NewApiVersionSet()
+            .HasApiVersion(new ApiVersion(1, 0))
+            .Build();
+        
+        var accountGroup = app.MapGroup("/api/v{version:apiVersion}/account")
+            .WithApiVersionSet(versionSet);
+        
         var loginGroup = accountGroup.MapGroup("/login");
         
         loginGroup.MapGet("/google", GoogleLogin);

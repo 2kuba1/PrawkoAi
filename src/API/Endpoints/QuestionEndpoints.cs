@@ -1,5 +1,6 @@
 ﻿using Application.Features.Questions.GetMediaAndStaticResponse;
 using Application.Features.Questions.GetRandomQuestionByCategory;
+using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +10,12 @@ public static class QuestionEndpoints
 {
     public static void MapQuestionsEndpoints(this IEndpointRouteBuilder app)
     {
-        var questionGroup = app.MapGroup("/api/questions");
+        var versionSet = app.NewApiVersionSet()
+            .HasApiVersion(new ApiVersion(1, 0))
+            .Build();
+        
+        var questionGroup = app.MapGroup("/api/v{version:apiVersion}/questions")
+            .WithApiVersionSet(versionSet);
         
         questionGroup.MapGet("/getRandomQuestionByCategory", GetRandomQuestionByCategory);
         questionGroup.MapGet("/getQuestionAdditionalData", GetQuestionAdditionalData);

@@ -51,7 +51,7 @@ export default function ExamSolvingScreen() {
     const fetchQuestions = async () => {
       try {
         const lang = (await AsyncStorage.getItem("user-language")) || "PL";
-        const response = await api.get("/api/learn/getQuestionsForSet", {
+        const response = await api.get("/learn/getQuestionsForSet", {
           params: { ...params, locale: lang.toUpperCase() },
         });
         if (isMounted) {
@@ -143,7 +143,7 @@ export default function ExamSolvingScreen() {
         );
 
         const payload = { userId: user?.id, answers: userAnswers };
-        await api.post("/api/answer/answerSet", payload);
+        await api.post("/answer/answerSet", payload);
 
         const storageKey = `progress_${params.categoryTag}`;
         const existingData = await AsyncStorage.getItem(storageKey);

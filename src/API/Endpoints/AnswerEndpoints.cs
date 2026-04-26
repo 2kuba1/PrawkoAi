@@ -1,5 +1,6 @@
 ﻿using Application.Features.Answers.LogUserAnswersInSet;
 using Application.Models.DTOs;
+using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +10,13 @@ public static class AnswerEndpoints
 {
     public static void MapAnswerEndpoints(this IEndpointRouteBuilder app)
     {
-        var answerGroup = app.MapGroup("/api/answer");
+        var versionSet = app.NewApiVersionSet()
+            .HasApiVersion(new ApiVersion(1, 0))
+            .Build();
+        
+        var answerGroup = app.MapGroup("/api/v{version:apiVersion}/answer")
+            .WithApiVersionSet(versionSet);
+        
         answerGroup.MapPost("/answerSet", LogUserAnswersInSet);
     }
 

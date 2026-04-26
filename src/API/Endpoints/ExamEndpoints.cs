@@ -4,6 +4,7 @@ using Application.Features.Exam.GetUserExamSessionResults;
 using Application.Features.Exam.GetUserExamsSessionHistory;
 using Application.Features.Exam.StartExam;
 using Application.Models.DTOs;
+using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,7 +14,12 @@ public static class ExamEndpoints
 {
     public static void MapExamEndpoints(this IEndpointRouteBuilder app)
     {
-        var examGroup = app.MapGroup("/api/exam");
+        var versionSet = app.NewApiVersionSet()
+            .HasApiVersion(new ApiVersion(1, 0))
+            .Build();
+        
+        var examGroup = app.MapGroup("/api/v{version:apiVersion}/exam")
+            .WithApiVersionSet(versionSet);
         
         examGroup.MapGet("/start", StartExam)
             .RequireAuthorization();

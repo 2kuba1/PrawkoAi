@@ -97,7 +97,7 @@ export default function ExamQuestionWithAnswerScreen() {
         i18n.locale = savedLanguage;
 
         const response = await api.get<MediaAndExplanationResponse>(
-          "/api/questions/getQuestionAdditionalData",
+          "/questions/getQuestionAdditionalData",
           {
             params: {
               questionId: questionData.questionId,
@@ -149,7 +149,7 @@ export default function ExamQuestionWithAnswerScreen() {
       const savedLanguage =
         (await AsyncStorage.getItem("user-language")) || "PL";
       const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/api/ai/aiExplanation`,
+        `${process.env.EXPO_PUBLIC_API_URL}/api/v1/ai/aiExplanation`,
         {
           method: "POST",
           headers: {

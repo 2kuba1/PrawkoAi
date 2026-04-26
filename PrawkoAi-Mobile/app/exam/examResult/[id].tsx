@@ -57,16 +57,13 @@ export default function ExamResultDetailPageScreen() {
     const fetchExamResult = async () => {
       if (!id || !user?.id) return;
       try {
-        const response = await api.get<ExamResultDetail>(
-          "/api/exam/examResults",
-          {
-            params: {
-              userId: user.id,
-              examSessionId: id,
-              locale: await AsyncStorage.getItem("user-language"),
-            },
+        const response = await api.get<ExamResultDetail>("/exam/examResults", {
+          params: {
+            userId: user.id,
+            examSessionId: id,
+            locale: await AsyncStorage.getItem("user-language"),
           },
-        );
+        });
         setExamResult(response.data);
       } catch (error) {
         showError("Wystąpił błąd podczas pobierania wyników egzaminu");

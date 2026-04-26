@@ -155,7 +155,7 @@ export default function ProfileScreen() {
     const fetchLastExams = async () => {
       try {
         const response = await api.get<ExamHistoryResponse>(
-          "/api/exam/userHistory",
+          "/exam/userHistory",
           {
             params: { userId: user?.id, pageNumber: 1, pageSize: 3 },
           },
@@ -169,7 +169,7 @@ export default function ProfileScreen() {
     const fetchCategories = async (): Promise<Option[]> => {
       try {
         const response = await api.get<string[]>(
-          "/api/category/getAllCategoriesNames",
+          "/category/getAllCategoriesNames",
         );
         const newCategories = response.data.map((categoryName) => ({
           label: "Kategoria " + categoryName,

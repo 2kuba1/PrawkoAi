@@ -88,7 +88,7 @@ export default function StudyTopicsScreen() {
   const fetchProgress = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/api/learn/getStudyTopics", {
+      const response = await api.get("/learn/getStudyTopics", {
         params: {
           userId: user?.id,
           category: "B",

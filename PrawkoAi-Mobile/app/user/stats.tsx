@@ -61,7 +61,7 @@ export default function StatsScreen() {
 
   const fetchData = async () => {
     try {
-      const response = await api.get<StatisticsResponse>("/api/user/stats", {
+      const response = await api.get<StatisticsResponse>("/user/stats", {
         params: { userId: user?.id },
       });
       if (response.data.aiProgressAnalysis) {
@@ -80,7 +80,7 @@ export default function StatsScreen() {
   const fetchAiAnalysis = async () => {
     setAiLoading(true);
     try {
-      const response = await api.get<string>("/api/ai/analyzeUserProgress", {
+      const response = await api.get<string>("/ai/analyzeUserProgress", {
         params: { userId: user?.id },
       });
       setAiAnalysis(response.data);

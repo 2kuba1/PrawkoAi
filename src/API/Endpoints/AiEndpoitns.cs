@@ -1,5 +1,6 @@
 ﻿using Application.Features.AI.AnalyzeUserProgress;
 using Application.Features.AI.GetAiExplanationStream;
+using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +10,12 @@ public static class AiEndpoints
 {
     public static void MapAiEndpoints(this IEndpointRouteBuilder app)
     {
-        var aiGroup = app.MapGroup("/api/ai");
+        var versionSet = app.NewApiVersionSet()
+            .HasApiVersion(new ApiVersion(1, 0))
+            .Build();
+        
+        var aiGroup = app.MapGroup("/api/v{version:apiVersion}/ai")
+            .WithApiVersionSet(versionSet);
         
         aiGroup.MapPost("/aiExplanation", AiQuestionExplanation)
             .RequireAuthorization();

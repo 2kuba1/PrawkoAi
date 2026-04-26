@@ -3,7 +3,7 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
 const api = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL,
+  baseURL: process.env.EXPO_PUBLIC_API_URL + "/api/v1",
 });
 
 api.interceptors.request.use(
@@ -34,7 +34,7 @@ api.interceptors.response.use(
         const { refreshToken }: TokenResponse = JSON.parse(savedTokenString);
 
         const response = await axios.get(
-          `${process.env.EXPO_PUBLIC_API_URL}/api/account/refresh-token?refreshToken=${encodeURIComponent(refreshToken)}`,
+          `${process.env.EXPO_PUBLIC_API_URL}/api/v1/account/refresh-token?refreshToken=${encodeURIComponent(refreshToken)}`,
         );
 
         const { accessToken: newAccess, refreshToken: newRefresh } =

@@ -72,7 +72,7 @@ export default function ExamHistoryScreen() {
 
     try {
       const response = await api.get<PagedResponse<ExamHistory>>(
-        "/api/exam/userHistory",
+        "/exam/userHistory",
         {
           params: {
             userId: user.id,

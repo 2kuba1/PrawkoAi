@@ -164,7 +164,7 @@ export default function RootLayout() {
     },
     signOut: async () => {
       try {
-        await api.delete(`/api/account/logout?userId=${user?.id}`);
+        await api.delete(`/account/logout?userId=${user?.id}`);
       } catch (e) {
         console.log(e);
       } finally {

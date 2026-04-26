@@ -79,7 +79,7 @@ export default function ExamSimulationScreen() {
       if (!user?.id) return;
 
       try {
-        const response = await api.get<ExamData>("/api/exam/start", {
+        const response = await api.get<ExamData>("/exam/start", {
           params: {
             userId: user.id,
             category: "B",
@@ -228,7 +228,7 @@ export default function ExamSimulationScreen() {
         }),
       );
 
-      await api.put("/api/exam/finish", {
+      await api.put("/exam/finish", {
         userId: user.id,
         examSessionId: examData.examSession.id,
         locale: language,

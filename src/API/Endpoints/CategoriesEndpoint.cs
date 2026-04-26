@@ -1,4 +1,5 @@
 ﻿using Application.Features.Category.GetAllCategoriesNames;
+using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,7 +9,12 @@ public static class CategoriesEndpoint
 {
     public static void MapCategoryEndpoints(this IEndpointRouteBuilder app)
     {
-        var categoryGroup = app.MapGroup("/api/category");
+        var versionSet = app.NewApiVersionSet()
+            .HasApiVersion(new ApiVersion(1, 0))
+            .Build();
+        
+        var categoryGroup = app.MapGroup("/api/v{version:apiVersion}/category")
+            .WithApiVersionSet(versionSet);
 
         categoryGroup.MapGet("/getAllCategoriesNames", GetAllCategoriesNames)
             .RequireAuthorization();

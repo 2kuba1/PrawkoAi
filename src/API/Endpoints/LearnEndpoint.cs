@@ -1,5 +1,6 @@
 ﻿using Application.Features.Learning.GetQuestionsForSet;
 using Application.Features.Learning.GetStudyTopics;
+using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +10,12 @@ public static class LearnEndpoint
 {
     public static void MapLearnEndpoints(this IEndpointRouteBuilder app)
     {
-        var learnGroup = app.MapGroup("/api/learn");
+        var versionSet = app.NewApiVersionSet()
+            .HasApiVersion(new ApiVersion(1, 0))
+            .Build();
+        
+        var learnGroup = app.MapGroup("/api/v{version:apiVersion}/learn")
+            .WithApiVersionSet(versionSet);
         
         learnGroup.MapGet("/getStudyTopics", GetStudyTopics)
             .RequireAuthorization();
