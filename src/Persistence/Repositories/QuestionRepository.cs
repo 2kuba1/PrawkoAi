@@ -239,4 +239,36 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
             ))
             .ToListAsync();
     }
+
+    public async Task<PagedList<FoundQuestionsDto>> SearchForQuestions(string query, string locale, string categoryType, int pageSize, int pageNumber)
+    {
+        var dbQuery = _context.Questions.AsNoTracking().AsQueryable();
+
+        dbQuery = locale.ToLower() switch
+        {
+            "en" => dbQuery.Where(x => EF.Functions.ILike(x.ContentEn!, $"%{query}%") && x.Categories.Any(c => c.Name == categoryType)),
+            "de" => dbQuery.Where(x => EF.Functions.ILike(x.ContentDe!, $"%{query}%") && x.Categories.Any(c => c.Name == categoryType)),
+            "ua" => dbQuery.Where(x => EF.Functions.ILike(x.ContentUa!, $"%{query}%") && x.Categories.Any(c => c.Name == categoryType)),
+            _ => dbQuery.Where(x => EF.Functions.ILike(x.ContentPl, $"%{query}%") && x.Categories.Any(c => c.Name == categoryType))
+        };
+
+        var items = await dbQuery
+            .OrderBy(q => q.QuestionNumber)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(q => new FoundQuestionsDto(
+                q.Id,
+                q.QuestionNumber,
+                locale == "en" ? q.ContentEn :
+                locale == "de" ? q.ContentDe :
+                locale == "ua" ? q.ContentUa : q.ContentPl,
+                (int)q.Points,
+                q.CategoryTag))
+            .ToListAsync();
+
+        var totalCount = await dbQuery.CountAsync();
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+        
+        return new PagedList<FoundQuestionsDto>(items, pageNumber, totalCount, totalPages);
+    }
 }

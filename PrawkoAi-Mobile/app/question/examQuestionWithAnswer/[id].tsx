@@ -24,7 +24,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface MediaAndExplanationResponse {
-  mediaUrl: string;
+  mediaUrl?: string;
   staticResponse: string;
   correctAnswerId: string;
 }
