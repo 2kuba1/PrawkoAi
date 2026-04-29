@@ -1,4 +1,5 @@
 ﻿using Application.Features.Questions.GetMediaAndStaticResponse;
+using Application.Features.Questions.GetQuestionWithAnswers;
 using Application.Features.Questions.GetRandomQuestionByCategory;
 using Application.Features.Questions.SearchForQuestion;
 using Asp.Versioning;
@@ -20,11 +21,15 @@ public static class QuestionEndpoints
         
         questionGroup.MapGet("/getRandomQuestionByCategory", GetRandomQuestionByCategory)
             .RequireAuthorization();
+        
         questionGroup.MapGet("/getQuestionAdditionalData", GetQuestionAdditionalData)
             .RequireAuthorization();
+        
         questionGroup.MapGet("/search", SearchForQuestion)
             .RequireAuthorization();
-
+        
+        questionGroup.MapGet("/getQuestionWithAnswers", GetQuestionWithAnswers)
+            .RequireAuthorization();
     }
 
     private static async Task<IResult> GetRandomQuestionByCategory([FromQuery] string category, IMediator mediator)
@@ -43,5 +48,12 @@ public static class QuestionEndpoints
     {
         var results = await mediator.Send(new SearchForQuestion(question, locale, categoryType,  pageSize, pageNumber));
         return Results.Ok(results);
+    }
+
+    private static async Task<IResult> GetQuestionWithAnswers([FromQuery] float questionNumber, [FromQuery] string locale,
+        [FromServices] IMediator mediator)
+    {
+        var result = await mediator.Send(new GetQuestionWithAnswers(questionNumber, locale));
+        return Results.Ok(result);
     }
  }

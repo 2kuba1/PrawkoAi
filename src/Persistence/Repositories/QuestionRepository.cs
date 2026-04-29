@@ -179,6 +179,7 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
         return studyTopicsResponse;
     }
 
+    //todo change categoryType to categoryName
     public async Task<List<SetQuestionDto>> GetQuestionSet(string categoryTag, string categoryType, int setNumber, string locale)
     {
         if (setNumber < 1) setNumber = 1;
@@ -270,5 +271,35 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
         
         return new PagedList<FoundQuestionsDto>(items, pageNumber, totalCount, totalPages);
+    }
+
+    public async Task<QuestionDto?> GetQuestionWithAnswers(float questionNumber, string locale)
+    {
+        var question = await _context.Questions
+            .AsNoTracking()
+            .Where(q => q.QuestionNumber == questionNumber)
+            .Select(q => new QuestionDto(
+                q.Id,
+                locale == "EN" ? q.ContentEn ?? q.ContentPl :
+                locale == "DE" ? q.ContentDe ?? q.ContentPl :
+                locale == "UA" ? q.ContentUa ?? q.ContentPl : q.ContentPl,
+                q.QuestionNumber,
+                q.CategoryType,
+                q.Points,
+                q.MediaUrl,
+                q.Answers.Select(a => new AnswerDto(
+                    a.Id,
+                    a.QuestionId,
+                    locale == "EN" ? a.ContentEn ?? a.ContentPl :
+                    locale == "DE" ? a.ContentDe ?? a.ContentPl :
+                    locale == "UA" ? a.ContentUa ?? a.ContentPl : a.ContentPl,
+                    a.CreatedAt)).ToList(),
+                locale == "EN" ? q.StaticResponseEn ?? q.StaticResponsePl :
+                locale == "DE" ? q.StaticResponseDe ?? q.StaticResponsePl :
+                locale == "UA" ? q.StaticResponseUa ?? q.StaticResponsePl : q.StaticResponsePl
+                ))
+            .FirstOrDefaultAsync();
+        
+        return question;
     }
 }
