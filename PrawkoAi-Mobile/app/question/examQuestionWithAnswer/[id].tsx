@@ -74,7 +74,9 @@ export default function ExamQuestionWithAnswerScreen() {
   };
 
   const fullMediaUrl = mediaAndExplanation?.mediaUrl
-    ? process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL + mediaAndExplanation.mediaUrl
+    ? process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL +
+      "/" +
+      mediaAndExplanation.mediaUrl
     : null;
 
   const isVideo = fullMediaUrl?.toLowerCase().endsWith(".mp4");

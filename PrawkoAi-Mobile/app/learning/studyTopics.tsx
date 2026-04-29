@@ -279,9 +279,9 @@ export default function StudyTopicsScreen() {
             <Text className="font-bold text-lg text-slate-900 dark:text-white mb-4 px-2">
               Wyniki wyszukiwania
             </Text>
-            {searchResults.map((item) => (
+            {searchResults.map((item, index) => (
               <TouchableOpacity
-                key={`${item.questionId}-${item.questionNumber}`}
+                key={index}
                 className="bg-white dark:bg-slate-800 p-4 rounded-2xl mb-3 border border-blue-500/10 shadow-sm"
               >
                 <Text className="text-[10px] font-bold text-[#1544b2] mb-1">
