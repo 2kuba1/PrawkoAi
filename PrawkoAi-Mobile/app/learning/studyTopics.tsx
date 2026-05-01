@@ -281,6 +281,11 @@ export default function StudyTopicsScreen() {
             </Text>
             {searchResults.map((item, index) => (
               <TouchableOpacity
+                onPress={() =>
+                  router.push(
+                    `/question/questionWithAnswers/${item.questionNumber}` as any,
+                  )
+                }
                 key={index}
                 className="bg-white dark:bg-slate-800 p-4 rounded-2xl mb-3 border border-blue-500/10 shadow-sm"
               >

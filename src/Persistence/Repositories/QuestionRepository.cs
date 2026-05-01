@@ -296,7 +296,8 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
                     a.CreatedAt)).ToList(),
                 locale == "EN" ? q.StaticResponseEn ?? q.StaticResponsePl :
                 locale == "DE" ? q.StaticResponseDe ?? q.StaticResponsePl :
-                locale == "UA" ? q.StaticResponseUa ?? q.StaticResponsePl : q.StaticResponsePl
+                locale == "UA" ? q.StaticResponseUa ?? q.StaticResponsePl : q.StaticResponsePl,
+                q.CorrectAnswerId
                 ))
             .FirstOrDefaultAsync();
         
