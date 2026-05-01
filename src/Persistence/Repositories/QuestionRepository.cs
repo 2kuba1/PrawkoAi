@@ -179,6 +179,7 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
         return studyTopicsResponse;
     }
 
+    //todo change categoryType to categoryName
     public async Task<List<SetQuestionDto>> GetQuestionSet(string categoryTag, string categoryType, int setNumber, string locale)
     {
         if (setNumber < 1) setNumber = 1;
@@ -238,5 +239,68 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
                     q.Id)).ToList()
             ))
             .ToListAsync();
+    }
+
+    public async Task<PagedList<FoundQuestionsDto>> SearchForQuestions(string query, string locale, string categoryType, int pageSize, int pageNumber)
+    {
+        var dbQuery = _context.Questions.AsNoTracking().AsQueryable();
+
+        dbQuery = locale.ToLower() switch
+        {
+            "en" => dbQuery.Where(x => EF.Functions.ILike(x.ContentEn!, $"%{query}%") && x.Categories.Any(c => c.Name == categoryType)),
+            "de" => dbQuery.Where(x => EF.Functions.ILike(x.ContentDe!, $"%{query}%") && x.Categories.Any(c => c.Name == categoryType)),
+            "ua" => dbQuery.Where(x => EF.Functions.ILike(x.ContentUa!, $"%{query}%") && x.Categories.Any(c => c.Name == categoryType)),
+            _ => dbQuery.Where(x => EF.Functions.ILike(x.ContentPl, $"%{query}%") && x.Categories.Any(c => c.Name == categoryType))
+        };
+
+        var items = await dbQuery
+            .OrderBy(q => q.QuestionNumber)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(q => new FoundQuestionsDto(
+                q.Id,
+                q.QuestionNumber,
+                locale == "en" ? q.ContentEn :
+                locale == "de" ? q.ContentDe :
+                locale == "ua" ? q.ContentUa : q.ContentPl,
+                (int)q.Points,
+                q.CategoryTag))
+            .ToListAsync();
+
+        var totalCount = await dbQuery.CountAsync();
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+        
+        return new PagedList<FoundQuestionsDto>(items, pageNumber, totalCount, totalPages);
+    }
+
+    public async Task<QuestionDto?> GetQuestionWithAnswers(float questionNumber, string locale)
+    {
+        var question = await _context.Questions
+            .AsNoTracking()
+            .Where(q => q.QuestionNumber == questionNumber)
+            .Select(q => new QuestionDto(
+                q.Id,
+                locale == "EN" ? q.ContentEn ?? q.ContentPl :
+                locale == "DE" ? q.ContentDe ?? q.ContentPl :
+                locale == "UA" ? q.ContentUa ?? q.ContentPl : q.ContentPl,
+                q.QuestionNumber,
+                q.CategoryType,
+                q.Points,
+                q.MediaUrl,
+                q.Answers.Select(a => new AnswerDto(
+                    a.Id,
+                    a.QuestionId,
+                    locale == "EN" ? a.ContentEn ?? a.ContentPl :
+                    locale == "DE" ? a.ContentDe ?? a.ContentPl :
+                    locale == "UA" ? a.ContentUa ?? a.ContentPl : a.ContentPl,
+                    a.CreatedAt)).ToList(),
+                locale == "EN" ? q.StaticResponseEn ?? q.StaticResponsePl :
+                locale == "DE" ? q.StaticResponseDe ?? q.StaticResponsePl :
+                locale == "UA" ? q.StaticResponseUa ?? q.StaticResponsePl : q.StaticResponsePl,
+                q.CorrectAnswerId
+                ))
+            .FirstOrDefaultAsync();
+        
+        return question;
     }
 }

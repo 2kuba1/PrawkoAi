@@ -260,6 +260,7 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen name="user/profile" />
+            <Stack.Screen name="question/questionWithAnswers/[questionNumber]" />
           </Stack>
         </SafeAreaProvider>
       </ErrorProvider>

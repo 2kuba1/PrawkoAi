@@ -1,14 +1,233 @@
 /* eslint-disable */
-import * as Router from 'expo-router';
+import * as Router from "expo-router";
 
-export * from 'expo-router';
+export * from "expo-router";
 
-declare module 'expo-router' {
+declare module "expo-router" {
   export namespace ExpoRouter {
     export interface __routes<T extends string | object = string> {
-      hrefInputParams: { pathname: Router.RelativePathString, params?: Router.UnknownInputParams } | { pathname: Router.ExternalPathString, params?: Router.UnknownInputParams } | { pathname: `/dashboard`; params?: Router.UnknownInputParams; } | { pathname: `/`; params?: Router.UnknownInputParams; } | { pathname: `/_sitemap`; params?: Router.UnknownInputParams; } | { pathname: `/components/footer`; params?: Router.UnknownInputParams; } | { pathname: `/context/errorContext`; params?: Router.UnknownInputParams; } | { pathname: `/exam/examHistory`; params?: Router.UnknownInputParams; } | { pathname: `/exam/examRules`; params?: Router.UnknownInputParams; } | { pathname: `/exam/examSimulation`; params?: Router.UnknownInputParams; } | { pathname: `/learning/studyTopics`; params?: Router.UnknownInputParams; } | { pathname: `/learning/setResult/setResult`; params?: Router.UnknownInputParams; } | { pathname: `/user/profile`; params?: Router.UnknownInputParams; } | { pathname: `/user/stats`; params?: Router.UnknownInputParams; } | { pathname: `/utils/api`; params?: Router.UnknownInputParams; } | { pathname: `/utils/categoryMap`; params?: Router.UnknownInputParams; } | { pathname: `/utils/translations`; params?: Router.UnknownInputParams; } | { pathname: `/exam/examResult/[id]`, params: Router.UnknownInputParams & { id: string | number; } } | { pathname: `/learning/setSolving/[category]`, params: Router.UnknownInputParams & { category: string | number; } } | { pathname: `/learning/studyTopic/[category]`, params: Router.UnknownInputParams & { category: string | number; } } | { pathname: `/question/examQuestionWithAnswer/[id]`, params: Router.UnknownInputParams & { id: string | number; } } | { pathname: `/question/questionWithAnswers/[questioNumber]`, params: Router.UnknownInputParams & { questioNumber: string | number; } };
-      hrefOutputParams: { pathname: Router.RelativePathString, params?: Router.UnknownOutputParams } | { pathname: Router.ExternalPathString, params?: Router.UnknownOutputParams } | { pathname: `/dashboard`; params?: Router.UnknownOutputParams; } | { pathname: `/`; params?: Router.UnknownOutputParams; } | { pathname: `/_sitemap`; params?: Router.UnknownOutputParams; } | { pathname: `/components/footer`; params?: Router.UnknownOutputParams; } | { pathname: `/context/errorContext`; params?: Router.UnknownOutputParams; } | { pathname: `/exam/examHistory`; params?: Router.UnknownOutputParams; } | { pathname: `/exam/examRules`; params?: Router.UnknownOutputParams; } | { pathname: `/exam/examSimulation`; params?: Router.UnknownOutputParams; } | { pathname: `/learning/studyTopics`; params?: Router.UnknownOutputParams; } | { pathname: `/learning/setResult/setResult`; params?: Router.UnknownOutputParams; } | { pathname: `/user/profile`; params?: Router.UnknownOutputParams; } | { pathname: `/user/stats`; params?: Router.UnknownOutputParams; } | { pathname: `/utils/api`; params?: Router.UnknownOutputParams; } | { pathname: `/utils/categoryMap`; params?: Router.UnknownOutputParams; } | { pathname: `/utils/translations`; params?: Router.UnknownOutputParams; } | { pathname: `/exam/examResult/[id]`, params: Router.UnknownOutputParams & { id: string; } } | { pathname: `/learning/setSolving/[category]`, params: Router.UnknownOutputParams & { category: string; } } | { pathname: `/learning/studyTopic/[category]`, params: Router.UnknownOutputParams & { category: string; } } | { pathname: `/question/examQuestionWithAnswer/[id]`, params: Router.UnknownOutputParams & { id: string; } } | { pathname: `/question/questionWithAnswers/[questioNumber]`, params: Router.UnknownOutputParams & { questioNumber: string; } };
-      href: Router.RelativePathString | Router.ExternalPathString | `/dashboard${`?${string}` | `#${string}` | ''}` | `/${`?${string}` | `#${string}` | ''}` | `/_sitemap${`?${string}` | `#${string}` | ''}` | `/components/footer${`?${string}` | `#${string}` | ''}` | `/context/errorContext${`?${string}` | `#${string}` | ''}` | `/exam/examHistory${`?${string}` | `#${string}` | ''}` | `/exam/examRules${`?${string}` | `#${string}` | ''}` | `/exam/examSimulation${`?${string}` | `#${string}` | ''}` | `/learning/studyTopics${`?${string}` | `#${string}` | ''}` | `/learning/setResult/setResult${`?${string}` | `#${string}` | ''}` | `/user/profile${`?${string}` | `#${string}` | ''}` | `/user/stats${`?${string}` | `#${string}` | ''}` | `/utils/api${`?${string}` | `#${string}` | ''}` | `/utils/categoryMap${`?${string}` | `#${string}` | ''}` | `/utils/translations${`?${string}` | `#${string}` | ''}` | { pathname: Router.RelativePathString, params?: Router.UnknownInputParams } | { pathname: Router.ExternalPathString, params?: Router.UnknownInputParams } | { pathname: `/dashboard`; params?: Router.UnknownInputParams; } | { pathname: `/`; params?: Router.UnknownInputParams; } | { pathname: `/_sitemap`; params?: Router.UnknownInputParams; } | { pathname: `/components/footer`; params?: Router.UnknownInputParams; } | { pathname: `/context/errorContext`; params?: Router.UnknownInputParams; } | { pathname: `/exam/examHistory`; params?: Router.UnknownInputParams; } | { pathname: `/exam/examRules`; params?: Router.UnknownInputParams; } | { pathname: `/exam/examSimulation`; params?: Router.UnknownInputParams; } | { pathname: `/learning/studyTopics`; params?: Router.UnknownInputParams; } | { pathname: `/learning/setResult/setResult`; params?: Router.UnknownInputParams; } | { pathname: `/user/profile`; params?: Router.UnknownInputParams; } | { pathname: `/user/stats`; params?: Router.UnknownInputParams; } | { pathname: `/utils/api`; params?: Router.UnknownInputParams; } | { pathname: `/utils/categoryMap`; params?: Router.UnknownInputParams; } | { pathname: `/utils/translations`; params?: Router.UnknownInputParams; } | `/exam/examResult/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ''}` | `/learning/setSolving/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ''}` | `/learning/studyTopic/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ''}` | `/question/examQuestionWithAnswer/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ''}` | `/question/questionWithAnswers/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ''}` | { pathname: `/exam/examResult/[id]`, params: Router.UnknownInputParams & { id: string | number; } } | { pathname: `/learning/setSolving/[category]`, params: Router.UnknownInputParams & { category: string | number; } } | { pathname: `/learning/studyTopic/[category]`, params: Router.UnknownInputParams & { category: string | number; } } | { pathname: `/question/examQuestionWithAnswer/[id]`, params: Router.UnknownInputParams & { id: string | number; } } | { pathname: `/question/questionWithAnswers/[questioNumber]`, params: Router.UnknownInputParams & { questioNumber: string | number; } };
+      hrefInputParams:
+        | {
+            pathname: Router.RelativePathString;
+            params?: Router.UnknownInputParams;
+          }
+        | {
+            pathname: Router.ExternalPathString;
+            params?: Router.UnknownInputParams;
+          }
+        | { pathname: `/dashboard`; params?: Router.UnknownInputParams }
+        | { pathname: `/`; params?: Router.UnknownInputParams }
+        | {
+            pathname: `/question/questionWithAnswers/[questionNumber]`;
+            params?: Router.UnknownInputParams;
+          }
+        | { pathname: `/_sitemap`; params?: Router.UnknownInputParams }
+        | { pathname: `/components/footer`; params?: Router.UnknownInputParams }
+        | {
+            pathname: `/context/errorContext`;
+            params?: Router.UnknownInputParams;
+          }
+        | { pathname: `/exam/examHistory`; params?: Router.UnknownInputParams }
+        | { pathname: `/exam/examRules`; params?: Router.UnknownInputParams }
+        | {
+            pathname: `/exam/examSimulation`;
+            params?: Router.UnknownInputParams;
+          }
+        | {
+            pathname: `/learning/studyTopics`;
+            params?: Router.UnknownInputParams;
+          }
+        | {
+            pathname: `/learning/setResult/setResult`;
+            params?: Router.UnknownInputParams;
+          }
+        | { pathname: `/user/profile`; params?: Router.UnknownInputParams }
+        | { pathname: `/user/stats`; params?: Router.UnknownInputParams }
+        | { pathname: `/utils/api`; params?: Router.UnknownInputParams }
+        | { pathname: `/utils/categoryMap`; params?: Router.UnknownInputParams }
+        | {
+            pathname: `/utils/translations`;
+            params?: Router.UnknownInputParams;
+          }
+        | {
+            pathname: `/exam/examResult/[id]`;
+            params: Router.UnknownInputParams & { id: string | number };
+          }
+        | {
+            pathname: `/learning/setSolving/[category]`;
+            params: Router.UnknownInputParams & { category: string | number };
+          }
+        | {
+            pathname: `/learning/studyTopic/[category]`;
+            params: Router.UnknownInputParams & { category: string | number };
+          }
+        | {
+            pathname: `/question/examQuestionWithAnswer/[id]`;
+            params: Router.UnknownInputParams & { id: string | number };
+          }
+        | {
+            pathname: `/question/questionWithAnswers/[questioNumber]`;
+            params: Router.UnknownInputParams & {
+              questioNumber: string | number;
+            };
+          };
+      hrefOutputParams:
+        | {
+            pathname: Router.RelativePathString;
+            params?: Router.UnknownOutputParams;
+          }
+        | {
+            pathname: Router.ExternalPathString;
+            params?: Router.UnknownOutputParams;
+          }
+        | { pathname: `/dashboard`; params?: Router.UnknownOutputParams }
+        | { pathname: `/`; params?: Router.UnknownOutputParams }
+        | {
+            pathname: `/question/questionWithAnswers/[questionNumber]`;
+            params?: Router.UnknownOutputParams;
+          }
+        | { pathname: `/_sitemap`; params?: Router.UnknownOutputParams }
+        | {
+            pathname: `/components/footer`;
+            params?: Router.UnknownOutputParams;
+          }
+        | {
+            pathname: `/context/errorContext`;
+            params?: Router.UnknownOutputParams;
+          }
+        | { pathname: `/exam/examHistory`; params?: Router.UnknownOutputParams }
+        | { pathname: `/exam/examRules`; params?: Router.UnknownOutputParams }
+        | {
+            pathname: `/exam/examSimulation`;
+            params?: Router.UnknownOutputParams;
+          }
+        | {
+            pathname: `/learning/studyTopics`;
+            params?: Router.UnknownOutputParams;
+          }
+        | {
+            pathname: `/learning/setResult/setResult`;
+            params?: Router.UnknownOutputParams;
+          }
+        | { pathname: `/user/profile`; params?: Router.UnknownOutputParams }
+        | { pathname: `/user/stats`; params?: Router.UnknownOutputParams }
+        | { pathname: `/utils/api`; params?: Router.UnknownOutputParams }
+        | {
+            pathname: `/utils/categoryMap`;
+            params?: Router.UnknownOutputParams;
+          }
+        | {
+            pathname: `/utils/translations`;
+            params?: Router.UnknownOutputParams;
+          }
+        | {
+            pathname: `/exam/examResult/[id]`;
+            params: Router.UnknownOutputParams & { id: string };
+          }
+        | {
+            pathname: `/learning/setSolving/[category]`;
+            params: Router.UnknownOutputParams & { category: string };
+          }
+        | {
+            pathname: `/learning/studyTopic/[category]`;
+            params: Router.UnknownOutputParams & { category: string };
+          }
+        | {
+            pathname: `/question/examQuestionWithAnswer/[id]`;
+            params: Router.UnknownOutputParams & { id: string };
+          }
+        | {
+            pathname: `/question/questionWithAnswers/[questioNumber]`;
+            params: Router.UnknownOutputParams & { questioNumber: string };
+          };
+      href:
+        | Router.RelativePathString
+        | Router.ExternalPathString
+        | `/dashboard${`?${string}` | `#${string}` | ""}`
+        | `/${`?${string}` | `#${string}` | ""}`
+        | `/question/questionWithAnswers/[questionNumber]${`?${string}` | `#${string}` | ""}`
+        | `/_sitemap${`?${string}` | `#${string}` | ""}`
+        | `/components/footer${`?${string}` | `#${string}` | ""}`
+        | `/context/errorContext${`?${string}` | `#${string}` | ""}`
+        | `/exam/examHistory${`?${string}` | `#${string}` | ""}`
+        | `/exam/examRules${`?${string}` | `#${string}` | ""}`
+        | `/exam/examSimulation${`?${string}` | `#${string}` | ""}`
+        | `/learning/studyTopics${`?${string}` | `#${string}` | ""}`
+        | `/learning/setResult/setResult${`?${string}` | `#${string}` | ""}`
+        | `/user/profile${`?${string}` | `#${string}` | ""}`
+        | `/user/stats${`?${string}` | `#${string}` | ""}`
+        | `/utils/api${`?${string}` | `#${string}` | ""}`
+        | `/utils/categoryMap${`?${string}` | `#${string}` | ""}`
+        | `/utils/translations${`?${string}` | `#${string}` | ""}`
+        | {
+            pathname: Router.RelativePathString;
+            params?: Router.UnknownInputParams;
+          }
+        | {
+            pathname: Router.ExternalPathString;
+            params?: Router.UnknownInputParams;
+          }
+        | { pathname: `/dashboard`; params?: Router.UnknownInputParams }
+        | { pathname: `/`; params?: Router.UnknownInputParams }
+        | {
+            pathname: `/question/questionWithAnswers/[questionNumber]`;
+            params?: Router.UnknownInputParams;
+          }
+        | { pathname: `/_sitemap`; params?: Router.UnknownInputParams }
+        | { pathname: `/components/footer`; params?: Router.UnknownInputParams }
+        | {
+            pathname: `/context/errorContext`;
+            params?: Router.UnknownInputParams;
+          }
+        | { pathname: `/exam/examHistory`; params?: Router.UnknownInputParams }
+        | { pathname: `/exam/examRules`; params?: Router.UnknownInputParams }
+        | {
+            pathname: `/exam/examSimulation`;
+            params?: Router.UnknownInputParams;
+          }
+        | {
+            pathname: `/learning/studyTopics`;
+            params?: Router.UnknownInputParams;
+          }
+        | {
+            pathname: `/learning/setResult/setResult`;
+            params?: Router.UnknownInputParams;
+          }
+        | { pathname: `/user/profile`; params?: Router.UnknownInputParams }
+        | { pathname: `/user/stats`; params?: Router.UnknownInputParams }
+        | { pathname: `/utils/api`; params?: Router.UnknownInputParams }
+        | { pathname: `/utils/categoryMap`; params?: Router.UnknownInputParams }
+        | {
+            pathname: `/utils/translations`;
+            params?: Router.UnknownInputParams;
+          }
+        | `/exam/examResult/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ""}`
+        | `/learning/setSolving/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ""}`
+        | `/learning/studyTopic/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ""}`
+        | `/question/examQuestionWithAnswer/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ""}`
+        | `/question/questionWithAnswers/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ""}`
+        | {
+            pathname: `/exam/examResult/[id]`;
+            params: Router.UnknownInputParams & { id: string | number };
+          }
+        | {
+            pathname: `/learning/setSolving/[category]`;
+            params: Router.UnknownInputParams & { category: string | number };
+          }
+        | {
+            pathname: `/learning/studyTopic/[category]`;
+            params: Router.UnknownInputParams & { category: string | number };
+          }
+        | {
+            pathname: `/question/examQuestionWithAnswer/[id]`;
+            params: Router.UnknownInputParams & { id: string | number };
+          }
+        | {
+            pathname: `/question/questionWithAnswers/[questioNumber]`;
+            params: Router.UnknownInputParams & {
+              questioNumber: string | number;
+            };
+          };
     }
   }
 }

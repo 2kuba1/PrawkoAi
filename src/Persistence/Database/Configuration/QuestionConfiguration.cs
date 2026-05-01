@@ -40,7 +40,29 @@ internal sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
                 x.HasIndex("CategoriesId");
             });
         
+        builder.HasIndex(x => x.ContentPl)
+            .HasMethod("gin")
+            .HasOperators("gin_trgm_ops")
+            .HasDatabaseName("IX_Questions_ContentPl_Trgm");
+
+        builder.HasIndex(x => x.ContentEn)
+            .HasMethod("gin")
+            .HasOperators("gin_trgm_ops")
+            .HasDatabaseName("IX_Questions_ContentEn_Trgm");
+
+        builder.HasIndex(x => x.ContentDe)
+            .HasMethod("gin")
+            .HasOperators("gin_trgm_ops")
+            .HasDatabaseName("IX_Questions_ContentDe_Trgm");
+
+        builder.HasIndex(x => x.ContentUa)
+            .HasMethod("gin")
+            .HasOperators("gin_trgm_ops")
+            .HasDatabaseName("IX_Questions_ContentUa_Trgm");
+        
         builder.HasIndex(x => x.QuestionNumber);
         builder.HasIndex(x => x.CategoryType);
+        builder.HasIndex(x => x.CategoryTag);
+        
     }
 }

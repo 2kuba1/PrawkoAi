@@ -23,10 +23,23 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-interface MediaAndExplanationResponse {
+interface QuestionWithAnswers {
+  id: string;
+  content: string;
+  questionNumber: number;
+  categoryType?: string;
+  points: number;
   mediaUrl?: string;
-  staticResponse: string;
-  correctAnswerId: string;
+  answers: Answer[];
+  staticResponse?: string;
+  correctAnswerId?: string;
+}
+
+interface Answer {
+  id: string;
+  questionId: string;
+  createdAt: string;
+  content: string;
 }
 
 interface ChatMessage {
@@ -34,9 +47,11 @@ interface ChatMessage {
   content: string;
 }
 
-export default function ExamQuestionWithAnswerScreen() {
+export default function QuestionWithAnswersScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { questionNumber } = useLocalSearchParams();
+
   const scrollViewRef = useRef<ScrollView>(null);
 
   const { token } = useContext(AuthContext);
@@ -47,36 +62,15 @@ export default function ExamQuestionWithAnswerScreen() {
   const [aiQuery, setAiQuery] = useState("");
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
-  const [mediaAndExplanation, setMediaAndExplanation] =
-    useState<MediaAndExplanationResponse | null>(null);
+  const [questionWithAnswers, setQuestionWithAnswers] =
+    useState<QuestionWithAnswers | null>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const params = useLocalSearchParams<{
-    questionId: string;
-    questionNumber: string;
-    question: string;
-    possibleAnswers: string;
-    selectedAnswerId: string;
-    wasCorrect: string;
-    points: string;
-  }>();
-
-  const questionData = {
-    questionId: params.questionId,
-    questionNumber: Number(params.questionNumber),
-    question: params.question,
-    selectedAnswerId: params.selectedAnswerId,
-    possibleAnswers: params.possibleAnswers
-      ? JSON.parse(params.possibleAnswers)
-      : [],
-    points: Number(params.points),
-  };
-
-  const fullMediaUrl = mediaAndExplanation?.mediaUrl
+  const fullMediaUrl = questionWithAnswers?.mediaUrl
     ? process.env.EXPO_PUBLIC_SUPABASE_BUCKET_URL +
       "/" +
-      mediaAndExplanation.mediaUrl
+      questionWithAnswers.mediaUrl
     : null;
 
   const isVideo = fullMediaUrl?.toLowerCase().endsWith(".mp4");
@@ -98,16 +92,16 @@ export default function ExamQuestionWithAnswerScreen() {
           (await AsyncStorage.getItem("user-language")) || "PL";
         i18n.locale = savedLanguage;
 
-        const response = await api.get<MediaAndExplanationResponse>(
-          "/questions/getQuestionAdditionalData",
+        const response = await api.get<QuestionWithAnswers>(
+          "/questions/getQuestionWithAnswers",
           {
             params: {
-              questionId: questionData.questionId,
+              questionNumber: questionNumber,
               locale: savedLanguage.toUpperCase(),
             },
           },
         );
-        setMediaAndExplanation(response.data);
+        setQuestionWithAnswers(response.data);
       } catch (error) {
         showError(
           "Wystąpił błąd podczas pobierania danych pytania. Proszę spróbować ponownie.",
@@ -118,7 +112,7 @@ export default function ExamQuestionWithAnswerScreen() {
       }
     };
     fetchData();
-  }, [questionData.questionId]);
+  }, []);
 
   const handleAskAi = async () => {
     if (!aiQuery.trim() || isAiLoading) return;
@@ -159,7 +153,7 @@ export default function ExamQuestionWithAnswerScreen() {
             Authorization: `Bearer ${token?.accessToken}`,
           },
           body: JSON.stringify({
-            questionId: questionData.questionId,
+            questionId: questionWithAnswers?.id,
             userQuery: currentQuery,
             locale: savedLanguage.toUpperCase(),
           }),
@@ -209,7 +203,7 @@ export default function ExamQuestionWithAnswerScreen() {
         </TouchableOpacity>
         <View>
           <Text className="text-lg font-bold text-slate-900 dark:text-white">
-            Pytanie {questionData.questionNumber}
+            Pytanie {questionWithAnswers?.questionNumber}
           </Text>
           <Text className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
             Tryb Przeglądu
@@ -269,22 +263,19 @@ export default function ExamQuestionWithAnswerScreen() {
           </View>
 
           <Text className="text-xl font-bold leading-tight text-slate-900 dark:text-white mb-6 mt-6">
-            {questionData.question}
+            {questionWithAnswers?.content}
           </Text>
 
           {/* Odpowiedzi */}
           <View className="gap-3 mb-8">
-            {questionData.possibleAnswers.map((answer: any) => {
-              const isSelected = questionData.selectedAnswerId === answer.id;
+            {questionWithAnswers?.answers.map((answer: any) => {
               const isCorrect =
-                mediaAndExplanation?.correctAnswerId === answer.id;
+                questionWithAnswers?.correctAnswerId === answer.id;
               let borderStyle =
                 "border-white dark:border-slate-800 bg-white dark:bg-slate-800";
               if (isCorrect)
                 borderStyle =
                   "border-green-500 bg-green-50 dark:bg-green-900/20";
-              else if (isSelected && !isCorrect)
-                borderStyle = "border-red-500 bg-red-50 dark:bg-red-900/20";
 
               return (
                 <View
@@ -302,9 +293,6 @@ export default function ExamQuestionWithAnswerScreen() {
                       size={24}
                       color="#22c55e"
                     />
-                  )}
-                  {isSelected && !isCorrect && (
-                    <MaterialIcons name="cancel" size={24} color="#ef4444" />
                   )}
                 </View>
               );
@@ -324,7 +312,7 @@ export default function ExamQuestionWithAnswerScreen() {
               </Text>
             </View>
             <Text className="text-slate-600 dark:text-slate-300 leading-6 font-medium">
-              {mediaAndExplanation?.staticResponse}
+              {questionWithAnswers?.staticResponse}
             </Text>
           </View>
         </View>

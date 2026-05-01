@@ -1,7 +1,8 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import React, { useContext, useEffect, useState } from "react";
+import { debounce } from "lodash";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -19,6 +20,14 @@ import Footer from "../components/footer";
 import { useError } from "../context/errorContext";
 import api from "../utils/api";
 import categoryMap from "../utils/categoryMap";
+
+export interface SearchResults {
+  questionId: string;
+  questionNumber: number;
+  content: string;
+  points: number;
+  categoryTag: string;
+}
 
 export interface StudyTopics {
   categoryTag: string;
@@ -66,22 +75,20 @@ export default function StudyTopicsScreen() {
   const { user } = useContext(AuthContext);
   const { showError } = useError();
 
-  const paddingTop =
-    Platform.OS === "android"
-      ? insets.top > 0
-        ? insets.top
-        : StatusBar.currentHeight || 24
-      : insets.top;
-
-  const [userProgress, setUserProgress] = React.useState<StudyTopics[] | null>(
-    null,
-  );
+  const [userProgress, setUserProgress] = useState<StudyTopics[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<SearchResults[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
   const getProgress = (id: string) =>
     userProgress?.find((p) => p.categoryTag === id) || {
-      CategoryTag: id,
+      categoryTag: id,
       questionsCount: 0,
       completedQuestions: 0,
     };
@@ -98,21 +105,90 @@ export default function StudyTopicsScreen() {
       setUserProgress(response.data);
     } catch (e) {
       showError("Wystąpił błąd podczas pobierania postępu użytkownika");
-      console.error("Błąd podczas pobierania postępu użytkownika:", e);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
+  const performSearch = async (
+    text: string,
+    pageNum: number = 1,
+    shouldAppend: boolean = false,
+  ) => {
+    if (text.length < 3) {
+      setSearchResults([]);
+      return;
+    }
+
+    if (pageNum === 1) setIsSearching(true);
+    else setLoadingMore(true);
+
+    try {
+      const response = await api.get<any>("/questions/search", {
+        params: {
+          question: text,
+          locale: (await AsyncStorage.getItem("user-language")) ?? "PL",
+          categoryType: (await AsyncStorage.getItem("user-category")) ?? "B",
+          pageSize: 15,
+          pageNumber: pageNum,
+        },
+      });
+
+      const newItems = response.data.items || [];
+      const hasMore = response.data.hasNextPage;
+
+      setSearchResults((prev) =>
+        shouldAppend ? [...prev, ...newItems] : newItems,
+      );
+      setHasNextPage(hasMore);
+      setPage(pageNum);
+    } catch (e) {
+      console.error("Błąd wyszukiwania:", e);
+    } finally {
+      setIsSearching(false);
+      setLoadingMore(false);
+    }
+  };
+
+  const debouncedSearch = useCallback(
+    debounce((t) => performSearch(t, 1, false), 500),
+    [],
+  );
+
+  const handleScroll = ({ nativeEvent }: any) => {
+    const isCloseToBottom =
+      nativeEvent.layoutMeasurement.height + nativeEvent.contentOffset.y >=
+      nativeEvent.contentSize.height - 100;
+
+    if (
+      isCloseToBottom &&
+      hasNextPage &&
+      !loadingMore &&
+      !isSearching &&
+      searchQuery.length >= 3
+    ) {
+      performSearch(searchQuery, page + 1, true);
+    }
+  };
+
   const onRefresh = () => {
     setRefreshing(true);
+    setSearchQuery("");
+    setSearchResults([]);
     fetchProgress();
   };
 
   useEffect(() => {
     fetchProgress();
   }, []);
+
+  const paddingTop =
+    Platform.OS === "android"
+      ? insets.top > 0
+        ? insets.top
+        : StatusBar.currentHeight || 24
+      : insets.top;
 
   if (loading && !refreshing) {
     return (
@@ -147,7 +223,6 @@ export default function StudyTopicsScreen() {
               router.canGoBack() ? router.back() : router.replace("/dashboard")
             }
             className="p-2"
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
             <MaterialIcons name="arrow-back" size={24} color="#1544b2" />
           </TouchableOpacity>
@@ -159,6 +234,8 @@ export default function StudyTopicsScreen() {
 
       <ScrollView
         className="flex-1"
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingTop: 16,
@@ -177,232 +254,290 @@ export default function StudyTopicsScreen() {
           <MaterialIcons name="search" size={20} color="#475569" />
           <TextInput
             className="flex-1 ml-3 text-slate-800 dark:text-white"
-            placeholder="Szukaj tematów..."
+            placeholder="Szukaj pytań..."
             placeholderTextColor="#94a3b8"
-          />
-        </View>
-
-        <View className="mb-10 bg-[#1544b2] rounded-[32px] p-6 shadow-lg relative overflow-hidden">
-          <View className="z-10 relative">
-            <View className="bg-white/20 self-start px-3 py-1 rounded-full">
-              <Text className="text-[10px] font-bold text-white uppercase tracking-widest">
-                Codzienna porada
-              </Text>
-            </View>
-            <Text className="text-2xl font-bold text-white mt-3">
-              Opanuj skrzyżowania
-            </Text>
-            <Text className="text-blue-100 text-sm mt-1 max-w-[200px]">
-              Skup się dzisiaj na zasadach pierwszeństwa.
-            </Text>
-            <TouchableOpacity className="mt-4 bg-white self-start px-6 py-2.5 rounded-xl">
-              <Text className="text-[#1544b2] font-bold">Rozpocznij naukę</Text>
-            </TouchableOpacity>
-          </View>
-          <MaterialIcons
-            name="psychology"
-            size={160}
-            color="white"
-            style={{
-              position: "absolute",
-              right: -30,
-              bottom: -30,
-              opacity: 0.1,
+            value={searchQuery}
+            onChangeText={(t) => {
+              setSearchQuery(t);
+              debouncedSearch(t);
             }}
           />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity
+              onPress={() => {
+                setSearchQuery("");
+                setSearchResults([]);
+              }}
+            >
+              <MaterialIcons name="close" size={20} color="#94a3b8" />
+            </TouchableOpacity>
+          )}
         </View>
 
-        {sections.map((section, sIdx) => (
-          <View key={sIdx} className="mb-10">
-            <View className="flex-row justify-between items-center mb-4 px-2">
-              <Text className="font-bold text-lg text-slate-900 dark:text-white">
-                {section.title}
-              </Text>
-              <View className="bg-[#e0e7ff] px-3 py-1 rounded-full">
-                <Text className="text-[10px] font-bold text-[#1544b2] uppercase">
-                  Część {section.part}
-                </Text>
-              </View>
-            </View>
-
-            {section.type === "list" && (
-              <View>
-                {section.ids.map((id) => {
-                  const cat = categoryMap[id];
-                  const prog = getProgress(id);
-                  return (
-                    <TouchableOpacity
-                      key={id}
-                      className="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-blue-500/10 flex-row mb-4"
-                      onPress={() =>
-                        router.push({
-                          pathname: "/learning/studyTopic/[id]" as any,
-                          params: {
-                            categoryId: id,
-                            categoryName: cat.name,
-                            questionsCount: prog.questionsCount.toString(),
-                          },
-                        })
-                      }
-                    >
-                      <View className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 items-center justify-center mr-4">
-                        <MaterialIcons
-                          name={cat.icon as any}
-                          size={24}
-                          color="#1544b2"
-                        />
-                      </View>
-                      <View className="flex-1">
-                        <Text className="font-bold text-slate-800 dark:text-white">
-                          {cat.name}
-                        </Text>
-                        <Text className="text-xs text-slate-500 mb-4">
-                          Podstawy i zasady
-                        </Text>
-                        <View className="flex-row items-center">
-                          <View className="flex-1 h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden mr-3">
-                            <View
-                              className="h-full bg-[#1544b2]"
-                              style={{
-                                width: `${(prog?.completedQuestions / prog?.questionsCount) * 100}%`,
-                              }}
-                            />
-                          </View>
-                          <Text className="text-[10px] font-bold text-slate-400">
-                            {prog.completedQuestions}/{prog.questionsCount}
-                          </Text>
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            )}
-
-            {section.type === "grid" && (
-              <View
-                className="flex-row flex-wrap justify-between"
-                style={{ gap: 12 }}
+        {searchQuery.length >= 3 ? (
+          <View className="mb-10">
+            <Text className="font-bold text-lg text-slate-900 dark:text-white mb-4 px-2">
+              Wyniki wyszukiwania
+            </Text>
+            {searchResults.map((item, index) => (
+              <TouchableOpacity
+                onPress={() =>
+                  router.push(
+                    `/question/questionWithAnswers/${item.questionNumber}` as any,
+                  )
+                }
+                key={index}
+                className="bg-white dark:bg-slate-800 p-4 rounded-2xl mb-3 border border-blue-500/10 shadow-sm"
               >
-                {section.ids.map((id) => {
-                  const cat = categoryMap[id];
-                  const prog = getProgress(id);
-                  const gridColors: any = {
-                    UncontrolledAndPriorityIntersections: {
-                      bg: "bg-orange-50",
-                      text: "#ea580c",
-                      icon: "priority-high",
-                    },
-                    SignalizedIntersectionsAndPedestrians: {
-                      bg: "bg-emerald-50",
-                      text: "#059669",
-                      icon: "traffic",
-                    },
-                    ManoeuvresAndPositioning: {
-                      bg: "bg-indigo-50",
-                      text: "#4f46e5",
-                      icon: "directions-car",
-                    },
-                    OvertakingAndPassing: {
-                      bg: "bg-blue-50",
-                      text: "#2563eb",
-                      icon: "move-up",
-                    },
-                  };
-                  const style = gridColors[id] || {
-                    bg: "bg-blue-50",
-                    text: "#1544b2",
-                    icon: "help",
-                  };
-
-                  return (
-                    <TouchableOpacity
-                      key={id}
-                      className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-blue-500/10 mb-1 flex-1 min-w-[45%]"
-                      onPress={() =>
-                        router.push({
-                          pathname: "/learning/studyTopic/[id]" as any,
-                          params: {
-                            categoryId: id,
-                            categoryName: cat.name,
-                            questionsCount: prog.questionsCount.toString(),
-                          },
-                        })
-                      }
-                    >
-                      <View
-                        className={`w-10 h-10 rounded-lg ${style.bg} items-center justify-center mb-3`}
-                      >
-                        <MaterialIcons
-                          name={style.icon as any}
-                          size={20}
-                          color={style.text}
-                        />
-                      </View>
-                      <View style={{ minHeight: 42, justifyContent: "center" }}>
-                        <Text className="font-bold text-slate-800 dark:text-white text-[11px] leading-4">
-                          {cat.name}
-                        </Text>
-                      </View>
-                      <View className="flex-row justify-between items-center mt-2">
-                        <Text className="text-[9px] font-bold text-[#1544b2] uppercase">
-                          Status
-                        </Text>
-                        <Text className="text-[10px] font-bold text-slate-400">
-                          {prog.completedQuestions}/{prog.questionsCount}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+                <Text className="text-[10px] font-bold text-[#1544b2] mb-1">
+                  PYTANIE NR {item.questionNumber}
+                </Text>
+                <Text className="text-slate-800 dark:text-white text-sm">
+                  {item.content}
+                </Text>
+              </TouchableOpacity>
+            ))}
+            {isSearching && <ActivityIndicator color="#1544b2" />}
+            {loadingMore && (
+              <ActivityIndicator
+                size="small"
+                color="#1544b2"
+                className="mt-4"
+              />
             )}
-
-            {section.type === "compact" && (
-              <View className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-blue-500/10 overflow-hidden">
-                {section.ids.map((id, idx) => {
-                  const cat = categoryMap[id];
-                  const prog = getProgress(id);
-                  return (
-                    <TouchableOpacity
-                      key={id}
-                      className={`p-4 flex-row items-center border-b border-slate-50 dark:border-slate-700 ${idx === section.ids.length - 1 ? "border-b-0" : ""}`}
-                      onPress={() =>
-                        router.push({
-                          pathname: "/learning/studyTopic/[id]" as any,
-                          params: {
-                            categoryId: id,
-                            categoryName: cat.name,
-                            questionsCount: prog.questionsCount.toString(),
-                          },
-                        })
-                      }
-                    >
-                      <MaterialIcons
-                        name={cat.icon as any}
-                        size={20}
-                        color="#94a3b8"
-                      />
-                      <Text className="flex-1 ml-4 text-sm font-medium text-slate-800 dark:text-white">
-                        {cat.name}
-                      </Text>
-                      <Text className="text-[10px] font-bold text-slate-400 mr-2">
-                        {prog.completedQuestions}/{prog.questionsCount}
-                      </Text>
-                      <MaterialIcons
-                        name="chevron-right"
-                        size={20}
-                        color="#cbd5e1"
-                      />
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+            {!hasNextPage && searchResults.length > 0 && (
+              <Text className="text-center text-slate-400 text-xs mt-6">
+                Koniec wyników
+              </Text>
             )}
           </View>
-        ))}
-      </ScrollView>
+        ) : (
+          <>
+            <View className="mb-10 bg-[#1544b2] rounded-[32px] p-6 shadow-lg relative overflow-hidden">
+              <View className="z-10 relative">
+                <View className="bg-white/20 self-start px-3 py-1 rounded-full">
+                  <Text className="text-[10px] font-bold text-white uppercase tracking-widest">
+                    Codzienna porada
+                  </Text>
+                </View>
+                <Text className="text-2xl font-bold text-white mt-3">
+                  Opanuj skrzyżowania
+                </Text>
+                <Text className="text-blue-100 text-sm mt-1 max-w-[200px]">
+                  Skup się dzisiaj na zasadach pierwszeństwa.
+                </Text>
+                <TouchableOpacity className="mt-4 bg-white self-start px-6 py-2.5 rounded-xl">
+                  <Text className="text-[#1544b2] font-bold">
+                    Rozpocznij naukę
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <MaterialIcons
+                name="psychology"
+                size={160}
+                color="white"
+                style={{
+                  position: "absolute",
+                  right: -30,
+                  bottom: -30,
+                  opacity: 0.1,
+                }}
+              />
+            </View>
 
+            {sections.map((section, sIdx) => (
+              <View key={sIdx} className="mb-10">
+                <View className="flex-row justify-between items-center mb-4 px-2">
+                  <Text className="font-bold text-lg text-slate-900 dark:text-white">
+                    {section.title}
+                  </Text>
+                  <View className="bg-[#e0e7ff] px-3 py-1 rounded-full">
+                    <Text className="text-[10px] font-bold text-[#1544b2] uppercase">
+                      Część {section.part}
+                    </Text>
+                  </View>
+                </View>
+
+                {section.type === "list" && (
+                  <View>
+                    {section.ids.map((id) => {
+                      const cat = categoryMap[id];
+                      const prog = getProgress(id);
+                      return (
+                        <TouchableOpacity
+                          key={id}
+                          className="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-blue-500/10 flex-row mb-4"
+                          onPress={() =>
+                            router.push({
+                              pathname: "/learning/studyTopic/[id]" as any,
+                              params: {
+                                categoryId: id,
+                                categoryName: cat.name,
+                                questionsCount: prog.questionsCount.toString(),
+                              },
+                            })
+                          }
+                        >
+                          <View className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 items-center justify-center mr-4">
+                            <MaterialIcons
+                              name={cat.icon as any}
+                              size={24}
+                              color="#1544b2"
+                            />
+                          </View>
+                          <View className="flex-1">
+                            <Text className="font-bold text-slate-800 dark:text-white">
+                              {cat.name}
+                            </Text>
+                            <Text className="text-xs text-slate-500 mb-4">
+                              Podstawy i zasady
+                            </Text>
+                            <View className="flex-row items-center">
+                              <View className="flex-1 h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden mr-3">
+                                <View
+                                  className="h-full bg-[#1544b2]"
+                                  style={{
+                                    width: `${(prog.completedQuestions / Math.max(prog.questionsCount, 1)) * 100}%`,
+                                  }}
+                                />
+                              </View>
+                              <Text className="text-[10px] font-bold text-slate-400">
+                                {prog.completedQuestions}/{prog.questionsCount}
+                              </Text>
+                            </View>
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                )}
+
+                {section.type === "grid" && (
+                  <View
+                    className="flex-row flex-wrap justify-between"
+                    style={{ gap: 12 }}
+                  >
+                    {section.ids.map((id) => {
+                      const cat = categoryMap[id];
+                      const prog = getProgress(id);
+                      const gridColors: any = {
+                        UncontrolledAndPriorityIntersections: {
+                          bg: "bg-orange-50",
+                          text: "#ea580c",
+                          icon: "priority-high",
+                        },
+                        SignalizedIntersectionsAndPedestrians: {
+                          bg: "bg-emerald-50",
+                          text: "#059669",
+                          icon: "traffic",
+                        },
+                        ManoeuvresAndPositioning: {
+                          bg: "bg-indigo-50",
+                          text: "#4f46e5",
+                          icon: "directions-car",
+                        },
+                        OvertakingAndPassing: {
+                          bg: "bg-blue-50",
+                          text: "#2563eb",
+                          icon: "move-up",
+                        },
+                      };
+                      const style = gridColors[id] || {
+                        bg: "bg-blue-50",
+                        text: "#1544b2",
+                        icon: "help",
+                      };
+                      return (
+                        <TouchableOpacity
+                          key={id}
+                          className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-blue-500/10 mb-1 flex-1 min-w-[45%]"
+                          onPress={() =>
+                            router.push({
+                              pathname: "/learning/studyTopic/[id]" as any,
+                              params: {
+                                categoryId: id,
+                                categoryName: cat.name,
+                                questionsCount: prog.questionsCount.toString(),
+                              },
+                            })
+                          }
+                        >
+                          <View
+                            className={`w-10 h-10 rounded-lg ${style.bg} items-center justify-center mb-3`}
+                          >
+                            <MaterialIcons
+                              name={style.icon as any}
+                              size={20}
+                              color={style.text}
+                            />
+                          </View>
+                          <View
+                            style={{ minHeight: 42, justifyContent: "center" }}
+                          >
+                            <Text className="font-bold text-slate-800 dark:text-white text-[11px] leading-4">
+                              {cat.name}
+                            </Text>
+                          </View>
+                          <View className="flex-row justify-between items-center mt-2">
+                            <Text className="text-[9px] font-bold text-[#1544b2] uppercase">
+                              Status
+                            </Text>
+                            <Text className="text-[10px] font-bold text-slate-400">
+                              {prog.completedQuestions}/{prog.questionsCount}
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                )}
+
+                {section.type === "compact" && (
+                  <View className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-blue-500/10 overflow-hidden">
+                    {section.ids.map((id, idx) => {
+                      const cat = categoryMap[id];
+                      const prog = getProgress(id);
+                      return (
+                        <TouchableOpacity
+                          key={id}
+                          className={`p-4 flex-row items-center border-b border-slate-50 dark:border-slate-700 ${idx === section.ids.length - 1 ? "border-b-0" : ""}`}
+                          onPress={() =>
+                            router.push({
+                              pathname: "/learning/studyTopic/[id]" as any,
+                              params: {
+                                categoryId: id,
+                                categoryName: cat.name,
+                                questionsCount: prog.questionsCount.toString(),
+                              },
+                            })
+                          }
+                        >
+                          <MaterialIcons
+                            name={cat.icon as any}
+                            size={20}
+                            color="#94a3b8"
+                          />
+                          <Text className="flex-1 ml-4 text-sm font-medium text-slate-800 dark:text-white">
+                            {cat.name}
+                          </Text>
+                          <Text className="text-[10px] font-bold text-slate-400 mr-2">
+                            {prog.completedQuestions}/{prog.questionsCount}
+                          </Text>
+                          <MaterialIcons
+                            name="chevron-right"
+                            size={20}
+                            color="#cbd5e1"
+                          />
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                )}
+              </View>
+            ))}
+          </>
+        )}
+      </ScrollView>
       <Footer />
     </View>
   );
