@@ -1,5 +1,4 @@
 ﻿using Application.Contracts.Repositories;
-using Domain;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Database;
@@ -20,5 +19,23 @@ public class CategoryRepository : GenericRepository<Category>, ICategoryReposito
 
     public async Task<List<string>> GetAllCategoriesNames()
         =>await _context.Categories.Select(x => x.Name).ToListAsync();
-    
+
+    public async Task<string?> GetUserWorsePerformingCategory(Guid userId)
+    {
+        var worstCategory = await _context.UserAnswers
+            .AsNoTracking()
+            .Where(u => u.UserId == userId)
+            .GroupBy(u => u.Question.CategoryTag)
+            .Select(g => new
+            {
+                CategoryName = g.Key,
+                Accuracy = (double)g.Count(x => x.SelectedAnswerId == x.Question.CorrectAnswerId) / g.Count() * 100
+            })
+            .OrderBy(x => x.Accuracy)
+            .ThenByDescending(x => _context.UserAnswers.Count(ua => ua.UserId == userId && ua.Question.CategoryTag == x.CategoryName))
+            .Select(x => x.CategoryName)
+            .FirstOrDefaultAsync();
+
+        return worstCategory;
+    }
 }

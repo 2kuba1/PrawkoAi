@@ -1,4 +1,5 @@
 ﻿using Application.Features.Users.GetStats;
+using Application.Features.Users.WorstPerformingCategory;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -18,11 +19,21 @@ public static class UserEndpoints
         
          userGroup.MapGet("/stats", GetUserStats)
             .RequireAuthorization();
+         
+         userGroup.MapGet("/getUserWorstPerformingCategory", GetUserWorstPerformingCategory)
+             .RequireAuthorization();
     }
 
     private static async Task<IResult> GetUserStats([FromQuery] Guid userId, [FromServices] IMediator mediator)
     {
         var result = await mediator.Send(new GetStats(userId));
+        return Results.Ok(result);
+    }
+    
+    private static async Task<IResult> GetUserWorstPerformingCategory([FromQuery] Guid userId,
+        [FromServices] IMediator mediator)
+    {
+        var result = await mediator.Send(new WorstPerformingCategory(userId));
         return Results.Ok(result);
     }
 }

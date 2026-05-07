@@ -44,7 +44,12 @@ export default function LoginScreen() {
   const [locale, setLocale] = useState(i18n.locale);
 
   useEffect(() => {
-    const initLang = async () => {
+    const initLangAndCategory = async () => {
+      const savedCategory = await AsyncStorage.getItem("user-category");
+      if (!savedCategory) {
+        await AsyncStorage.setItem("user-category", "B");
+      }
+
       const saved = await AsyncStorage.getItem("user-language");
       if (saved) {
         changeLanguage(saved);
@@ -55,7 +60,7 @@ export default function LoginScreen() {
         }
       }
     };
-    initLang();
+    initLangAndCategory();
   }, []);
 
   const handleGoogleSignIn = async () => {
