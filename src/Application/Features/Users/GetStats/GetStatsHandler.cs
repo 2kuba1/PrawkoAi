@@ -2,8 +2,10 @@
 using Application.Models.DTOs;
 using Application.Shared;
 using Domain.Enums;
+using Domain.Exceptions;
 using MathNet.Numerics.Distributions;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.Users.GetStats;
@@ -13,18 +15,21 @@ internal sealed class GetStatsHandler : IRequestHandler<GetStats, UserStatsDto>
     private readonly IUserAnswerRepository _userAnswerRepository;
     private readonly IExamSessionRepository _examSessionRepository;
     private readonly IUserAiProgressRepository _aiProgressRepository;
-    private readonly IConfiguration _config;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public GetStatsHandler(IUserAnswerRepository userAnswerRepository, IExamSessionRepository examSessionRepository, IUserAiProgressRepository aiProgressRepository, IConfiguration config)
+    public GetStatsHandler(IUserAnswerRepository userAnswerRepository, IExamSessionRepository examSessionRepository, IUserAiProgressRepository aiProgressRepository, IHttpContextAccessor httpContextAccessor)
     {
         _userAnswerRepository = userAnswerRepository;
         _examSessionRepository = examSessionRepository;
         _aiProgressRepository = aiProgressRepository;
-        _config = config;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<UserStatsDto> Handle(GetStats request, CancellationToken cancellationToken)
     {
+        if(request.UserId != Utils.GetCurrentUserId(_httpContextAccessor))
+            throw new UnauthorizedException("You are not authorized to revoke this refresh tokens");
+        
         var lastAnswers = await _userAnswerRepository.GetUserLastAnswers(request.UserId);
         var lastExamsScoresNullable = await _examSessionRepository.GetLastExamsScores(request.UserId);
         

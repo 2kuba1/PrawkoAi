@@ -82,4 +82,19 @@ public class UserAnswerRepository : GenericRepository<UserAnswer>, IUserAnswerRe
         await _context.UserAnswers.AddRangeAsync(newAnswers);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<int> GetUniqueQuestionsAnsweredCount(Guid userId, string category = "B")
+        => await _context.UserAnswers
+            .AsNoTracking()
+            .Where(u => u.UserId == userId && u.Question.Categories.Any(c => c.Name == category.ToUpper()))
+            .Select(u => u.QuestionId)
+            .Distinct()
+            .CountAsync();
+
+    public async Task<int> TodayQuestionsAnsweredCount(Guid userId)
+     => await _context.UserAnswers
+            .AsNoTracking()
+            .Where(u => u.UserId == userId && u.CreatedAt.Date == DateTime.UtcNow.Date)
+            .Select(u => u.Id)
+            .CountAsync();
 }

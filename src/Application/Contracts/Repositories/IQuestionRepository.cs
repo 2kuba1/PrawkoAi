@@ -15,4 +15,5 @@ public interface IQuestionRepository : IGenericRepository<Question>
     Task<List<SetQuestionDto>> GetQuestionSet(string categoryTag, string categoryType, int setNumber, string locale);
     Task<PagedList<FoundQuestionsDto>> SearchForQuestions(string query, string locale, string categoryType, int  pageSize, int pageNumber);
     Task<QuestionDto?> GetQuestionWithAnswers(float questionNumber,  string locale);
+    Task<int> GetQuestionsCountOfCategory(string category = "B");
 }

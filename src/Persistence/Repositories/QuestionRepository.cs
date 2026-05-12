@@ -303,4 +303,11 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
         
         return question;
     }
+
+    public async Task<int> GetQuestionsCountOfCategory(string category = "B")
+        => await _context.Questions
+            .AsNoTracking()
+            .Where(q => q.Categories.Any(c => c.Name == category))
+            .Select(q => q.QuestionNumber)
+            .CountAsync();
 }
