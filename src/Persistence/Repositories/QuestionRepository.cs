@@ -179,7 +179,6 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
         return studyTopicsResponse;
     }
 
-    //todo change categoryType to categoryName
     public async Task<List<SetQuestionDto>> GetQuestionSet(string categoryTag, string categoryName, int setNumber, string locale)
     {
         if (setNumber < 1) setNumber = 1;

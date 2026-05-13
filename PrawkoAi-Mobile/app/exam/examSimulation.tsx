@@ -73,17 +73,18 @@ export default function ExamSimulationScreen() {
   >("prep");
 
   const [hasRevealedMedia, setHasRevealedMedia] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState<string>("PL");
 
   useEffect(() => {
     const fetchExamData = async () => {
       if (!user?.id) return;
-
+      setCurrentLanguage(await AsyncStorage.getItem("user-language") ?? "PL");
       try {
         const response = await api.get<ExamData>("/exam/start", {
           params: {
             userId: user.id,
             category: (await AsyncStorage.getItem("user-category")) ?? "B",
-            locale: (await AsyncStorage.getItem("user-language")) ?? "EN",
+            locale: (await AsyncStorage.getItem("user-language")) ?? "PL",
           },
         });
         setExamData(response.data);
@@ -210,7 +211,7 @@ export default function ExamSimulationScreen() {
     setIsFinishing(true);
 
     try {
-      const language = (await AsyncStorage.getItem("user-language")) ?? "EN";
+      const language = (await AsyncStorage.getItem("user-language")) ?? "PL";
 
       const answersMap = finalAnswers || {
         ...userAnswers,
@@ -244,17 +245,31 @@ export default function ExamSimulationScreen() {
       setIsFinishing(false);
     }
   };
+
   const sortedAnswers = useMemo(() => {
     if (!currentQuestion?.answers) return [];
     const answers = [...currentQuestion.answers];
 
     if (currentScope === "standard" && answers.length === 2) {
+      const languageOrders = {
+        pl: ["tak", "nie"],
+        en: ["yes", "no"],
+        uk: ["так", "ні"],
+        de: ["ja", "nein"],
+      };
+
+      const language = currentLanguage.toLowerCase();
+
+      const order =
+        language in languageOrders ? languageOrders[language as keyof typeof languageOrders] : languageOrders["pl"];
+
       return answers.sort((a, b) => {
-        const order = ["tak", "nie"];
-        return (
-          order.indexOf(a.content.toLowerCase()) -
-          order.indexOf(b.content.toLowerCase())
-        );
+        const indexA = order.indexOf(a.content.toLowerCase());
+        const indexB = order.indexOf(b.content.toLowerCase());
+
+        if (indexA === -1 || indexB === -1) return 0;
+
+        return indexA - indexB;
       });
     }
     return answers;

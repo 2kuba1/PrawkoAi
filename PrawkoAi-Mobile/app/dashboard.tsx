@@ -128,12 +128,12 @@ export default function DashboardScreen() {
                 className="bg-[#1544b2] h-full"
                 style={{
                   width: dashboardData?.maxQuestionsCount
-                    ? Math.round(
+                    ? `${Math.round(
                         (dashboardData.questionsAnsweredCount /
                           dashboardData.maxQuestionsCount) *
                           100,
-                      )
-                    : 0,
+                      )}%`
+                    : "0%",
                 }}
               />
             </View>

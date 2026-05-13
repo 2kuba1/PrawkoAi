@@ -5,7 +5,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -43,6 +43,7 @@ export default function ExamSolvingScreen() {
   const [correctCount, setCorrectCount] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [userAnswers, setUserAnswers] = useState<UserSetAnswer[]>([]);
+  const [currentLanguage, setCurrentLanguage] = useState("pl");
 
   const { user } = useContext(AuthContext);
 
@@ -51,6 +52,7 @@ export default function ExamSolvingScreen() {
     const fetchQuestions = async () => {
       try {
         const lang = (await AsyncStorage.getItem("user-language")) || "PL";
+        setCurrentLanguage(lang.toLowerCase());
         const response = await api.get("/learn/getQuestionsForSet", {
           params: { ...params, locale: lang.toUpperCase() },
         });
@@ -73,6 +75,35 @@ export default function ExamSolvingScreen() {
   }, [params.setNumber]);
 
   const currentQuestion = questions[currentIndex];
+
+  const sortedAnswers = useMemo(() => {
+    if (!currentQuestion?.answers) return [];
+    const answers = [...currentQuestion.answers];
+
+    if (answers.length === 2) {
+      const languageOrders = {
+        pl: ["tak", "nie"],
+        en: ["yes", "no"],
+        uk: ["так", "ні"],
+        de: ["ja", "nein"],
+      };
+
+      const lang = currentLanguage.toLowerCase();
+      const order =
+        lang in languageOrders
+          ? languageOrders[lang as keyof typeof languageOrders]
+          : languageOrders["pl"];
+
+      return answers.sort((a, b) => {
+        const indexA = order.indexOf(a.answerContent.toLowerCase());
+        const indexB = order.indexOf(b.answerContent.toLowerCase());
+
+        if (indexA === -1 || indexB === -1) return 0;
+        return indexA - indexB;
+      });
+    }
+    return answers;
+  }, [currentQuestion, currentLanguage]);
 
   const handleCheck = () => {
     if (!selectedId || isChecked) return;
@@ -227,7 +258,6 @@ export default function ExamSolvingScreen() {
   return (
     <View className="flex-1 bg-[#f6f6f8] dark:bg-[#111621]">
       <StatusBar barStyle="default" />
-
       <View
         style={{ paddingTop: insets.top }}
         className="bg-white dark:bg-slate-900 px-4 pb-4 border-b border-slate-100 dark:border-slate-800"
@@ -303,7 +333,7 @@ export default function ExamSolvingScreen() {
           </Text>
 
           <View className="gap-3">
-            {currentQuestion.answers.map((answer: any) => {
+            {sortedAnswers.map((answer: any) => {
               const isSelected = selectedId === answer.answerId;
               const isCorrect =
                 isChecked &&
