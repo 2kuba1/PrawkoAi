@@ -24,7 +24,7 @@ public static class UserEndpoints
          userGroup.MapGet("/getUserWorstPerformingCategory", GetUserWorstPerformingCategory)
              .RequireAuthorization();
 
-         userGroup.MapGet("/getDashBoardData", GetDashboardData);
+         userGroup.MapGet("/getDashboardData", GetDashboardData);
     }
 
     private static async Task<IResult> GetUserStats([FromQuery] Guid userId, [FromServices] IMediator mediator)

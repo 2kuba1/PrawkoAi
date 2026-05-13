@@ -8,4 +8,5 @@ public interface IUserRepository : IGenericRepository<User>
     Task<User?> FindUserByEmailAsync(string email);
     Task<User?> FindUserByDeviceIdAsync(string deviceId);
     Task<User> CreateNewGuestAsync(string deviceId);
+    Task<int> GetStreak(Guid userId);
 }

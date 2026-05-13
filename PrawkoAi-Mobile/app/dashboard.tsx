@@ -16,8 +16,11 @@ import i18n from "./utils/translations";
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
-  const { signOut } = useContext(AuthContext);
+  const { user, token } = useContext(AuthContext);
   const router = useRouter();
+
+  console.log("User token: " + token?.accessToken);
+  console.log("User ID: " + user?.id);
 
   const paddingTop =
     Platform.OS === "android"

@@ -7,5 +7,5 @@ public interface ICategoryRepository : IGenericRepository<Category>
 {
     Task<Category?> GetCategoryByName(string categoryName);
     Task<List<string>> GetAllCategoriesNames();
-    Task<string> GetUserWorsePerformingCategory(Guid userId);
+    Task<string?> GetUserWorsePerformingCategory(Guid userId);
 }

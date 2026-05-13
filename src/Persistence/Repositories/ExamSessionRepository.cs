@@ -61,4 +61,10 @@ public class ExamSessionRepository : GenericRepository<ExamSession>, IExamSessio
             .OrderByDescending(e => e.CreatedAt)
             .Select(e => e.Score)
             .ToListAsync();
+
+    public async Task<float> GetAverageExamScore(Guid userId)
+        => await _context.ExamSessions
+            .AsNoTracking()
+            .Where(e => e.UserId == userId && e.FinishedAt != null)
+            .AverageAsync(e => (float?)e.Score) ?? 0f;
 }

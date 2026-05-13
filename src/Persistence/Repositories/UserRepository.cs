@@ -50,4 +50,11 @@ public class UserRepository : GenericRepository<User>, IUserRepository
         
         return newUser;
     }
+
+    public async Task<int> GetStreak(Guid userId)
+        => await _context.Users
+            .AsNoTracking()
+            .Where(x => x.Id == userId)
+            .Select(x => x.Streak)
+            .FirstOrDefaultAsync();
 }
