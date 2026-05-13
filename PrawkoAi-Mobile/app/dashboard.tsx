@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import {
   Platform,
   ScrollView,
@@ -12,15 +12,50 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContext } from "./_layout";
 import Footer from "./components/footer";
+import { useError } from "./context/errorContext";
+import api from "./utils/api";
 import i18n from "./utils/translations";
+
+export interface DashboardData {
+  worstPerformingCategory?: string;
+  maxQuestionsCount: number;
+  questionsAnsweredCount: number;
+  streak: number;
+  averageScore: number;
+  todayQuestionsAnsweredCount: number;
+}
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const { user, token } = useContext(AuthContext);
   const router = useRouter();
+  const { showError } = useError();
 
-  console.log("User token: " + token?.accessToken);
-  console.log("User ID: " + user?.id);
+  const [dashboardData, setDashboardData] = React.useState<DashboardData>();
+
+  useEffect(() => {
+    const getData = async () => {
+      if (!user || !token) {
+        showError("User not authenticated");
+        router.replace("/index" as any);
+      }
+      try {
+        const response = await api.get<DashboardData>(
+          "/user/getDashboardData",
+          {
+            params: {
+              userId: user?.id,
+            },
+          },
+        );
+
+        setDashboardData(response.data);
+      } catch (error) {
+        showError("Failed to load dashboard data");
+      }
+    };
+    getData();
+  }, []);
 
   const paddingTop =
     Platform.OS === "android"
@@ -77,17 +112,48 @@ export default function DashboardScreen() {
               <Text className="text-sm text-slate-500 dark:text-slate-400 font-medium">
                 {i18n.t("dashboard.learning_progress")}
               </Text>
-              <Text className="text-[#1544b2] font-bold text-xl">65%</Text>
+              <Text className="text-[#1544b2] font-bold text-xl">
+                {dashboardData?.maxQuestionsCount
+                  ? Math.round(
+                      (dashboardData.questionsAnsweredCount /
+                        dashboardData.maxQuestionsCount) *
+                        100,
+                    )
+                  : 0}
+                %
+              </Text>
             </View>
             <View className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 mb-3 overflow-hidden">
-              <View className="bg-[#1544b2] h-full" style={{ width: "65%" }} />
+              <View
+                className="bg-[#1544b2] h-full"
+                style={{
+                  width: dashboardData?.maxQuestionsCount
+                    ? Math.round(
+                        (dashboardData.questionsAnsweredCount /
+                          dashboardData.maxQuestionsCount) *
+                          100,
+                      )
+                    : 0,
+                }}
+              />
             </View>
             <View className="flex-row justify-between items-center">
               <Text className="text-[11px] text-slate-400 font-medium">
-                130 z 200 {i18n.t("dashboard.questions_mastered")}
+                {dashboardData?.questionsAnsweredCount ?? 0} z{" "}
+                {dashboardData?.maxQuestionsCount ?? 0}{" "}
+                {i18n.t("dashboard.questions_mastered")}
               </Text>
-              <Text className="text-[11px] text-green-600 font-bold">
-                +12 {i18n.t("dashboard.today")}
+              <Text
+                className="text-[11px] text-green-600 font-bold"
+                style={{
+                  color:
+                    (dashboardData?.todayQuestionsAnsweredCount ?? 0) > 0
+                      ? "#16a34a"
+                      : "#dc2626",
+                }}
+              >
+                +{dashboardData?.todayQuestionsAnsweredCount ?? 0}{" "}
+                {i18n.t("dashboard.today")}
               </Text>
             </View>
           </View>
@@ -173,7 +239,7 @@ export default function DashboardScreen() {
             <View className="flex-row items-center gap-2">
               <MaterialCommunityIcons name="fire" size={20} color="#f97316" />
               <Text className="text-lg font-bold text-slate-900 dark:text-white">
-                5 {i18n.t("dashboard.days")}
+                {dashboardData?.streak} {i18n.t("dashboard.days")}
               </Text>
             </View>
           </View>
@@ -184,7 +250,7 @@ export default function DashboardScreen() {
             <View className="flex-row items-center gap-2">
               <MaterialIcons name="trending-up" size={20} color="#1544b2" />
               <Text className="text-lg font-bold text-slate-900 dark:text-white">
-                84%
+                {dashboardData?.averageScore}/74
               </Text>
             </View>
           </View>

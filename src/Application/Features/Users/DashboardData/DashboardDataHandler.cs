@@ -31,21 +31,20 @@ internal sealed class DashboardDataHandler : IRequestHandler<DashboardData, Dash
         if(request.UserId != Utils.GetCurrentUserId(_httpContextAccessor))
             throw new UnauthorizedException("You are not authorized to revoke this refresh tokens");
         
-        var worstPerformingCategory = _categoryRepository.GetUserWorsePerformingCategory(request.UserId);
-        var uniqueQuestionsAnswered = _userAnswerRepository.GetUniqueQuestionsAnsweredCount(request.UserId, request.Category);
-        var questionsOfCategory = _questionRepository.GetQuestionsCountOfCategory(request.Category);
-        var todayQuestionsAnswered= _userAnswerRepository.TodayQuestionsAnsweredCount(request.UserId);
-        var avgExamScore = _examSessionRepository.GetAverageExamScore(request.UserId);
-        var streak = _userRepository.GetStreak(request.UserId);
-
-        await Task.WhenAll(worstPerformingCategory, uniqueQuestionsAnswered, questionsOfCategory, avgExamScore, todayQuestionsAnswered, streak);
+        var worstPerformingCategory = await _categoryRepository.GetUserWorsePerformingCategory(request.UserId);
+        var uniqueQuestionsAnswered = await _userAnswerRepository.GetUniqueQuestionsAnsweredCount(request.UserId, request.Category);
+        var questionsOfCategory = await _questionRepository.GetQuestionsCountOfCategory(request.Category);
+        var todayQuestionsAnswered= await _userAnswerRepository.TodayQuestionsAnsweredCount(request.UserId);
+        var avgExamScore = await _examSessionRepository.GetAverageExamScore(request.UserId);
+        var streak = await _userRepository.GetStreak(request.UserId);
         
         return new DashboardDataDto(
-            worstPerformingCategory.Result,
-            questionsOfCategory.Result,
-            uniqueQuestionsAnswered.Result,
-            streak.Result,
-            avgExamScore.Result,
-            streak.Result);
+            worstPerformingCategory,
+            questionsOfCategory,
+            uniqueQuestionsAnswered,
+            streak,
+            avgExamScore,
+            todayQuestionsAnswered
+            );
     }
 }

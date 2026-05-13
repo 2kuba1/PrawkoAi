@@ -180,13 +180,13 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
     }
 
     //todo change categoryType to categoryName
-    public async Task<List<SetQuestionDto>> GetQuestionSet(string categoryTag, string categoryType, int setNumber, string locale)
+    public async Task<List<SetQuestionDto>> GetQuestionSet(string categoryTag, string categoryName, int setNumber, string locale)
     {
         if (setNumber < 1) setNumber = 1;
 
         var totalQuestionsInCategoryTypeWithCategoryTag = await _context.Questions
             .AsNoTracking()
-            .CountAsync(q => q.Categories.Any(c => c.Name == categoryType) && q.CategoryTag == categoryTag);
+            .CountAsync(q => q.Categories.Any(c => c.Name == categoryName) && q.CategoryTag == categoryTag);
 
         if (totalQuestionsInCategoryTypeWithCategoryTag == 0) return [];
 
@@ -213,7 +213,7 @@ public class QuestionRepository : GenericRepository<Question>, IQuestionReposito
         
         return await _context.Questions
             .AsNoTracking()
-            .Where(q => q.CategoryTag == categoryTag && q.Categories.Any(c => c.Name == categoryType))
+            .Where(q => q.CategoryTag == categoryTag && q.Categories.Any(c => c.Name == categoryName))
             .OrderBy(q => q.QuestionNumber)
             .Skip(skipAmount)
             .Take(takeAmount)

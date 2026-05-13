@@ -86,7 +86,6 @@ public class UserRepository : GenericRepository<User>, IUserRepository
 
         user.LastStreakDate = today;
         
-        _context.Update(user);
         await _context.SaveChangesAsync();
     }
 }
