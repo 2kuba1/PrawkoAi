@@ -9,4 +9,5 @@ public interface IUserRepository : IGenericRepository<User>
     Task<User?> FindUserByDeviceIdAsync(string deviceId);
     Task<User> CreateNewGuestAsync(string deviceId);
     Task<int> GetStreak(Guid userId);
+    Task UpdateStreak(Guid userId);
 }

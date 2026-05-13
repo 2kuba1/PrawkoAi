@@ -16,14 +16,16 @@ internal sealed class FinishExamHandler : IRequestHandler<FinishExam, ExamResult
     private readonly IExamSessionRepository _examSessionRepository;
     private readonly IExamSessionQuestionRepository _examSessionQuestionRepository;
     private readonly IUserAnswerRepository _userAnswerRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public FinishExamHandler(IHttpContextAccessor httpContextAccessor, IExamSessionRepository examSessionRepository, IExamSessionQuestionRepository examSessionQuestionRepository, IUserAnswerRepository userAnswerRepository, IUnitOfWork  unitOfWork)
+    public FinishExamHandler(IHttpContextAccessor httpContextAccessor, IExamSessionRepository examSessionRepository, IExamSessionQuestionRepository examSessionQuestionRepository, IUserAnswerRepository userAnswerRepository, IUserRepository userRepository, IUnitOfWork  unitOfWork)
     {
         _httpContextAccessor = httpContextAccessor;
         _examSessionRepository = examSessionRepository;
         _examSessionQuestionRepository = examSessionQuestionRepository;
         _userAnswerRepository = userAnswerRepository;
+        _userRepository = userRepository;
         _unitOfWork = unitOfWork;
     }
     
@@ -33,6 +35,8 @@ internal sealed class FinishExamHandler : IRequestHandler<FinishExam, ExamResult
         
         if (!isHttpContextAndRequestMatching)
             throw new UnauthorizedException("You are not allowed to update this exam");
+        
+        await _userRepository.UpdateStreak(request.UserId);
 
         var examSession = await _examSessionRepository.GetByIdAsync(request.ExamSessionId);
         

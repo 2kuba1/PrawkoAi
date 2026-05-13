@@ -57,4 +57,36 @@ public class UserRepository : GenericRepository<User>, IUserRepository
             .Where(x => x.Id == userId)
             .Select(x => x.Streak)
             .FirstOrDefaultAsync();
+
+    public async Task UpdateStreak(Guid userId)
+    {
+        var user = await _context.Users
+            .FirstOrDefaultAsync(x => x.Id == userId);
+        
+        if(user is null)
+            throw new NotFoundException("This user does not exist");
+        
+        var today = DateTime.UtcNow.Date;
+    
+        if (user.LastStreakDate == today)
+        {
+            return; 
+        }
+
+        var yesterday = today.AddDays(-1);
+    
+        if (user.LastStreakDate == yesterday)
+        {
+            user.Streak += 1;
+        }
+        else
+        {
+            user.Streak = 1;
+        }
+
+        user.LastStreakDate = today;
+        
+        _context.Update(user);
+        await _context.SaveChangesAsync();
+    }
 }
