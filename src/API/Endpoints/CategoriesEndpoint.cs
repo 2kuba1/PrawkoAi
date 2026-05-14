@@ -2,6 +2,7 @@
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace API.Endpoints;
 
@@ -20,9 +21,15 @@ public static class CategoriesEndpoint
             .RequireAuthorization();
     }
 
-    private static async Task<IResult> GetAllCategoriesNames([FromServices] IMediator mediator)
+    private static async Task<IResult> GetAllCategoriesNames([FromServices] IMediator mediator, [FromServices] IMemoryCache cache)
     {
-        var results = await mediator.Send(new GetAllCategoriesNames());
-        return Results.Ok(results);
+        var cachedCategories = await cache.GetOrCreateAsync("categories", async entry =>
+        {
+            entry.AbsoluteExpiration = DateTimeOffset.UtcNow.AddDays(1);
+            var results = await mediator.Send(new GetAllCategoriesNames());
+            return results;
+        });
+        
+        return Results.Ok(cachedCategories);
     }
 }

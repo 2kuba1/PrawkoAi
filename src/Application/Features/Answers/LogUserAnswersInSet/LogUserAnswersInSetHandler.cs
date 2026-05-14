@@ -9,11 +9,13 @@ namespace Application.Features.Answers.LogUserAnswersInSet;
 internal sealed class LogUserAnswersInSetHandler : IRequestHandler<LogUserAnswersInSet, Unit>
 {
     private readonly IUserAnswerRepository _userAnswerRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public LogUserAnswersInSetHandler(IUserAnswerRepository userAnswerRepository, IHttpContextAccessor httpContextAccessor)
+    public LogUserAnswersInSetHandler(IUserAnswerRepository userAnswerRepository, IUserRepository userRepository, IHttpContextAccessor httpContextAccessor)
     {
         _userAnswerRepository = userAnswerRepository;
+        _userRepository = userRepository;
         _httpContextAccessor = httpContextAccessor;
     }
     
@@ -24,6 +26,7 @@ internal sealed class LogUserAnswersInSetHandler : IRequestHandler<LogUserAnswer
         if (!isHttpContextAndRequestMatching)
             throw new UnauthorizedException("You are not allowed to write this answers to this user");
 
+        await _userRepository.UpdateStreak(request.UserId);
         await _userAnswerRepository.CreateSetAnswers(request.UserId, request.Answers);
         
         return Unit.Value;
