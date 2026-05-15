@@ -1,6 +1,6 @@
-﻿using Application.Contracts.Repositories;
+﻿using Application.Common;
+using Application.Contracts.Repositories;
 using Application.Models.DTOs;
-using Application.Shared;
 using Domain.Enums;
 using Domain.Exceptions;
 using MathNet.Numerics.Distributions;

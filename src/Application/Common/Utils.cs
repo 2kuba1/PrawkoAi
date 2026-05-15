@@ -1,8 +1,7 @@
-﻿using System.Security.Claims;
-using Application.Models.DTOs;
+﻿using Application.Models.DTOs;
 using Microsoft.AspNetCore.Http;
 
-namespace Application.Shared;
+namespace Application.Common;
 
 internal static class Utils
 {

@@ -1,12 +1,13 @@
 ﻿using System.Transactions;
+using Application.Common;
 using Application.Contracts.Repositories;
 using Application.Contracts.Services;
 using Application.Models.DTOs;
-using Application.Shared;
 using Domain.Entities;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Application.Features.Exam.FinishExam;
 
@@ -18,8 +19,9 @@ internal sealed class FinishExamHandler : IRequestHandler<FinishExam, ExamResult
     private readonly IUserAnswerRepository _userAnswerRepository;
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IDistributedCache _cache;
 
-    public FinishExamHandler(IHttpContextAccessor httpContextAccessor, IExamSessionRepository examSessionRepository, IExamSessionQuestionRepository examSessionQuestionRepository, IUserAnswerRepository userAnswerRepository, IUserRepository userRepository, IUnitOfWork  unitOfWork)
+    public FinishExamHandler(IHttpContextAccessor httpContextAccessor, IExamSessionRepository examSessionRepository, IExamSessionQuestionRepository examSessionQuestionRepository, IUserAnswerRepository userAnswerRepository, IUserRepository userRepository, IUnitOfWork  unitOfWork, IDistributedCache cache)
     {
         _httpContextAccessor = httpContextAccessor;
         _examSessionRepository = examSessionRepository;
@@ -27,6 +29,7 @@ internal sealed class FinishExamHandler : IRequestHandler<FinishExam, ExamResult
         _userAnswerRepository = userAnswerRepository;
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
+        _cache = cache;
     }
     
     public async Task<ExamResultsDto> Handle(FinishExam request, CancellationToken cancellationToken)
@@ -83,6 +86,9 @@ internal sealed class FinishExamHandler : IRequestHandler<FinishExam, ExamResult
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             
             await _unitOfWork.CommitTransactionAsync();
+            
+            string cacheKey = $"user_stats_{request.UserId}";
+            await _cache.RemoveAsync(cacheKey, cancellationToken);
             
             results.IsPassed = isPassed;
             results.StartedAt = examSession.StaredAt;

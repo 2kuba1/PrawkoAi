@@ -1,8 +1,8 @@
-﻿using Application.Contracts.Repositories;
+﻿using Application.Common;
+using Application.Contracts.Repositories;
 using Application.Jobs;
 using Application.Models;
 using Application.Models.DTOs;
-using Application.Shared;
 using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;

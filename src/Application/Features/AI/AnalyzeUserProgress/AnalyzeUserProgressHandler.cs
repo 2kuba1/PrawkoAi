@@ -1,9 +1,9 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
+using Application.Common;
 using Application.Contracts.Repositories;
 using Application.Models;
 using Application.Models.DTOs;
-using Application.Shared;
 using Domain.Entities;
 using Domain.Enums;
 using MediatR;

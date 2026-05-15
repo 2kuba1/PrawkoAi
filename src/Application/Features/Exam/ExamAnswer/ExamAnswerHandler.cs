@@ -1,5 +1,5 @@
-﻿using Application.Contracts.Repositories;
-using Application.Shared;
+﻿using Application.Common;
+using Application.Contracts.Repositories;
 using Domain;
 using Domain.Entities;
 using Domain.Exceptions;

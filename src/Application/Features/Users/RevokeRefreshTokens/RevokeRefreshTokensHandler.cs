@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
+using Application.Common;
 using Application.Contracts.Repositories;
-using Application.Shared;
 using Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Http;

@@ -1,5 +1,5 @@
-﻿using Application.Contracts.Repositories;
-using Application.Shared;
+﻿using Application.Common;
+using Application.Contracts.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
