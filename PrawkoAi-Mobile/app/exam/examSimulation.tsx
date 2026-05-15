@@ -78,7 +78,7 @@ export default function ExamSimulationScreen() {
   useEffect(() => {
     const fetchExamData = async () => {
       if (!user?.id) return;
-      setCurrentLanguage(await AsyncStorage.getItem("user-language") ?? "PL");
+      setCurrentLanguage((await AsyncStorage.getItem("user-language")) ?? "PL");
       try {
         const response = await api.get<ExamData>("/exam/start", {
           params: {
@@ -234,6 +234,7 @@ export default function ExamSimulationScreen() {
         examSessionId: examData.examSession.id,
         locale: language,
         answers: formattedAnswers,
+        categoryName: (await AsyncStorage.getItem("user-category")) ?? "B",
       });
 
       router.replace(`/exam/examResult/${examData.examSession.id}`);
@@ -261,7 +262,9 @@ export default function ExamSimulationScreen() {
       const language = currentLanguage.toLowerCase();
 
       const order =
-        language in languageOrders ? languageOrders[language as keyof typeof languageOrders] : languageOrders["pl"];
+        language in languageOrders
+          ? languageOrders[language as keyof typeof languageOrders]
+          : languageOrders["pl"];
 
       return answers.sort((a, b) => {
         const indexA = order.indexOf(a.content.toLowerCase());

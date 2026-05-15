@@ -39,8 +39,6 @@ internal sealed class FinishExamHandler : IRequestHandler<FinishExam, ExamResult
         if (!isHttpContextAndRequestMatching)
             throw new UnauthorizedException("You are not allowed to update this exam");
         
-        await _userRepository.UpdateStreak(request.UserId);
-
         var examSession = await _examSessionRepository.GetByIdAsync(request.ExamSessionId);
         
         if(examSession is null)
@@ -82,6 +80,8 @@ internal sealed class FinishExamHandler : IRequestHandler<FinishExam, ExamResult
 
             var isPassed = _examSessionRepository.CheckIfPassedAndSaveSession(examSession, finishedAt,
                 results.Score, results.CorrectAnswersCount);
+
+            await _userRepository.UpdateStreak(request.UserId, _cache, request.CategoryName);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             

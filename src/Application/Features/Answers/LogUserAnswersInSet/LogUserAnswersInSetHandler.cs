@@ -29,7 +29,7 @@ internal sealed class LogUserAnswersInSetHandler : IRequestHandler<LogUserAnswer
         if (!isHttpContextAndRequestMatching)
             throw new UnauthorizedException("You are not allowed to write this answers to this user");
 
-        await _userRepository.UpdateStreak(request.UserId);
+        await _userRepository.UpdateStreak(request.UserId, _cache, request.CategoryName);
         await _userAnswerRepository.CreateSetAnswers(request.UserId, request.Answers);
         
         var cacheKey = $"user_stats_{request.UserId}";

@@ -3,6 +3,7 @@ using Domain;
 using Domain.Entities;
 using Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Persistence.Database;
 
 namespace Persistence.Repositories;
@@ -58,7 +59,7 @@ public class UserRepository : GenericRepository<User>, IUserRepository
             .Select(x => x.Streak)
             .FirstOrDefaultAsync();
 
-    public async Task UpdateStreak(Guid userId)
+    public async Task UpdateStreak(Guid userId, IDistributedCache cache, string categoryName = "B")
     {
         var user = await _context.Users
             .FirstOrDefaultAsync(x => x.Id == userId);
@@ -85,7 +86,8 @@ public class UserRepository : GenericRepository<User>, IUserRepository
         }
 
         user.LastStreakDate = today;
-        
+        await cache.RemoveAsync($"dashboard_data_{userId}_category_{categoryName}");
+
         await _context.SaveChangesAsync();
     }
 }

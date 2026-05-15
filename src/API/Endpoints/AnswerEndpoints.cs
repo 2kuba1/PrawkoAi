@@ -31,7 +31,8 @@ public static class AnswerEndpoints
         
         await mediator.Send(new LogUserAnswersInSet(
             questionSet.UserId,
-            mappedAnswers
+            mappedAnswers,
+            questionSet.CategoryName.ToUpper()
         ));
 
         return Results.NoContent();
@@ -39,7 +40,8 @@ public static class AnswerEndpoints
 
     private record AnswersInSet(
         Guid UserId,
-        List<UserSetAnswer> Answers
+        List<UserSetAnswer> Answers,
+        string CategoryName = "B"
         );
 
     private record UserSetAnswer(

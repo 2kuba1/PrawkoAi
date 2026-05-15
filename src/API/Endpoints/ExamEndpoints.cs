@@ -52,7 +52,7 @@ public static class ExamEndpoints
     private static async Task<IResult> FinishExam([FromBody] FinishExamSession finishExamSession,
         [FromServices] IMediator mediator)
     {
-        var results = await mediator.Send(new FinishExam(finishExamSession.UserId, finishExamSession.ExamSessionId, finishExamSession.Locale, finishExamSession.Answers));
+        var results = await mediator.Send(new FinishExam(finishExamSession.UserId, finishExamSession.ExamSessionId, finishExamSession.Locale, finishExamSession.Answers, finishExamSession.CategoryName.ToUpper()));
         return Results.Ok(results);
     }
 
@@ -76,7 +76,8 @@ public static class ExamEndpoints
         Guid UserId,
         Guid ExamSessionId,
         string Locale,
-        List<UserAnswerSubmissionDto> Answers);
+        List<UserAnswerSubmissionDto> Answers,
+        string CategoryName = "B");
 
     private record AnswerToQuestionRequest(
         Guid QuestionId,

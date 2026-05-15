@@ -173,7 +173,11 @@ export default function ExamSolvingScreen() {
           JSON.stringify(resultsData),
         );
 
-        const payload = { userId: user?.id, answers: userAnswers };
+        const payload = {
+          userId: user?.id,
+          answers: userAnswers,
+          categoryName: (await AsyncStorage.getItem("user-category")) ?? "B",
+        };
         await api.post("/answer/answerSet", payload);
 
         const storageKey = `progress_${params.categoryTag}`;

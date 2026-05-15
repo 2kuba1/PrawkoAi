@@ -3,4 +3,4 @@ using MediatR;
 
 namespace Application.Features.Answers.LogUserAnswersInSet;
 
-public record LogUserAnswersInSet(Guid UserId, List<UserSetAnswerDto> Answers) : IRequest<Unit>;
+public record LogUserAnswersInSet(Guid UserId, List<UserSetAnswerDto> Answers, string CategoryName) : IRequest<Unit>;
