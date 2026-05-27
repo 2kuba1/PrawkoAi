@@ -87,14 +87,17 @@ builder.Services.AddApiVersioning(options =>
 
 builder.Services.AddMemoryCache();
 
+//middlewares
+builder.Services.AddTransient<ErrorHandlingMiddleware>();
+
 var app = builder.Build();
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-
-app.UseMiddleware<ErrorHandlingMiddleware>();
 
 await app.SeedDatabaseAsync();
 

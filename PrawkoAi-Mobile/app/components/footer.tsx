@@ -55,13 +55,6 @@ const Footer = () => {
       path: "/learning/studyTopics",
     },
     {
-      id: "school",
-      label: i18n.t("navigation.nav_school"),
-      icon: "school",
-      family: "MaterialIcons",
-      path: "/school",
-    },
-    {
       id: "profile",
       label: i18n.t("navigation.nav_profile"),
       icon: "account-circle",
