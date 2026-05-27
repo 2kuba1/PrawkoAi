@@ -1,5 +1,6 @@
 using System.Text;
 using API.Endpoints;
+using API.Middlewares;
 using Application;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -32,7 +33,7 @@ builder.Services.AddCors(opt =>
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    options.KnownNetworks.Clear();
+    options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
 });
 
@@ -92,6 +93,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 await app.SeedDatabaseAsync();
 

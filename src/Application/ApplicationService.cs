@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Application.Common;
+using Application.PipelineBehaviors;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

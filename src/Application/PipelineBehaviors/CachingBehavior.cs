@@ -1,10 +1,11 @@
 ﻿using System.Text.Json;
+using Application.Common;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace Application.Common;
+namespace Application.PipelineBehaviors;
 
-public sealed class CachingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+internal sealed class CachingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : ICachableRequest
 {
     private readonly IDistributedCache _cache;
