@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using Application.Common;
 using Application.PipelineBehaviors;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,8 +9,6 @@ public static class ApplicationService
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddHttpClient();
-
         services.AddStackExchangeRedisCache(opt =>
         {
             opt.Configuration = configuration.GetConnectionString("RedisConnection");

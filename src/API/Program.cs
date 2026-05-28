@@ -3,6 +3,7 @@ using API.Endpoints;
 using API.Middlewares;
 using Application;
 using Asp.Versioning;
+using Infrastructure;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -17,6 +18,7 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddPersistenceServices(builder.Configuration);
+builder.Services.AddInfrastructureServices();
 
 builder.Services.AddHttpContextAccessor();
 

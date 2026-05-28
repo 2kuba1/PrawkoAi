@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Application.Contracts.Repositories;
+using Application.Contracts.Services;
 using Application.Models;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -11,14 +12,14 @@ namespace Application.Features.AI.GetAiExplanationStream;
 public class GetAiExplanationStreamHandler : IStreamRequestHandler<GetAiExplanationStream, string>
 {
     private readonly IConfiguration _configuration;
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IAiService _aiService;
     private readonly IQuestionRepository _questionRepository;
 
-    public GetAiExplanationStreamHandler(IConfiguration configuration, IHttpClientFactory httpClientFactory,
+    public GetAiExplanationStreamHandler(IConfiguration configuration, IAiService aiService,
         IQuestionRepository questionRepository)
     {
         _configuration = configuration;
-        _httpClientFactory = httpClientFactory;
+        _aiService = aiService;
         _questionRepository = questionRepository;
     }
 
@@ -63,55 +64,9 @@ public class GetAiExplanationStreamHandler : IStreamRequestHandler<GetAiExplanat
                       ### Odpowiadaj w języku: {targetLanguage}
                       """;
 
-        var payload = new
+        await foreach (var chunk in _aiService.StreamContentAsync(prompt, cancellationToken))
         {
-            contents = new[] { new { parts = new[] { new { text = prompt } } } },
-            generationConfig = new { temperature = 0.3, maxOutputTokens = 150 }
-        };
-
-        using var client = _httpClientFactory.CreateClient();
-
-        var response = await client.PostAsJsonAsync(url, payload, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var error = await response.Content.ReadAsStringAsync(cancellationToken);
-            yield return $"API error ({response.StatusCode}): {error}";
-            yield break;
-        }
-
-        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-        using var reader = new StreamReader(stream);
-
-        while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
-        {
-            var line = await reader.ReadLineAsync(cancellationToken);
-            if (string.IsNullOrWhiteSpace(line)) continue;
-
-            if (!line.StartsWith("data: ")) continue;
-            var json = line.Substring(6).Trim();
-
-            if (json == "{}" || string.IsNullOrEmpty(json)) continue;
-
-            string? textPart = null;
-            try
-            {
-                var chunk = JsonSerializer.Deserialize<GeminiResponse>(json, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-
-                textPart = chunk?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
-            }
-            catch
-            {
-                continue;
-            }
-
-            if (!string.IsNullOrEmpty(textPart))
-            {
-                yield return textPart;
-            }
+            yield return chunk;
         }
     }
 }
