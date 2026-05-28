@@ -60,6 +60,7 @@ Backend infrastructure:
 ### Languages
 
 - JavaScript
+- TypeScript
 
 ### Technologies & Libraries
 

@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Application.Common;
 using Application.Contracts.Repositories;
+using Application.Contracts.Services;
 using Application.Models;
 using Application.Models.DTOs;
 using Domain.Entities;
@@ -15,17 +16,15 @@ internal sealed class AnalyzeUserProgressHandler : IRequestHandler<AnalyzeUserPr
 {
     private readonly IUserAnswerRepository _userAnswerRepository;
     private readonly IExamSessionRepository _examSessionRepository;
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly IUserAiProgressRepository _aiProgressRepository;
-    private readonly IConfiguration _config;
+    private readonly IAiService _aiService;
 
-    public AnalyzeUserProgressHandler(IUserAnswerRepository userAnswerRepository, IExamSessionRepository examSessionRepository, IHttpClientFactory httpClientFactory, IUserAiProgressRepository aiProgressRepository, IConfiguration config)
+    public AnalyzeUserProgressHandler(IUserAnswerRepository userAnswerRepository, IExamSessionRepository examSessionRepository, IUserAiProgressRepository aiProgressRepository, IAiService  aiService)
     {
         _userAnswerRepository = userAnswerRepository;
         _examSessionRepository = examSessionRepository;
-        _httpClientFactory = httpClientFactory;
         _aiProgressRepository = aiProgressRepository;
-        _config = config;
+        _aiService = aiService;
     }
     
     public async Task<string> Handle(AnalyzeUserProgress request, CancellationToken cancellationToken)
@@ -98,40 +97,19 @@ internal sealed class AnalyzeUserProgressHandler : IRequestHandler<AnalyzeUserPr
                        NIE UŻYWAJ MARKDOWN, POGRUBIEN, LIST ITP.
                        """;
         
-        var apiKey = _config["AI:GeminiApiKey"];
-        var url =
-            $"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key={apiKey}";
-        
-        var payload = new
-        {
-            contents = new[] { new { parts = new[] { new { text = prompt } } } },
-            generationConfig = new { 
-                temperature = 0.5, 
-                maxOutputTokens = 400,
-                topP = 0.8
-            }
-        };
+        var aiText = await _aiService.GenerateContentAsync(prompt, cancellationToken);
 
-        using var client = _httpClientFactory.CreateClient();
-        
-        var response = await client.PostAsJsonAsync(url, payload, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-            return "Analiza jest chwilowo niedostępna. Spróbuj później.";
-
-        var result = await response.Content.ReadFromJsonAsync<GeminiResponse>(cancellationToken: cancellationToken);
-        var aiText = result?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
-        var aiTextTrim = aiText?.Trim();
-
-        if (aiTextTrim == null)
+        if (string.IsNullOrWhiteSpace(aiText))
             return "Analiza jest chwilowo niedostępna.";
 
-        await _aiProgressRepository.CreateAsync(new UserAiProgress()
+        var aiTextTrim = aiText.Trim();
+
+        await _aiProgressRepository.CreateAsync(new UserAiProgress
         {
             UserId = request.UserId,
             Content = aiTextTrim
         });
-            
+
         return aiTextTrim;
     }
 }
