@@ -114,6 +114,58 @@ https://www.gov.pl/web/infrastruktura/prawo-jazdy
 
 ---
 
+# 🐳 Docker Support
+
+Backend project can be started using Docker and Docker Compose.
+
+## Docker Prerequisites
+
+- Docker
+- Docker desktop
+
+## Start services:
+
+```bash
+docker compose up -d
+```
+
+---
+
+# 📄 .env.example
+
+Create a `.env` file based on the following template:
+
+```env
+#DB PARAMS
+
+DB_DATABASE=DB_NAME
+DB_USER=DB_USERNAME
+DB_PASSWORD=DB_PASSWORD
+
+#CONNECTION STRINGS
+
+CONNECTION_REDIS=REDIS_CONNECTION
+
+#JWT PARAMS
+
+JWT_SECRET=JWT_SECRET
+JWT_ISSUER=JWT_ISSUER
+JWT_AUDIENCE=JWT_AUDIENCE
+JWT_ACCESS_TOKEN_EXPIRATION=ACCESS_TOKEN_EXPIRATION_IN_MINUTES
+JWT_REFRESH_TOKEN_EXPIRATION=REFRESH_TOKEN_EXPIRATION_IN_DAYS
+
+#AI PRAMS
+
+AI_API_KEY=YOUR_API_KEY
+AI_ANWER_COUNT=NUMBER_OF_ANSWERS_TAKEN_TO_ANALITYCS
+AI_EXAM_COUNT=NUMBER_OF_EXAMS_TAKEN_TO_ANALITYCS
+
+#GOOGLE AUTH PARAMS
+
+GOOGLE_AUTH_CLIENT_ID=YOUR_CLIENT_ID
+GOOGLE_AUTH_SECRET=YOUR_SECRET
+```
+
 # 🚀 Installation Guide
 
 ## ✅ Prerequisites
@@ -231,7 +283,6 @@ The `appsettings.json` file must be filled with your own credentials and configu
 }
 ```
 
----
 
 # ▶️ Running Backend
 

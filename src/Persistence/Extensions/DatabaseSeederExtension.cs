@@ -14,9 +14,7 @@ public static class DatabaseSeederExtension
         var context =  scope.ServiceProvider.GetService<AppDbContext>();
         if (context != null)
         {
-            await context.Database.EnsureCreatedAsync();
             await QuestionsSeeder.Seed(context);
-            // await CategoriesSeeder.Seed(context);
             await RolesSeeder.Seed(context);
         }
     }
