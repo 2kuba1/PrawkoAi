@@ -9,8 +9,6 @@ internal static class RolesSeeder
 {
     internal static async Task Seed(AppDbContext context)
     {
-        await context.Database.EnsureCreatedAsync();
-        
         if(await context.Roles.AnyAsync())
             return;
 
