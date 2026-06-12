@@ -6,6 +6,9 @@
 # dotenv files
 .env
 
+#containers
+.containers
+
 # appsettings
 appsettings.json
 
