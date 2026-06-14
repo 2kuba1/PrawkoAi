@@ -156,6 +156,8 @@ JWT_REFRESH_TOKEN_EXPIRATION=REFRESH_TOKEN_EXPIRATION_IN_DAYS
 
 #AI PRAMS
 
+AI_MODEL_STREAM_URL=AI_MODEL_URL
+AI_MODEL_GENERATE_URL=AI_MODEL_URL_WITH_STREAM_ABILITY
 AI_API_KEY=YOUR_API_KEY
 AI_ANWER_COUNT=NUMBER_OF_ANSWERS_TAKEN_TO_ANALITYCS
 AI_EXAM_COUNT=NUMBER_OF_EXAMS_TAKEN_TO_ANALITYCS
@@ -274,7 +276,9 @@ The `appsettings.json` file must be filled with your own credentials and configu
   "AI": {
     "GeminiApiKey": "YOUR_GEMINI_API_KEY",
     "AnswersCount": 500,
-    "ExamCount": 10
+    "ExamCount": 10,
+    "ModelGenerateUrl": "AI_MODEL_URL",
+    "ModelStreamUrl": "AI_MODEL_URL_WITH_STREAM_ABILITY"
   },
   "GoogleAuth": {
     "ClientId": "YOUR_GOOGLE_CLIENT_ID",

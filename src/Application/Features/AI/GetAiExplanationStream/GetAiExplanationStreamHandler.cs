@@ -26,10 +26,6 @@ public class GetAiExplanationStreamHandler : IStreamRequestHandler<GetAiExplanat
     public async IAsyncEnumerable<string> Handle(GetAiExplanationStream request,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var apiKey = _configuration["AI:GeminiApiKey"];
-        var url =
-            $"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:streamGenerateContent?alt=sse&key={apiKey}";
-
         var data = await _questionRepository.GetRequiredAiData(request.QuestionId, request.Locale);
 
         if (data == null) yield break;

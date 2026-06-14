@@ -1,35 +1,37 @@
 ﻿services:
   api:
-    image: api
+    image: api-dev
     build:
       context: .
       dockerfile: src/API/Dockerfile
+      target: final
     ports:
       - "5000:8080"
       - "5001:8081"
     env_file:
       - .env
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DatabaseConnectionString=Host=database;Port=5432;Password=${DB_PASSWORD};Persist Security Info=True;Username=${DB_USER};Database=${DB_DATABASE}
-      - ConnectionStrings__RedisConnectionString=redis:6379
-      - Jwt__Secret=${JWT_SECRET}
-      - Jwt__Issuer=${JWT_ISSUER}
-      - Jwt__Audience=${JWT_AUDIENCE}
-      - Jwt__AccessTokenExpirationInMinutes=${JWT_ACCESS_TOKEN_EXPIRATION}
-      - Jwt__RefreshTokenExpirationInDays=${JWT_REFRESH_TOKEN_EXPIRATION}
-      - Ai__ApiKey=${AI_API_KEY}
-      - Ai__AnswerCount=${AI_ANWER_COUNT}
-      - Ai__ExamCount=${AI_EXAM_COUNT}
-      - GoogleAuth__ClientId=${GOOGLE_AUTH_CLIENT_ID}
-      - GoogleAuth__Secret=${GOOGLE_AUTH_SECRET}
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DatabaseConnectionString: Host=database;Port=5432;Username=${DB_USER};Password=${DB_PASSWORD};Database=${DB_DATABASE}
+      ConnectionStrings__RedisConnection: redis:6379
+      Jwt__Secret: ${JWT_SECRET}
+      Jwt__Issuer: ${JWT_ISSUER}
+      Jwt__Audience: ${JWT_AUDIENCE}
+      Jwt__AccessTokenExpirationInMinutes: ${JWT_ACCESS_TOKEN_EXPIRATION}
+      Jwt__RefreshTokenExpirationInDays: ${JWT_REFRESH_TOKEN_EXPIRATION}
+      Ai__ApiKey: ${AI_API_KEY}
+      Ai__AnswerCount: ${AI_ANWER_COUNT}
+      Ai__ExamCount: ${AI_EXAM_COUNT}
+      Ai__ModelStreamUrl: ${AI_MODEL_STREAM_URL}
+      Ai__ModelGenerateUrl: ${AI_MODEL_GENERATE_URL}
+      GoogleAuth__ClientId: ${GOOGLE_AUTH_CLIENT_ID}
+      GoogleAuth__Secret: ${GOOGLE_AUTH_SECRET}
     depends_on:
       database:
         condition: service_healthy
       redis:
         condition: service_healthy
-    restart: always
-
+    restart: unless-stopped
   database:
     image: postgres:18-alpine
     container_name: prawko_postgres
@@ -39,11 +41,11 @@
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_DATABASE}
+    ports:
+      - "5433:5432"
     volumes:
       - ./.containers/database:/var/lib/postgresql
       - ./init-scripts:/docker-entrypoint-initdb.d
-    ports:
-      - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_DATABASE}"]
       interval: 10s
@@ -55,11 +57,10 @@
     container_name: prawko_redis
     ports:
       - "6379:6379"
-    volumes:
-      - ./.containers/redis:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-    restart: always
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+

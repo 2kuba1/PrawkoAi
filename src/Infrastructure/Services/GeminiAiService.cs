@@ -25,7 +25,8 @@ public sealed class GeminiAiService : IAiService
         CancellationToken cancellationToken)
     {
         var apiKey = _configuration["AI:GeminiApiKey"];
-        var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key={apiKey}";
+        var modelUrl = _configuration["Ai:ModelGenerateUrl"];
+        var url = modelUrl + apiKey;
 
         var payload = new
         {
@@ -56,8 +57,10 @@ public sealed class GeminiAiService : IAiService
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var apiKey = _configuration["AI:GeminiApiKey"];
-        var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:streamGenerateContent?alt=sse&key={apiKey}";
-
+        var modelUrl = _configuration["AI:ModelStreamUrl"];
+        
+        var url =  modelUrl + apiKey;
+        
         var payload = new
         {
             contents = new[] { new { parts = new[] { new { text = prompt } } } },
