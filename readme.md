@@ -53,6 +53,48 @@ Backend infrastructure:
 
 ---
 
+## 📱 UI Preview & Screenshots
+
+### 🔑 Core Navigation & Search
+<p align="center">
+  <img src="screenshots/login.PNG" width="15%" alt="Welcome & Login Screen" />
+  <img src="screenshots/main.PNG" width="15%" alt="Dashboard & AI Suggestions" />
+  <img src="screenshots/learning1.PNG" width="15%" alt="Learning Topics & Modules" />
+  <img src="screenshots/search.PNG" width="15%" alt="Keyword Question Search" />
+  <img src="screenshots/account.PNG" width="15%" alt="Keyword Question Search" />
+  <img src="screenshots/notifications.JPG" width="15%" alt="Keyword Question Search" />
+</p>
+
+### 📝 Learning Paths & Exam Simulation
+<p align="center">
+  <img src="screenshots/learning1.PNG" width="15%" alt="Step-by-Step Roadmap" />
+  <img src="screenshots/learning_path.PNG" width="15%" alt="Step-by-Step Roadmap" />
+  <img src="screenshots/learning2.PNG" width="15%" alt="Practice Mode - Image" />
+  <img src="screenshots/exam1.PNG" width="15%" alt="Practice Mode - Video" />
+  <img src="screenshots/exam4.PNG" width="15%" alt="Practice Mode - Video" />
+  <img src="screenshots/exam_history.PNG" width="15%" alt="Practice Mode - Video" />
+</p>
+
+### 📊 AI Analytics & Statistics
+<p align="center">
+  <img src="screenshots/ai_analisys.PNG" width="15%" alt="AI Statistics & Passing Probability" />
+  <img src="screenshots/ai_chat.PNG" width="15%" alt="Category Success Breakdown" />
+  <img src="screenshots/ai_chat2.PNG" width="15%" alt="Deep AI Legal Explanation" />
+  <img src="screenshots/stats.PNG" width="15%" alt="Deep AI Legal Explanation" />
+  <img src="screenshots/stats2.PNG" width="15%" alt="Deep AI Legal Explanation" />
+</p>
+
+---
+
+## 🛠️ App Navigation
+
+1.  **Home** — Dashboard, AI recommendations, and streaks.
+2.  **Stats** — Deep analytics, mistake distribution, and AI insights.
+3.  **Learn** — Question search, categories, and roadmap paths.
+4.  **Profile** — Account management and premium settings.
+
+---
+
 # 🛠️ Tech Stack
 
 ## 📱 Frontend
